@@ -1,5 +1,5 @@
 import React from 'react';
-import app from './fire';
+import app from './Config/fire';
 
 
 const Home = () =>{
