@@ -2,10 +2,10 @@ import React, {Component} from 'react';
 import './App.css';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 import Home from './Home';
-import logIn from './Authentication/logInPage';
-import signUp from './Authentication/signUpPage';
-import { AuthProvider } from "./Authentication/auth";
-import PrivateRoute from "./Authentication/privateRoute";
+import logIn from './Components/Authentication/logInPage';
+import signUp from './Components/Authentication/signUpPage';
+import { AuthProvider } from "./Actions/auth";
+import PrivateRoute from "./Actions/privateRoute";
 
 const App = () => {
   return (

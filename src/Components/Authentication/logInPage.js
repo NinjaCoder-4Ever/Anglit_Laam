@@ -12,9 +12,9 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import app from '../fire';
+import app from '../../Config/fire';
 import {withRouter, Redirect} from 'react-router';
-import { AuthContext } from "./auth";
+import { AuthContext } from "../../Actions/auth";
 
 function Copyright() {
     return (
