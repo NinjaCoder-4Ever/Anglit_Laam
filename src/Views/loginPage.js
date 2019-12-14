@@ -98,7 +98,7 @@ const LoginSide = ({ history }) => {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Sign in
+                        Login
                     </Typography>
                     <form onSubmit={handleLogin} className={classes.form} noValidate>
                         <TextField
