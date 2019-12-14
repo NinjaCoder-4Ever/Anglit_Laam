@@ -61,7 +61,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-const LogInSide = ({ history }) => {
+const LoginSide = ({ history }) => {
         const classes = useStyles();
 
         const handleLogin = useCallback(async event => {
@@ -156,4 +156,4 @@ const LogInSide = ({ history }) => {
     );
 }
 
-export default withRouter(LogInSide);
+export default withRouter(LoginSide);
