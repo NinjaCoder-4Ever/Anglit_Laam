@@ -125,10 +125,6 @@ const LogInSide = ({ history }) => {
                             autoComplete="current-password"
                             placeholder="Password"
                         />
-                        <FormControlLabel
-                            control={<Checkbox value="remember" color="primary" />}
-                            label="Remember me"
-                        />
                         <Button
                             type="submit"
                             fullWidth
@@ -136,7 +132,7 @@ const LogInSide = ({ history }) => {
                             color="primary"
                             className={classes.submit}
                         >
-                            Sign In
+                            Login
                         </Button>
                         <Grid container>
                             <Grid item xs>
