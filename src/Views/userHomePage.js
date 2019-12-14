@@ -1,8 +1,8 @@
 import React from 'react';
-import app from './Config/fire';
+import app from '../Config/fire';
 
 
-const Home = () =>{
+const userHomePage = () =>{
     return (
         <>
             <h1>Home</h1>
@@ -10,4 +10,4 @@ const Home = () =>{
         </>
     );
 };
-export default Home;
+export default userHomePage;

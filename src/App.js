@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import './App.css';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
-import Home from './Home';
-import logIn from './Components/Authentication/logInPage';
-import signUp from './Components/Authentication/signUpPage';
+import Home from './Views/userHomePage';
+import logIn from './Views/logInPage';
+import signUp from './Views/signUpPage';
 import { AuthProvider } from "./Actions/auth";
 import PrivateRoute from "./Actions/privateRoute";
 
