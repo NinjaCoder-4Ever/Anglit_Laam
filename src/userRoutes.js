@@ -33,49 +33,49 @@ const dashboardRoutes = [
         name: "My Lessons",
         icon: Dashboard,
         component: MyLessons,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/user",
         name: "User Profile",
         icon: Person,
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/creditStatus",
         name: "Credit Status",
         icon: "content_paste",
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/myLessons",
         name: "Typography",
         icon: LibraryBooks,
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/myLessons",
         name: "Icons",
         icon: BubbleChart,
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/myLessons",
         name: "Notifications",
         icon: Notifications,
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     },
     {
         path: "/myLessons",
         name: "Upgrade To PRO",
         icon: Unarchive,
         component: CreditStatus,
-        layout: "/userSideBar"
+        layout: "/user"
     }
 ];
 
