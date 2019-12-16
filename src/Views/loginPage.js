@@ -9,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
 import app from '../Config/fire';
-import {withRouter, Redirect} from 'react-router';
+import {withRouter, Redirect} from 'react-router-dom';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
 import Typography from '@material-ui/core/Typography';

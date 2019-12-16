@@ -1,13 +1,13 @@
 import React from 'react';
-import app from '../Config/fire';
+import app from '../../Config/fire';
 
 
-const userHomePage = () =>{
+const myLessonsPage = () =>{
     return (
         <>
-            <h1>Home</h1>
+            <h1>my Lessons Page</h1>
             <button on click={() => app.auth().signOut()}>Sign out </button>
         </>
     );
 };
-export default userHomePage;
+export default myLessonsPage;

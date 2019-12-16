@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import app from '../Config/fire';
-import {withRouter} from 'react-router';
+import {withRouter} from 'react-router-dom';
 import Copyright from "../Common/Copyright";
 
 
