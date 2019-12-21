@@ -58,7 +58,7 @@ const LoginSide = ({ history }) => {
                     await app
                         .auth()
                         .signInWithEmailAndPassword(email.value, password.value);
-                    history.push("/Home");
+                    history.push("/Student/homePage");
                 } catch (error) {
                     alert(error);
                 }

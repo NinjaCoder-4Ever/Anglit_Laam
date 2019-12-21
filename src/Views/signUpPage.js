@@ -46,7 +46,7 @@ const SignUp = ({ history }) => {
             await app
                 .auth()
                 .createUserWithEmailAndPassword(email.value, password.value);
-            history.push("/Home");
+            history.push("/Student/homePage");
         } catch (error) {
             alert(error);
         }
