@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import app from '../Config/fire';
+import firebase from '../Config/fire';
 import {withRouter} from 'react-router-dom';
 import Copyright from "../Common/Copyright";
 
@@ -43,7 +43,7 @@ const SignUp = ({ history }) => {
         event.preventDefault();
         const { email, password } = event.target.elements;
         try {
-            await app
+            await firebase
                 .auth()
                 .createUserWithEmailAndPassword(email.value, password.value);
             history.push("/Student/homePage");
