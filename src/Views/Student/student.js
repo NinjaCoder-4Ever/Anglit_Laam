@@ -1,5 +1,4 @@
 import React from 'react';
-import app from '../../Config/fire';
 import { Switch, Route, Redirect } from "react-router-dom";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
@@ -8,9 +7,7 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 import { makeStyles } from "@material-ui/core/styles";
 // core components
 import Sidebar from "../../Components/Sidebar/Sidebar";
-
-import routes from "../../userRoutes";
-
+import routes from "../../studentRoutes";
 import styles from "../../Layouts/adminStyle";
 import logo from '../../logo512.png';
 import image from '../../sidebarBackground.jpg';
@@ -20,19 +17,18 @@ let ps;
 
 const switchRoutes = (
     <Switch>
-        {routes.map((prop, key) => {
-            if (prop.layout === "/admin") {
+        {routes.map((prop) => {
+            if (prop.layout === "/Student") {
                 return (
                     <Route
                         path={prop.layout + prop.path}
                         component={prop.component}
-                        key={key}
                     />
                 );
             }
             return null;
         })}
-        <Redirect from="/admin" to="/admin/dashboard" />
+        <Redirect from="/Student" to="/Student/myLessons" />
     </Switch>
 );
 
@@ -49,9 +45,6 @@ export default function Admin({ ...rest }) {
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
-    };
-    const getRoute = () => {
-        return window.location.pathname !== "/admin/maps";
     };
     const resizeFunction = () => {
         if (window.innerWidth >= 960) {
@@ -89,14 +82,11 @@ export default function Admin({ ...rest }) {
                 {...rest}
             />
             <div className={classes.mainPanel} ref={mainPanel}>
-                {/* On the /maps route we want the map to be on full screen - this is not possible if the content and conatiner classes are present because they have some paddings which would make the map smaller */}
-                {getRoute() ? (
+                {
                     <div className={classes.content}>
                         <div className={classes.container}>{switchRoutes}</div>
                     </div>
-                ) : (
-                    <div className={classes.map}>{switchRoutes}</div>
-                )}
+                }
             </div>
         </div>
     );

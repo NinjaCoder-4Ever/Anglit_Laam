@@ -20,62 +20,65 @@ import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
 import BubbleChart from "@material-ui/icons/BubbleChart";
-import LocationOn from "@material-ui/icons/LocationOn";
 import Notifications from "@material-ui/icons/Notifications";
 import Unarchive from "@material-ui/icons/Unarchive";
 // core components/views for userSideBar layout
-import MyLessons from './Views/User/myLessons'
-import CreditStatus from './Views/User/creditStatus'
+import HomePage from './Views/Student/homePage'
+import MyLessons from './Views/Student/myLessons'
+import MyProfile from './Views/Student/myProfile'
+import MySubscription from './Views/Student/mySubscription'
+import ContactUs from './Views/Student/contactUs'
 
 const dashboardRoutes = [
     {
+        path: "/homePage",
+        name: "Home Page",
+        icon: Dashboard,
+        component: HomePage,
+        layout: "/Student"
+    },
+    {
         path: "/myLessons",
         name: "My Lessons",
-        icon: Dashboard,
-        component: MyLessons,
-        layout: "/user"
-    },
-    {
-        path: "/user",
-        name: "User Profile",
-        icon: Person,
-        component: CreditStatus,
-        layout: "/user"
-    },
-    {
-        path: "/creditStatus",
-        name: "Credit Status",
-        icon: "content_paste",
-        component: CreditStatus,
-        layout: "/user"
-    },
-    {
-        path: "/myLessons",
-        name: "Typography",
-        icon: LibraryBooks,
-        component: CreditStatus,
-        layout: "/user"
-    },
-    {
-        path: "/myLessons",
-        name: "Icons",
-        icon: BubbleChart,
-        component: CreditStatus,
-        layout: "/user"
-    },
-    {
-        path: "/myLessons",
-        name: "Notifications",
         icon: Notifications,
-        component: CreditStatus,
-        layout: "/user"
+        component: MyLessons,
+        layout: "/Student"
     },
     {
-        path: "/myLessons",
-        name: "Upgrade To PRO",
+        path: "/mySubscription",
+        name: "My Subscription",
+        icon: "content_paste",
+        component: MySubscription,
+        layout: "/Student"
+    },
+    {
+        path: "/myProfile",
+        name: "Student Profile",
+        icon: Person,
+        component: MyProfile,
+        layout: "/Student"
+    },
+    {
+        path: "/contactUs",
+        name: "Contact Us",
+        icon: LibraryBooks,
+        component: ContactUs,
+        layout: "/Student"
+    },
+    {
+        path: "/contactUs",
+        name: "Contact Us",
+        icon: BubbleChart,
+        component: ContactUs,
+        layout: "/Student"
+    },
+
+    {
+        path: "/contactUs",
+        name: "Contact Us",
         icon: Unarchive,
-        component: CreditStatus,
-        layout: "/user"
+        component: ContactUs,
+        layout: "/Student"
     }
 ];
 
