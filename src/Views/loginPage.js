@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
-import app from '../Config/fire';
+import firebase from '../Config/fire';
 import {withRouter, Redirect} from 'react-router-dom';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
@@ -55,10 +55,10 @@ const LoginSide = ({ history }) => {
                 event.preventDefault();
                 const { email, password } = event.target.elements;
                 try {
-                    await app
+                    await firebase
                         .auth()
                         .signInWithEmailAndPassword(email.value, password.value);
-                    history.push("/Home");
+                    history.push("/Student/homePage");
                 } catch (error) {
                     alert(error);
                 }

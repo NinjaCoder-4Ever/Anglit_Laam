@@ -2,7 +2,7 @@ import * as firebase from 'firebase/app';
 import "firebase/auth";
 
 // Your web app's Firebase configuration
-const app = firebase.initializeApp({
+const config = ({
     apiKey: "AIzaSyBgASxfCSaGLqpzYp-nEyVlWuWAF-i2K4A",
     authDomain: "easy-sync-4u.firebaseapp.com",
     databaseURL: "https://easy-sync-4u.firebaseio.com",
@@ -14,4 +14,7 @@ const app = firebase.initializeApp({
 });
 // Initialize Firebase
 
-export default app;
+firebase.initializeApp(config)
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+export default firebase ;
+
