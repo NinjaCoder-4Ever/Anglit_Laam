@@ -1,5 +1,6 @@
 import * as firebase from 'firebase/app';
 import "firebase/auth";
+import "firebase/firestore"
 
 // Your web app's Firebase configuration
 const config = ({
@@ -14,7 +15,8 @@ const config = ({
 });
 // Initialize Firebase
 
-firebase.initializeApp(config)
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+firebase.initializeApp(config);
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+export const db = firebase.firestore();
 export default firebase ;
 
