@@ -13,6 +13,7 @@ import Container from '@material-ui/core/Container';
 import firebase from '../Config/fire';
 import {withRouter} from 'react-router-dom';
 import Copyright from "../Common/Copyright";
+import {setNewStudent} from "../Actions/firestore_functions";
 
 
 
@@ -41,11 +42,12 @@ const SignUp = ({ history }) => {
 
     const handleSignUp = useCallback(async event => {
         event.preventDefault();
-        const { email, password } = event.target.elements;
+        const { email, password ,phone, firstName, lastName} = event.target.elements;
         try {
             await firebase
                 .auth()
                 .createUserWithEmailAndPassword(email.value, password.value);
+            await setNewStudent(email.value, firstName.value, lastName.value, phone.value);
             history.push("/Student/homePage");
         } catch (error) {
             alert(error);
@@ -160,6 +162,6 @@ const SignUp = ({ history }) => {
             </Box>
         </Container>
     );
-}
+};
 
 export default withRouter(SignUp);
