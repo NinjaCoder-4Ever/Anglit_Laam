@@ -47,7 +47,8 @@ const SignUp = ({ history }) => {
             await firebase
                 .auth()
                 .createUserWithEmailAndPassword(email.value, password.value);
-            await setNewStudent(email.value, firstName.value, lastName.value, phone.value);
+            await setNewStudent(firebase.auth().currentUser.uid,
+                email.value, firstName.value, lastName.value, phone.value);
             history.push("/Student/homePage");
         } catch (error) {
             alert(error);
