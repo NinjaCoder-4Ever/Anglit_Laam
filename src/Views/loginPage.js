@@ -66,13 +66,27 @@ const LoginSide = ({ history }) => {
             [history]
         );
 
+
+        const handleForgotPassword = useCallback(async event => {
+            event.preventDefault();
+            const { email, password } = event.target.elements;
+            try {
+                await firebase
+                    .auth()
+                    .sendPasswordResetEmail(email.value);
+                    alert('Please check your email...')
+            } catch (error) {
+                alert(error);
+                }
+            },
+            [history]
+        );
+
         const { currentUser } = useContext(AuthContext);
 
         if (currentUser) {
             return <Redirect to="/" />;
         }
-
-
 
 
     return (
