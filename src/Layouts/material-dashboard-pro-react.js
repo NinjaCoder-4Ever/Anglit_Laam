@@ -1,18 +1,19 @@
 /*!
 
- =========================================================
- * Material Dashboard React - v1.8.0 based on Material Dashboard - v1.2.0
- =========================================================
+=========================================================
+* Material Dashboard PRO React - v1.8.0
+=========================================================
 
- * Product Page: http://www.creative-tim.com/product/material-dashboard-react
- * Copyright 2019 Creative Tim (http://www.creative-tim.com)
- * Licensed under MIT (https://github.com/creativetimofficial/material-dashboard-react/blob/master/LICENSE.md)
+* Product Page: https://www.creative-tim.com/product/material-dashboard-pro-react
+* Copyright 2019 Creative Tim (https://www.creative-tim.com)
 
- =========================================================
+* Coded by Creative Tim
 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+=========================================================
 
- */
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+*/
 
 // ##############################
 // // // Function that converts from hex color to rgb color
@@ -53,15 +54,47 @@ const hexToRgb = input => {
 
 const drawerWidth = 260;
 
+const drawerMiniWidth = 80;
+
 const transition = {
   transition: "all 0.33s cubic-bezier(0.685, 0.0473, 0.346, 1)"
+};
+
+const containerFluid = {
+  paddingRight: "15px",
+  paddingLeft: "15px",
+  marginRight: "auto",
+  marginLeft: "auto",
+  "&:before,&:after": {
+    display: "table",
+    content: '" "'
+  },
+  "&:after": {
+    clear: "both"
+  }
 };
 
 const container = {
   paddingRight: "15px",
   paddingLeft: "15px",
   marginRight: "auto",
-  marginLeft: "auto"
+  marginLeft: "auto",
+  "@media (min-width: 768px)": {
+    width: "750px"
+  },
+  "@media (min-width: 992px)": {
+    width: "970px"
+  },
+  "@media (min-width: 1200px)": {
+    width: "1170px"
+  },
+  "&:before,&:after": {
+    display: "table",
+    content: '" "'
+  },
+  "&:after": {
+    clear: "both"
+  }
 };
 
 const defaultFont = {
@@ -70,12 +103,44 @@ const defaultFont = {
   lineHeight: "1.5em"
 };
 
-const primaryColor = ["#9c27b0", "#ab47bc", "#8e24aa", "#af2cc5"];
-const warningColor = ["#ff9800", "#ffa726", "#fb8c00", "#ffa21a"];
-const dangerColor = ["#f44336", "#ef5350", "#e53935", "#f55a4e"];
-const successColor = ["#4caf50", "#66bb6a", "#43a047", "#5cb860"];
-const infoColor = ["#00acc1", "#26c6da", "#00acc1", "#00d3ee"];
-const roseColor = ["#e91e63", "#ec407a", "#d81b60", "#eb3573"];
+const primaryColor = ["#9c27b0", "#ab47bc", "#8e24aa", "#af2cc5", "#7b1fa2"];
+const warningColor = [
+  "#ff9800",
+  "#ffa726",
+  "#fb8c00",
+  "#ffa21a",
+  "#f57c00",
+  "#faf2cc",
+  "#fcf8e3"
+];
+const dangerColor = [
+  "#f44336",
+  "#ef5350",
+  "#e53935",
+  "#f55a4e",
+  "#d32f2f",
+  "#ebcccc",
+  "#f2dede"
+];
+const successColor = [
+  "#4caf50",
+  "#66bb6a",
+  "#43a047",
+  "#5cb860",
+  "#388e3c",
+  "#d0e9c6",
+  "#dff0d8"
+];
+const infoColor = [
+  "#00acc1",
+  "#26c6da",
+  "#00acc1",
+  "#00d3ee",
+  "#0097a7",
+  "#c4e3f3",
+  "#d9edf7"
+];
+const roseColor = ["#e91e63", "#ec407a", "#d81b60", "#eb3573", "#c2185b"];
 const grayColor = [
   "#999",
   "#777",
@@ -83,15 +148,32 @@ const grayColor = [
   "#AAAAAA",
   "#D2D2D2",
   "#DDD",
-  "#b4b4b4",
   "#555555",
   "#333",
-  "#a9afbb",
   "#eee",
-  "#e7e7e7"
+  "#ccc",
+  "#e4e4e4",
+  "#E5E5E5",
+  "#f9f9f9",
+  "#f5f5f5",
+  "#495057",
+  "#e7e7e7",
+  "#212121",
+  "#c8c8c8",
+  "#505050"
 ];
 const blackColor = "#000";
 const whiteColor = "#FFF";
+const twitterColor = "#55acee";
+const facebookColor = "#3b5998";
+const googleColor = "#dd4b39";
+const linkedinColor = "#0976b4";
+const pinterestColor = "#cc2127";
+const youtubeColor = "#e52d27";
+const tumblrColor = "#35465c";
+const behanceColor = "#1769ff";
+const dribbbleColor = "#ea4c89";
+const redditColor = "#ff4500";
 
 const boxShadow = {
   boxShadow:
@@ -184,10 +266,21 @@ const roseCardHeader = {
   ...roseBoxShadow
 };
 
+const card = {
+  display: "inline-block",
+  position: "relative",
+  width: "100%",
+  margin: "25px 0",
+  boxShadow: "0 1px 4px 0 rgba(" + hexToRgb(blackColor) + ", 0.14)",
+  borderRadius: "6px",
+  color: "rgba(" + hexToRgb(blackColor) + ", 0.87)",
+  background: whiteColor
+};
+
 const cardActions = {
   margin: "0 20px 10px",
   paddingTop: "10px",
-  borderTop: "1px solid " + grayColor[10],
+  borderTop: "1px solid " + grayColor[8],
   height: "auto",
   ...defaultFont
 };
@@ -196,17 +289,6 @@ const cardHeader = {
   margin: "-20px 15px 0",
   borderRadius: "3px",
   padding: "15px"
-};
-
-const card = {
-  display: "inline-block",
-  position: "relative",
-  width: "100%",
-  margin: "25px 0",
-  boxShadow: "0 1px 4px 0 rgba(" + hexToRgb(blackColor) + ", 0.14)",
-  borderRadius: "3px",
-  color: "rgba(" + hexToRgb(blackColor) + ", 0.87)",
-  background: whiteColor
 };
 
 const defaultBoxShadow = {
@@ -224,6 +306,39 @@ const defaultBoxShadow = {
   transition: "all 150ms ease 0s"
 };
 
+const tooltip = {
+  padding: "10px 15px",
+  minWidth: "130px",
+  color: whiteColor,
+  lineHeight: "1.7em",
+  background: "rgba(" + hexToRgb(grayColor[6]) + ",0.9)",
+  border: "none",
+  borderRadius: "3px",
+  opacity: "1!important",
+  boxShadow:
+    "0 8px 10px 1px rgba(" +
+    hexToRgb(blackColor) +
+    ", 0.14), 0 3px 14px 2px rgba(" +
+    hexToRgb(blackColor) +
+    ", 0.12), 0 5px 5px -3px rgba(" +
+    hexToRgb(blackColor) +
+    ", 0.2)",
+  maxWidth: "200px",
+  textAlign: "center",
+  fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif',
+  fontSize: "12px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  textShadow: "none",
+  textTransform: "none",
+  letterSpacing: "normal",
+  wordBreak: "normal",
+  wordSpacing: "normal",
+  wordWrap: "normal",
+  whiteSpace: "normal",
+  lineBreak: "auto"
+};
+
 const title = {
   color: grayColor[2],
   textDecoration: "none",
@@ -234,6 +349,7 @@ const title = {
   fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
   "& small": {
     color: grayColor[1],
+    fontSize: "65%",
     fontWeight: "400",
     lineHeight: "1"
   }
@@ -266,8 +382,10 @@ export {
   hexToRgb,
   //variables
   drawerWidth,
+  drawerMiniWidth,
   transition,
   container,
+  containerFluid,
   boxShadow,
   card,
   defaultFont,
@@ -280,6 +398,16 @@ export {
   grayColor,
   blackColor,
   whiteColor,
+  twitterColor,
+  facebookColor,
+  googleColor,
+  linkedinColor,
+  pinterestColor,
+  youtubeColor,
+  tumblrColor,
+  behanceColor,
+  dribbbleColor,
+  redditColor,
   primaryBoxShadow,
   infoBoxShadow,
   successBoxShadow,
@@ -295,6 +423,7 @@ export {
   cardActions,
   cardHeader,
   defaultBoxShadow,
+  tooltip,
   title,
   cardTitle,
   cardSubtitle,
