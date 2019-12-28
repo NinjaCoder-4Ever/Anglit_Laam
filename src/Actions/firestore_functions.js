@@ -53,7 +53,7 @@ export async function getStudentByMail(email) {
 }
 
 // enters a new teacher to teachers collection and users collection
-export function setNewTeachers(uid, email, firstName, lastName, phoneNumber){
+export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, location, working_hours){
     let newTeacherData = {
         email: email,
         first_name: firstName,
@@ -69,7 +69,9 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber){
             'Saturday': {}
         },
         uid: uid,
-        students: []
+        students: [],
+        location: location,
+        working_hours: working_hours
     };
 
     let usersData = {
@@ -176,6 +178,18 @@ export async function chooseTeacherForStudent(studentMail) {
     await addStudentToTeacher(chosenTeacher[0].email, studentMail);
 
     return chosenTeacher[0]
+}
+
+// update a teacher's working hours
+// working hours has the following structure:
+// {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
+export async function updateTeacherWorkingHours(email,working_hours) {
+    const collectionRef = db.collection('teachers');
+    collectionRef.doc(email).update({
+        working_hours: working_hours
+    }).then(function () {
+        console.log("updated teachers working hours");
+    });
 }
 
 // ################################# LESSON FUNCTIONS #####################################
