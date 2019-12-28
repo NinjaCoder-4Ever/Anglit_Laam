@@ -1,6 +1,6 @@
-import React, { useCallback, useContext } from "react";
+import React from "react";
 import firebase from '../../Config/fire';
-import {withRouter, Redirect} from 'react-router-dom';
+import {withRouter} from 'react-router-dom';
 
 const Home = ({ history }) => {
 
@@ -25,4 +25,4 @@ const Home = ({ history }) => {
     );
 };
 
-export default withRouter (Home);
+export default withRouter(Home);
