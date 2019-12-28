@@ -1,14 +1,28 @@
-import React from 'react'
+import React, { useCallback, useContext } from "react";
+import firebase from '../../Config/fire';
+import {withRouter, Redirect} from 'react-router-dom';
 
-const Home = () => {
+const Home = ({ history }) => {
+
+    const handleLogout = () => {
+        try {
+            firebase
+                .auth()
+                .signOut()
+            history.push("/login");
+        } catch (error) {
+            alert(error);
+        }
+    }
+
     return (
         <div>
             <div className="container">
-                <h4 className="center">My Profile</h4>
-                <p>Ya Ya</p>
+                <h2 className="center">My Lessons Page</h2>
+                <button onClick={handleLogout} >Sign out </button>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Home
+export default withRouter (Home);
