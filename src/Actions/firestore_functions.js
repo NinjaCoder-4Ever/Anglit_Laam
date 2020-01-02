@@ -475,11 +475,11 @@ function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
 
 export async function getTeacherFreeTimeInDate(teacher_mail, date_in_student_local_time) {
     let busyTime = {};
-    let utcDate = convertLocalTimeToUtc(date_in_student_local_time);
-    let dayOfWeek = WEEKDAYS[utcDate.getUTCDay()];
-    let utcDateDay = utcDate.getUTCDate();
-    let utcMonth = utcDate.getUTCMonth();
-    let utcYear = utcDate.getUTCFullYear();
+    let localDate = new Date(date_in_student_local_time);
+    let dayOfWeek = WEEKDAYS[localDate.getUTCDay()];
+    let utcDateDay = localDate.getUTCDate();
+    let utcMonth = localDate.getUTCMonth() + 1;
+    let utcYear = localDate.getUTCFullYear();
     let fullSchedule = await constructTeacherWorkingHours(dayOfWeek, teacher_mail);
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     await teacherLessons.where('date_utc.day', '==', utcDateDay)
@@ -496,5 +496,7 @@ export async function getTeacherFreeTimeInDate(teacher_mail, date_in_student_loc
     //the free time will be in the local time.
     return convertFreeTimeToLocalTime(freeTime, utcDateDay, utcMonth, utcYear)
 }
+
+
 
 
