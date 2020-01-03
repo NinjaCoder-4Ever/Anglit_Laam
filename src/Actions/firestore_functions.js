@@ -1,4 +1,5 @@
 import {db} from '../Config/fire'
+import student from "../Views/Student/student";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -241,7 +242,7 @@ export async function getThisMonthLessonsStudent(email){
         let i;
         for (i = 0; i<lessons.length; i++){
             let lesson = lessons[i];
-            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date);
+            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date_string);
             thisMontLessons.push(lesson)
         }
     });
@@ -257,7 +258,7 @@ export async function getThisWeekLessonsTeacher(email) {
         let i;
         for (i = 0; i < lessons.length; i++){
             let lesson = lessons[i];
-            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date);
+            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date_string);
             lessonsThisWeek.push(lesson)
         }
     });
@@ -272,7 +273,7 @@ export async function getAllPastLessonsForStudent(email){
     await collectionRef.where('date_utc', '<=', today).get().then(function(snapshot){
        snapshot.forEach(doc =>{
            let lessonData = doc.data();
-           lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date);
+           lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
            pastLessons.push(lessonData)
        })
     });
@@ -302,7 +303,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
         .where('started', '==', true).get().then(function (snapshot) {
             snapshot.forEach(doc =>{
                 let lessonData = doc.data();
-                lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date);
+                lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
                 futureFeedbacks.push(lessonData)
             })
         });
@@ -529,9 +530,9 @@ function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
     return freeTimeInLocalTime
 }
 
-export async function getTeacherFreeTimeInDate(teacher_mail, date_in_student_local_time) {
+export async function getTeacherFreeTimeInDate(teacher_mail, local_year, local_month, local_day) {
     let busyTime = {};
-    let localDate = new Date(date_in_student_local_time);
+    let localDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day));
     let dayOfWeek = WEEKDAYS[localDate.getUTCDay()];
     let utcDateDay = localDate.getUTCDate();
     let utcMonth = localDate.getUTCMonth() + 1;
@@ -553,5 +554,196 @@ export async function getTeacherFreeTimeInDate(teacher_mail, date_in_student_loc
     return convertFreeTimeToLocalTime(freeTime, utcDateDay, utcMonth, utcYear)
 }
 
+function checkSameWeek(date1, date2){
+    let sundayOfDate1 = new Date(date1).setDate(date1.getDate() - date1.getDay());
+    let sundayOfDate2 = new Date(date2).setDate(date2.getDate() - date2.getDay());
+    return sundayOfDate1.toString() === sundayOfDate2.toString();
+}
 
 
+export async function setNewLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time, duration){
+    let currentLocalDate = new Date();
+    const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    let local_min = local_time.split(':')[1];
+    let local_hour = local_time.split(':')[0];
+    let lessonDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day),
+        parseInt(local_hour), parseInt(local_min));
+    let utcLessonDate = lessonDate.toISOString();
+    let lesson_id = constructLessonId(student_mail, teacher_mail, utcLessonDate);
+    let lessonInfo = {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    };
+    studentLessons.doc(lesson_id).set(lessonInfo).then(function () {
+        console.log("Lesson set in student lessons")
+    });
+    teacherLessons.doc(lesson_id).set(lessonInfo).then(function () {
+       console.log("Lesson set in teacher lessons")
+    });
+
+    if (lessonDate.getUTCMonth() === currentLocalDate.getUTCMonth()){
+        const studentCollectionRef = db.collection('students');
+        let currentMonthLessons = [];
+        await studentCollectionRef.doc(student_mail).get().then(function (doc) {
+            currentMonthLessons.push(doc.data().lessons_this_month)
+        });
+        currentMonthLessons = currentMonthLessons[0];
+        currentMonthLessons[lesson_id] = lessonInfo;
+        studentCollectionRef.doc(student_mail).update({
+            lessons_this_month: currentMonthLessons
+        });
+    }
+    if (checkSameWeek(currentLocalDate, lessonDate)){
+        const teacherCollectionRef = db.collection('teachers');
+        let currentWeekLessons = [];
+        await  teacherCollectionRef.doc(teacher_mail).get().then(function (doc) {
+            currentWeekLessons.push(doc.data().lessons_this_week)
+        });
+        currentWeekLessons = currentWeekLessons[0];
+        currentWeekLessons[lesson_id] = lessonInfo;
+        teacherCollectionRef.doc(teacher_mail).update({
+            lessons_this_week: currentWeekLessons
+        });
+    }
+}
+
+export async function cancelLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time){
+    let currentLocalDate = new Date();
+    const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    let local_min = local_time.split(':')[1];
+    let local_hour = local_time.split(':')[0];
+    let lessonDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day),
+        parseInt(local_hour), parseInt(local_min));
+    let utcLessonDate = lessonDate.toISOString();
+    let lesson_id = constructLessonId(student_mail, teacher_mail, utcLessonDate);
+    studentLessons.doc(lesson_id).delete().then(function () {
+        console.log("Deleted lesson in student lessons")
+    });
+    teacherLessons.doc(lesson_id).delete().then(function(){
+       console.log("Deleted lessin in teacher lessons")
+    });
+
+    if (lessonDate.getUTCMonth() === currentLocalDate.getUTCMonth()){
+        const studentCollectionRef = db.collection('students');
+        let currentMonthLessons = [];
+        await studentCollectionRef.doc(student_mail).get().then(function (doc) {
+            currentMonthLessons.push(doc.data().lessons_this_month)
+        });
+        currentMonthLessons = currentMonthLessons[0];
+        delete currentMonthLessons[lesson_id];
+        studentCollectionRef.doc(student_mail).update({
+            lessons_this_month: currentMonthLessons
+        });
+    }
+
+    if (checkSameWeek(currentLocalDate, lessonDate)){
+        const teacherCollectionRef = db.collection('teachers');
+        let currentWeekLessons = [];
+        await  teacherCollectionRef.doc(teacher_mail).get().then(function (doc) {
+            currentWeekLessons.push(doc.data().lessons_this_week)
+        });
+        currentWeekLessons = currentWeekLessons[0];
+        delete currentWeekLessons[lesson_id];
+        teacherCollectionRef.doc(teacher_mail).update({
+            lessons_this_week: currentWeekLessons
+        });
+    }
+
+}
+
+export async function getNextFourLessonsStudent(student_mail) {
+    const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
+    let nextLessons = [];
+    await collectionRef.where('started', '==', true).where("no_show", '==', true)
+        .orderBy('date_utc.full_date').limit(4).get().then(function (snapshot) {
+            snapshot.forEach(doc =>{
+                let lessonInfo = doc.data();
+                lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+                nextLessons.push(lessonInfo)
+            })
+        });
+
+    return nextLessons
+}
+
+export async function getMonthLessonsStudent(student_mail, month_num, year){
+    const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
+    let monthLessons = [];
+    await collectionRef.where('date_utc.month', '==', month_num)
+        .where('date_utc.year', '==', year).get().then(function(snapshot){
+            snapshot.forEach(doc => {
+                let lessonInfo = doc.data();
+                lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+                monthLessons.push(lessonInfo)
+            })
+        });
+
+    return monthLessons
+}
+
+export async function getWeekLessonByDateTeacher(teacher_mail, local_year, local_month, local_day){
+    const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    let weekLessons = [];
+    let localDate = new Date(local_year, local_month - 1, local_day);
+    let localSunday = new Date(localDate.toString()).setDate(localDate.getDate() - localDate.getDay());
+    let localSaturday = new Date(localDate.toString()).setDate(localDate.getDate() + (6 - localDate.getDay()));
+    await collectionRef.orderBy('date_utc.full_date')
+        .where('date_utc.full_date', '>=', new Date(localSunday.toISOString()))
+        .where('date_utc.full_date', '<=', new Date(localSaturday.toISOString())).get()
+        .then(function (snapshot){
+            snapshot.forEach(doc => {
+                let lessonInfo = doc.data();
+                lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+                weekLessons.push(lessonInfo)
+            })
+        });
+
+    return weekLessons
+}
+
+export async function updateStudentMonthLessons(student_mail){
+    let currentDate = new Date();
+    let nextMontLessons = await getMonthLessonsStudent(student_mail,
+        currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear())
+    const collectionRef = db.collection('students').doc(student_mail);
+    let formattedMonthLessons = {};
+    nextMontLessons.forEach(lesson => {
+        formattedMonthLessons[lesson.lesson_id] = lesson
+    });
+    await collectionRef.update({
+        lessons_this_month: formattedMonthLessons
+    });
+}
+
+export async function updateTeacherWeekLessons(teacher_mail) {
+    let currentDate = new Date();
+    let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,
+        currentDate.getUTCFullYear(), currentDate.getUTCMonth() +1, currentDate.getDate());
+    const collectionRef = db.collection('teachers').doc(teacher_mail);
+    let formattedWeekLessons = {};
+    nextWeekLessons.forEach(lesson => {
+        formattedWeekLessons[lesson.lesson_id] = lesson
+    });
+
+    await collectionRef.update({
+        lessons_this_week: formattedWeekLessons
+    })
+}
