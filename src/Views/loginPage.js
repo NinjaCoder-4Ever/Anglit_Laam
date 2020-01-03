@@ -1,4 +1,3 @@
-import React, { useCallback, useContext } from "react";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -8,12 +7,14 @@ import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
-import firebase from '../Config/fire';
 import {withRouter, Redirect} from 'react-router-dom';
-import { AuthContext } from "../Actions/auth";
-import Copyright from "../Common/Copyright";
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
+
+import React, { useCallback, useContext } from "react";
+import firebase from '../Config/fire';
+import { AuthContext } from "../Actions/auth";
+import Copyright from "../Common/Copyright";
 
 
 const useStyles = makeStyles(theme => ({
@@ -49,45 +50,42 @@ const useStyles = makeStyles(theme => ({
 
 
 const LoginSide = ({ history }) => {
-        const classes = useStyles();
 
-        const handleLogin = useCallback(async event => {
-                event.preventDefault();
-                const { email, password } = event.target.elements;
-                try {
-                    await firebase
-                        .auth()
-                        .signInWithEmailAndPassword(email.value, password.value);
-                    history.push("/Student/homePage");
-                } catch (error) {
-                    alert(error);
-                }
-            },
-            [history]
-        );
+    const classes = useStyles();
 
-
-        const handleForgotPassword = useCallback(async event => {
-            event.preventDefault();
-            const { email, password } = event.target.elements;
-            try {
-                await firebase
-                    .auth()
-                    .sendPasswordResetEmail(email.value);
-                    alert('Please check your email...')
-            } catch (error) {
-                alert(error);
-                }
-            },
-            [history]
-        );
-
-        const { currentUser } = useContext(AuthContext);
-
-        if (currentUser) {
-            return <Redirect to="/" />;
+    const handleLogin = useCallback(async event => {
+        event.preventDefault();
+        const { email, password } = event.target.elements;
+        try {
+            await firebase
+                .auth()
+                .signInWithEmailAndPassword(email.value, password.value);
+            history.push("/Student/homePage");
+        } catch (error) {
+            alert(error);
         }
+        },
+        [history]
+    );
 
+    const handleForgotPassword = (event) => {
+
+        /* call prompt() with custom message to get user input from alert-like dialog */
+        const enteredName = prompt('Please enter the email address you wish to reset')
+
+        try {
+             firebase.auth().sendPasswordResetEmail(enteredName);
+            alert('Please check your email for further instructions')
+        } catch (error) {
+            alert(error);
+        }
+    }
+
+    const { currentUser } = useContext(AuthContext);
+
+    if (currentUser) {
+        return <Redirect to="/" />;
+    }
 
     return (
         <Grid container component="main" className={classes.root}>
@@ -137,7 +135,7 @@ const LoginSide = ({ history }) => {
                         </Button>
                         <Grid container>
                             <Grid item xs>
-                                <Link href="#" variant="body2">
+                                <Link onClick={handleForgotPassword} variant="body2">
                                     Forgot password?
                                 </Link>
                             </Grid>
