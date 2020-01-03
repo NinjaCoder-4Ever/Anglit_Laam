@@ -72,12 +72,13 @@ const LoginSide = ({ history }) => {
 
         /* call prompt() with custom message to get user input from alert-like dialog */
         const enteredName = prompt('Please enter the email address you wish to reset')
-
-        try {
-             firebase.auth().sendPasswordResetEmail(enteredName);
-            alert('Please check your email for further instructions')
-        } catch (error) {
-            alert(error);
+        if (enteredName) {
+            try {
+                firebase.auth().sendPasswordResetEmail(enteredName);
+                alert('Please check your email for further instructions')
+            } catch (error) {
+                alert(error);
+            }
         }
     }
 
