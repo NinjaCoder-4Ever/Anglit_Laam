@@ -507,6 +507,12 @@ function getFreeTime(fullSchedule, busyTime) {
 
 function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
     let freeTimeInLocalTime = {};
+    if (utcMonth.toString().length === 1){
+        utcMonth = "0" + utcMonth;
+    }
+    if (utcDay.toString().length === 1){
+        utcDay = "0" + utcDay;
+    }
     let utcFullDate = utcYear + "-" + utcMonth + "-" + utcDay;
     let i;
     for (i = 0; Object.keys(freeTimeInUTC).length; i++){
