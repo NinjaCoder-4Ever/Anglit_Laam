@@ -386,9 +386,6 @@ function applyTimezoneoffset(localTimeString){
     let utcHours = localTimeHours + offsetHours;
     let utcMin = localTimeMinutes;
     if ('-' === offsetInHours.slice(0,1)){
-        if (utcHours < 0){
-            utcHours = 24 + offsetHours;
-        }
         if (offsetInHours.split('.').length === 2) {
             let offsetMin = parseInt(offsetInHours.split('.')[1]) * 60;
             utcMin = localTimeMinutes - offsetMin;
@@ -397,11 +394,11 @@ function applyTimezoneoffset(localTimeString){
                 utcHours = utcHours - 1;
             }
         }
+        if (utcHours < 0){
+            utcHours = 24 + offsetHours;
+        }
     }
     else {
-         if (utcHours > 23){
-             utcHours = offsetHours - 1;
-         }
          if (offsetInHours.split('.').length === 2) {
             let offsetMin = parseInt(offsetInHours.split('.')[1]) * 60;
             utcMin = localTimeMinutes + offsetMin;
@@ -409,6 +406,9 @@ function applyTimezoneoffset(localTimeString){
                 utcMin = utcMin - 60;
                 utcHours = utcHours + 1;
             }
+        }
+        if (utcHours > 23){
+            utcHours = offsetHours - 1;
         }
 
     }
@@ -552,7 +552,6 @@ export async function getTeacherFreeTimeInDate(teacher_mail, date_in_student_loc
     //the free time will be in the local time.
     return convertFreeTimeToLocalTime(freeTime, utcDateDay, utcMonth, utcYear)
 }
-
 
 
 
