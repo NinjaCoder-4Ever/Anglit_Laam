@@ -378,14 +378,60 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
     return lessonData[0]
 }
 
+function applyTimezoneoffset(localTimeString){
+    let localTimeHours = parseInt(localTimeString.split(':')[0]);
+    let localTimeMinutes = parseInt(localTimeString.split(':')[1]);
+    let offsetInHours = (new Date().getTimezoneOffset() / 60).toString();
+    let offsetHours = parseInt(offsetInHours.split('.')[0]);
+    let utcHours = localTimeHours + offsetHours;
+    let utcMin = localTimeMinutes;
+    if ('-' === offsetInHours.slice(0,1)){
+        if (utcHours < 0){
+            utcHours = 24 + offsetHours;
+        }
+        if (offsetInHours.split('.').length === 2) {
+            let offsetMin = parseInt(offsetInHours.split('.')[1]) * 60;
+            utcMin = localTimeMinutes - offsetMin;
+            if (utcMin < 0){
+                utcMin = 60 - offsetMin;
+                utcHours = utcHours - 1;
+            }
+        }
+    }
+    else {
+         if (utcHours > 23){
+             utcHours = offsetHours - 1;
+         }
+         if (offsetInHours.split('.').length === 2) {
+            let offsetMin = parseInt(offsetInHours.split('.')[1]) * 60;
+            utcMin = localTimeMinutes + offsetMin;
+            if (utcMin > 59){
+                utcMin = utcMin - 60;
+                utcHours = utcHours + 1;
+            }
+        }
+
+    }
+    utcHours = utcHours.toString();
+    utcMin = utcMin.toString();
+    if (utcHours.length === 1){
+        utcHours = "0" + utcHours;
+    }
+    if (utcMin.length === 1){
+        utcMin = "0" + utcMin;
+    }
+    return utcHours + ":" + utcMin
+}
+
+
 async function constructTeacherWorkingHours(weekday, teacher_mail) {
     let startTime = [];
     let endTime = [];
     await db.collection('teachers').doc(teacher_mail).get().then(function(doc){
         let working_hours = doc.data().working_hours;
         if (working_hours[weekday].working === true){
-            startTime.push(working_hours[weekday].from);
-            endTime.push(working_hours[weekday].to);
+            startTime.push(applyTimezoneoffset(working_hours[weekday].from));
+            endTime.push(applyTimezoneoffset(working_hours[weekday].to));
         }
         else {
             startTime.push("00:00");
@@ -402,7 +448,11 @@ async function constructTeacherWorkingHours(weekday, teacher_mail) {
         }
         else{
             if (currentTime.split(':')[1] === "30"){
-                let nextTime = (parseInt(currentTime.split(':')[0]) + 1).toString() + ":00";
+                let nextTime = (parseInt(currentTime.split(':')[0]) + 1).toString();
+                if (nextTime.length === 1){
+                    nextTime = "0" + nextTime;
+                }
+                nextTime = nextTime + ":00";
                 totalSchedule.push(nextTime)
             }
             else {
