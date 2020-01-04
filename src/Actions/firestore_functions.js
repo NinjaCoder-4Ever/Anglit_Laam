@@ -10,13 +10,31 @@ const WEEKDAYS = {
     5: 'Friday',
     6: 'Saturday'
 };
+const LEAP_YEAR = 2020;
+const MONTH_DAYS = {
+    1: 31,
+    2: 28,
+    3: 31,
+    4: 30,
+    5: 31,
+    6: 30,
+    7: 31,
+    8: 31,
+    9: 30,
+    10: 31,
+    11: 30,
+    12:31
+};
 
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
 
-// enters a new student to students collection and the users collection
-// will also choose a teacher for the student and add the student to the teachers student list
 export async function setNewStudent(uid, email, firstName, lastName, phoneNumber){
+    /**
+     *Function enters a new student to the "students" collection.
+     * Chooses a teacher for the student (the one with least students)
+     * Also adds the student to "users" collection.
+     */
     let newStudentData = {
         email: email,
         first_name: firstName,
@@ -52,17 +70,37 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
     ]);
 }
 
-export async function getStudedntTeacher(student_mail) {
+export async function getStudentTeacher(student_mail) {
+    /**
+     * Function gets the teacher's info, for a given student (by mail).
+     *
+     * Returns teachers info: {first_name: *, last_name: *, email: *}
+     */
     let teacherInfo = [];
-    db.collection('students').doc(student_mail).get().then(function (doc) {
+    await db.collection('students').doc(student_mail).get().then(function (doc) {
         teacherInfo.push(doc.data().teacher)
     });
 
     return teacherInfo[0]
 }
 
-// gets a student data by mail.
 export async function getStudentByMail(email) {
+    /**
+     * Function gets all the student's data by searching it's mail.
+     *
+     * Returns mapping of all student's info.
+     * {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        lessons_this_month:[],
+        subscription: 'PAL',
+        teacher: {first_name: *, last_name: *, email: *},
+        credits: 1,
+        uid: uid,
+    }
+     */
     const values = [];
     const collectionRef = db.collection('students');
     await collectionRef.doc(email).get().then(function(doc){
@@ -72,8 +110,12 @@ export async function getStudentByMail(email) {
     return values[0]
 }
 
-// enters a new teacher to teachers collection and users collection
-export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, location, working_hours){
+export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours){
+    /**
+     * Function enters a new teacher to the "teachers" collection.
+     * Also enters the teacher to the "users" collection.
+     */
+    working_hours = convertWorkingHoursToUTCTime(working_hours);
     let newTeacherData = {
         email: email,
         first_name: firstName,
@@ -90,7 +132,6 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, loc
         },
         uid: uid,
         students: [],
-        location: location,
         working_hours: working_hours
     };
 
@@ -100,7 +141,7 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, loc
         uid: uid
     };
 
-    Promise.all([
+     Promise.all([
         db.collection('teachers').doc(email).set(newTeacherData).then(function() {
             console.log('Added teacher with ID: ', email)
         }),
@@ -110,18 +151,61 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, loc
     ]);
 }
 
-// gets the user's collection doc data
-// return value looks like so: {email: X, uid: Y, collection: Z}
 export async function getUserData(email) {
+    /**
+     * Function gets the data about a given user from the "users" collection.
+     *
+     * Returns {collection: *, email: *, uid: *}
+     */
     let returnVal = [];
-    db.collection('users').doc(email).get().then(function (doc) {
+    await db.collection('users').doc(email).get().then(function (doc) {
         returnVal.push(doc.data())
     });
     return returnVal[0]
 }
 
-// gets teacher data from teachers collection.
+export async function getUerDataByUid(uid) {
+    /**
+     * Function gets the user data from "users" collection by the uid of the user.
+     *
+     * Returns {collection: *, email: *, uid: *}
+     */
+    let returnVal = [];
+    await db.collection('users').where('uid', '==', uid).get().then(function (snapshot) {
+        snapshot.forEach(doc =>{
+            returnVal.push(doc.data())
+        })
+    });
+    return returnVal[0]
+}
+
 export async function getTeacherByMail(email) {
+    /**
+     * Function returns the teacher's data from "teachers" collection by mail.
+     *
+     * Returns: {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        lessons_this_week:{
+            'Sunday': {lesson_id:{lesson_info}},
+            'Monday': {},
+            'Tuesday': {},
+            'Wednesday': {},
+            'Thursday': {},
+            'Friday': {},
+            'Saturday': {}
+        },
+        uid: uid,
+        students: [student_mail],
+        working_hours: {"Sunday": {
+            from: "12:00",
+            to: "21:00",
+            working: true
+        }...}
+    };
+     */
     const values = [];
     const collectionRef = db.collection('teachers');
     await collectionRef.doc(email).get().then(function(doc){
@@ -133,6 +217,12 @@ export async function getTeacherByMail(email) {
 
 // get all the values from a given collection where the given field has the given value.
 export async function lookup(collection, field, value) {
+    /**
+     * Function is a general lookup function: looks for all the docs that have "value" in "field" in a given
+     * "collection"
+     *
+     * Returns and array of docs data.
+     */
     const values = [];
     const collectionRef = db.collection(collection);
     await collectionRef.where(field, '==', value).get().then(function (snapshot) {
@@ -144,8 +234,10 @@ export async function lookup(collection, field, value) {
     return values
 }
 
-// update the amount of credits the student has.
 export async function updateCredits(email, addedCredits) {
+    /**
+     * Function updates the amount of credits a student has.
+     */
     const currentCreditValue = [];
     const collectionRef = db.collection('students');
     await collectionRef.doc(email).get().then(function (doc) {
@@ -159,8 +251,10 @@ export async function updateCredits(email, addedCredits) {
     });
 }
 
-// adds a student's mail to the teacher's student array.
 export async function addStudentToTeacher(teacherMail, studentMail){
+    /**
+     * Function adds a student mail to the teacher's student array
+     */
     const fullStudentList = [studentMail];
     const collectionRef = db.collection('teachers');
     await collectionRef.doc(teacherMail).get().then(function (doc) {
@@ -174,8 +268,13 @@ export async function addStudentToTeacher(teacherMail, studentMail){
     });
 }
 
-// goes through all existing teachers and chooses the one with the least amount of students.
 export async function chooseTeacherForStudent(studentMail) {
+    /**
+     * Function goes through all the teachers in the "teachers" collection and and brings back the info about
+     * the teacher with the least amount of students.
+     *
+     * Returns teacher info: {first_mail: *, last_mail: *, email: *}
+     */
     const chosenTeacher = [];
     const teacherCollection = db.collection('teachers');
     await teacherCollection.get().then(function (querySnapshot) {
@@ -203,10 +302,33 @@ export async function chooseTeacherForStudent(studentMail) {
     }
 }
 
-// update a teacher's working hours
-// working hours has the following structure:
-// {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
+function convertWorkingHoursToUTCTime(working_hours){
+    /**
+     * Convert working hours from local time to utc time.
+     *
+     * Returns: {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
+     * where the times listed are in utc.
+     */
+    let i;
+    for (i=0; i<7; i++){
+        let day_data = working_hours[WEEKDAYS[i]];
+        if (day_data.working) {
+            day_data.from = applyTimezoneoffset(day_data.from);
+            day_data.to = applyTimezoneoffset(day_data.to);
+        }
+        working_hours[WEEKDAYS[i]] = day_data;
+    }
+    return working_hours
+}
+
+
 export async function updateTeacherWorkingHours(email,working_hours) {
+    /**
+     * Function updates the teacher's working_hours fields.
+     * working_hours field should have the following structure:
+     * {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
+     */
+    working_hours = convertWorkingHoursToUTCTime(working_hours);
     const collectionRef = db.collection('teachers');
     collectionRef.doc(email).update({
         working_hours: working_hours
@@ -219,22 +341,61 @@ export async function updateTeacherWorkingHours(email,working_hours) {
 
 
 function constructLessonId(student_mail, teacher_mail, date_utc_time){
+    /**
+     * Function returns a valid lesson id.
+     *
+     * Example: student@mail.com_teache@mail.com_2020-01-04T12:00:00.000Z
+     */
     return student_mail + "_" + teacher_mail + "_" + date_utc_time
 }
 
-// gets a dateUtcTime in ISO format and returns a local time string.
 function convertUtcToLocalTime(dateUtcTime){
+    /**
+     * Function converts ISO format UTC time string to local time string
+     *
+     * Returns: "Sat Jan 04 2020 16:40:29 GMT+0200 (שעון ישראל (חורף)) "
+     */
     var localDate = new Date(dateUtcTime).toString();
     return localDate
 }
 
 // gets a local time string and converts it to utc ISO format string.
 function convertLocalTimeToUtc(localTimeDate){
+    /**
+     * Function gets a local date string and converts it to ISO format in UTC time.
+     *
+     * Returns: "2020-01-04T12:00:00.000Z"
+     */
     var dateUtcTime = new Date(localTimeDate).toISOString();
     return dateUtcTime
 }
 
 export async function getThisMonthLessonsStudent(email){
+    /**
+     * Function returns all the lessons a student has in this current month.
+     *
+     * Returns Array of lessons data: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string,
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     const thisMontLessons = [];
     const collectionRef = db.collection('students');
     await collectionRef.doc(email).get().then(function (doc) {
@@ -251,6 +412,31 @@ export async function getThisMonthLessonsStudent(email){
 }
 
 export async function getThisWeekLessonsTeacher(email) {
+    /**
+     * Function returns the lessons a teacher has this week.
+     *
+     * Returns an array of lesson info: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string,
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     const lessonsThisWeek = [];
     const collectionRef = db.collection('teachers');
     await collectionRef.doc(email).get().then(function (doc) {
@@ -267,10 +453,34 @@ export async function getThisWeekLessonsTeacher(email) {
 }
 
 export async function getAllPastLessonsForStudent(email){
+    /**
+     * Gets all the past lessons of a given student.
+     * {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
     let today = new Date().toISOString();
-    await collectionRef.where('date_utc', '<=', today).get().then(function(snapshot){
+    await collectionRef.where('date_utc.full_date', '<=', today).get().then(function(snapshot){
        snapshot.forEach(doc =>{
            let lessonData = doc.data();
            lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
@@ -282,6 +492,30 @@ export async function getAllPastLessonsForStudent(email){
 }
 
 export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_mail){
+    /**
+     * Function returns all the past lessons a teacher had given a given student where a feedback was given.
+     * Returns: and array of {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string,
+        feedback: {
+            fields: "None"
+        },
+        started: true,
+        feedback_given: true,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     const pastFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     await collectionRef.where('student_mail', '==', student_mail)
@@ -297,6 +531,31 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
 }
 
 export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
+    /**
+     * Function returns all the teacher's lessons which occurred but a feedback was not given.
+     *
+     * Returns an array of: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string,
+        feedback: {
+            fields: "None"
+        },
+        started: true,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     const futureFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     await collectionRef.where('feedback_given', '==', false)
@@ -312,6 +571,9 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
 }
 
 export function setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail){
+    /**
+     * Function sets a feedback to a given lesson both in student_lessons collection and teacher_lessons collection.
+     */
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
 
@@ -331,6 +593,9 @@ export function setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_
 }
 
 export function setLessonStarted(lesson_id, teacher_mail, student_mail){
+    /**
+     * Function sets a lesson status to "started" in both student_lessons and teacher_lessons collections.
+     */
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
 
@@ -349,6 +614,9 @@ export function setLessonStarted(lesson_id, teacher_mail, student_mail){
 
 
 export function setLessonNoShow(lesson_id, teacher_mail, student_mail){
+    /**
+     * Function sets a lesson status to "no_show" in both student_lessons and teacher_lessons collections.
+     */
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
 
@@ -366,9 +634,33 @@ export function setLessonNoShow(lesson_id, teacher_mail, student_mail){
 }
 
 export async function getLessonByDateForStudent(student_mail, local_date, teacher_mail=null){
+    /**
+     * Function returns the lesson data of a lesson in a given date.
+     * Returns: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_time: local_time_string,
+        feedback: {
+            fields: "None"
+        },
+        started: true,
+        feedback_given: true,
+        no_show: false,
+        lesson_id: lesson_id
+    }
+     */
     let lessonData = [];
     if (teacher_mail == null){
-        teacher_mail = getStudedntTeacher(student_mail).email;
+        teacher_mail = getStudentTeacher(student_mail).email;
     }
     let lesson_id = constructLessonId(student_mail, teacher_mail, convertLocalTimeToUtc(local_date));
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
@@ -380,6 +672,11 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
 }
 
 function applyTimezoneoffset(localTimeString){
+    /**
+     * Function converts a time only string ("14:00") to UTC time.
+     * meaning if the local time offset is "+2 GMT" and the function is given "14:00"
+     * it will return "12:00" - the time in UTC time.
+     */
     let localTimeHours = parseInt(localTimeString.split(':')[0]);
     let localTimeMinutes = parseInt(localTimeString.split(':')[1]);
     let offsetInHours = (new Date().getTimezoneOffset() / 60).toString();
@@ -426,6 +723,14 @@ function applyTimezoneoffset(localTimeString){
 
 
 async function constructTeacherWorkingHours(weekday, teacher_mail) {
+    /**
+     * NOTE: All times here should be in utc time.
+     *
+     * Gets a teacher mail and a given day and constructs and array of the working time slots for the teacher.
+     * Example: A teacher's working_hours mapping includes 'Sunday: {from: "12:00", to: "16:00", working : true}
+     * Then this function will return an array looking like this:
+     * ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30"]
+     */
     let startTime = [];
     let endTime = [];
     await db.collection('teachers').doc(teacher_mail).get().then(function(doc){
@@ -450,6 +755,9 @@ async function constructTeacherWorkingHours(weekday, teacher_mail) {
         else{
             if (currentTime.split(':')[1] === "30"){
                 let nextTime = (parseInt(currentTime.split(':')[0]) + 1).toString();
+                if (nextTime === "24"){
+                    nextTime = "00";
+                }
                 if (nextTime.length === 1){
                     nextTime = "0" + nextTime;
                 }
@@ -466,7 +774,19 @@ async function constructTeacherWorkingHours(weekday, teacher_mail) {
     return totalSchedule.slice(0,-1)
 }
 
-function getFreeTime(fullSchedule, busyTime) {
+function constructTeacherFreeTime(fullSchedule, busyTime) {
+    /**
+     * NOTE: All times here should be in utc time.
+     *
+     * Function is given a full schedule array:
+     * ["12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30"]
+     * and a busy time mapping - a mapping of existing lessons in that day:
+     * {14:00: 30, 15:00: 60} (meaning he has a lesson of 30 min in 14:00 and 60 min in 15:00)
+     *
+     * This function will return:
+     * {12:00:[30, 60], 12:30:[30,60], 13:00:[30, 60], 13:30:[30], 14:30:[30]}
+     * meaning for example one can set a lesson in 12:00 for 30 or 60 min but at 13:30 you can only set a 30 min lesson.
+     */
     let freeTime = {};
     let i;
     for (i = 0; i < fullSchedule.length; i++){
@@ -502,7 +822,6 @@ function getFreeTime(fullSchedule, busyTime) {
     }
     // this will return a map looking like so:
     // {free_time:[30, 60]} where free time is the free time that day and the array is how long is the teacher free at that time.
-
     return freeTime
 }
 
@@ -516,15 +835,39 @@ function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
     }
     let utcFullDate = utcYear + "-" + utcMonth + "-" + utcDay;
     let i;
+    let lastUtcTime = -1;
     for (i = 0; Object.keys(freeTimeInUTC).length; i++){
         let utcTime = Object.keys(freeTimeInUTC)[i];
+        // check if we passed a day forward
+        if (parseInt(utcTime.split(':')[0]) < lastUtcTime){
+            utcDay = utcDay + 1;
+            // check if we passed a month forward
+            if (MONTH_DAYS[parseInt(utcMonth)] < utcDay){
+                // take into account the possibility of a leap year (29th of February)
+                if (parseInt(utcMonth) !== 2 || (utcYear-LEAP_YEAR) % 4 !== 0){
+                    utcMonth = parseInt(utcMonth) + 1;
+                    utcDay = "01";
+                    // check if we passed a year forward
+                    if (utcMonth === 13){
+                        utcMonth = "01";
+                        utcYear = utcYear + 1;
+                    }
+                    else {
+                        if (utcMonth.toString().length === 1){
+                            utcMonth = "0" + utcMonth;
+                        }
+                    }
+                }
+            }
+        }
         // construct ISO format UTC time.
         let fullUtcDateWithTime = utcFullDate + "T" + utcTime + ":00.000Z";
         // convert to local time
         let localFullDateTime = convertUtcToLocalTime(fullUtcDateWithTime);
-        // take only time (without the date nor the milliseconds and timezone offset
+        // take only time (without the date nor the milliseconds and timezone offset)
         let localTimeOnly = localFullDateTime.split(" ")[4].slice(0, 5);
         freeTimeInLocalTime[localTimeOnly] = freeTimeInUTC[utcTime];
+        lastUtcTime = parseInt(utcTime.split(':')[0]);
     }
 
     return freeTimeInLocalTime
@@ -547,7 +890,7 @@ export async function getTeacherFreeTimeInDate(teacher_mail, local_year, local_m
             })
         });
 
-    let freeTime = getFreeTime(fullSchedule, busyTime);
+    let freeTime = constructTeacherFreeTime(fullSchedule, busyTime);
     // will return a map looking like so:
     // {free_time: [possible duration (30, 60)]
     //the free time will be in the local time.
@@ -672,7 +1015,7 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
 export async function getNextFourLessonsStudent(student_mail) {
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let nextLessons = [];
-    await collectionRef.where('started', '==', true).where("no_show", '==', true)
+    await collectionRef.where('started', '==', false).where("no_show", '==', false)
         .orderBy('date_utc.full_date').limit(4).get().then(function (snapshot) {
             snapshot.forEach(doc =>{
                 let lessonInfo = doc.data();
