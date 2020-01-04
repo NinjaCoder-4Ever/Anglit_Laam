@@ -386,7 +386,7 @@ export async function getThisMonthLessonsStudent(email){
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string,
+        local_date: local_date_string,
         feedback: {
             fields: "None"
         },
@@ -403,7 +403,7 @@ export async function getThisMonthLessonsStudent(email){
         let i;
         for (i = 0; i<lessons.length; i++){
             let lesson = lessons[i];
-            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date_string);
+            lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
             thisMontLessons.push(lesson)
         }
     });
@@ -427,7 +427,7 @@ export async function getThisWeekLessonsTeacher(email) {
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string,
+        local_date: local_date_string,
         feedback: {
             fields: "None"
         },
@@ -444,7 +444,7 @@ export async function getThisWeekLessonsTeacher(email) {
         let i;
         for (i = 0; i < lessons.length; i++){
             let lesson = lessons[i];
-            lesson.local_time = convertUtcToLocalTime(lesson.date_utc.full_date_string);
+            lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
             lessonsThisWeek.push(lesson)
         }
     });
@@ -467,7 +467,7 @@ export async function getAllPastLessonsForStudent(email){
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string
+        local_date: local_date_string
         feedback: {
             fields: "None"
         },
@@ -483,7 +483,7 @@ export async function getAllPastLessonsForStudent(email){
     await collectionRef.where('date_utc.full_date', '<=', today).get().then(function(snapshot){
        snapshot.forEach(doc =>{
            let lessonData = doc.data();
-           lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
+           lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
            pastLessons.push(lessonData)
        })
     });
@@ -506,7 +506,7 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string,
+        local_date: local_date_string,
         feedback: {
             fields: "None"
         },
@@ -522,7 +522,7 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
         .where('feedback_given', '==', true).get().then(function (snapshot) {
            snapshot.forEach(doc =>{
                let lessonData = doc.data();
-               lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date);
+               lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date);
                pastFeedbacks.push(lessonData)
            })
         });
@@ -546,7 +546,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string,
+        local_date: local_date_string,
         feedback: {
             fields: "None"
         },
@@ -562,7 +562,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
         .where('started', '==', true).get().then(function (snapshot) {
             snapshot.forEach(doc =>{
                 let lessonData = doc.data();
-                lessonData.local_time = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
+                lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
                 futureFeedbacks.push(lessonData)
             })
         });
@@ -648,7 +648,7 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
-        local_time: local_time_string,
+        local_date: local_date_string,
         feedback: {
             fields: "None"
         },
@@ -826,6 +826,13 @@ function constructTeacherFreeTime(fullSchedule, busyTime) {
 }
 
 function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
+    /**
+     * Function converts the free time structure to local time from utc time.
+     *
+     * This function will return:
+     * {12:00:[30, 60], 12:30:[30,60], 13:00:[30, 60], 13:30:[30], 14:30:[30]}
+     * meaning for example one can set a lesson in 12:00 for 30 or 60 min but at 13:30 you can only set a 30 min lesson.
+     */
     let freeTimeInLocalTime = {};
     if (utcMonth.toString().length === 1){
         utcMonth = "0" + utcMonth;
@@ -874,6 +881,13 @@ function convertFreeTimeToLocalTime(freeTimeInUTC, utcDay, utcMonth, utcYear) {
 }
 
 export async function getTeacherFreeTimeInDate(teacher_mail, local_year, local_month, local_day) {
+    /**
+     * Function gets a date for a single day in local time and returns the teachers free time in local time.
+     *
+     * This function will return:
+     * {12:00:[30, 60], 12:30:[30,60], 13:00:[30, 60], 13:30:[30], 14:30:[30]}
+     * meaning for example one can set a lesson in 12:00 for 30 or 60 min but at 13:30 you can only set a 30 min lesson.
+     */
     let busyTime = {};
     let localDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day));
     let dayOfWeek = WEEKDAYS[localDate.getUTCDay()];
@@ -898,6 +912,12 @@ export async function getTeacherFreeTimeInDate(teacher_mail, local_year, local_m
 }
 
 function checkSameWeek(date1, date2){
+    /**
+     * Function gets two dates and checks if they are in the same week.
+     * function works by checking it both date's Sundays are the same.
+     *
+     * Returns true if both in the same week, and false otherwise.
+     */
     let sundayOfDate1 = new Date(date1).setDate(date1.getDate() - date1.getDay());
     let sundayOfDate2 = new Date(date2).setDate(date2.getDate() - date2.getDay());
     return sundayOfDate1.toString() === sundayOfDate2.toString();
@@ -905,6 +925,15 @@ function checkSameWeek(date1, date2){
 
 
 export async function setNewLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time, duration){
+    /**
+     * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
+     *
+     * If the lesson is in the current month, it will also be entered to the student's lessons_this_month field under
+     * the "students" collection.
+     *
+     * If the lesson is in the current week, it will also be entered to the teacher's lessons_this_week field under
+     * the "teachers" collection.
+     */
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
@@ -968,6 +997,15 @@ export async function setNewLesson(student_mail, teacher_mail, local_year, local
 }
 
 export async function cancelLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time){
+    /**
+     * Function deletes an existing lesson in "student_lessons" and "teacher_lessons" collection.
+     *
+     * If the lesson is this month it will also be deleted from the student's lessons_this_month field under
+     * the "students" collection.
+     *
+     * If the lesson is this week it will also be deleted from the teacher's lessons_this_week field under
+     * the "teachers" collection.
+     */
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
@@ -1013,6 +1051,31 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
 }
 
 export async function getNextFourLessonsStudent(student_mail) {
+    /**
+     * Function returns the next four lessons in the "student_lessons" collection for a given student.
+     *
+     * Returns an array of size 4 of: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_date: local_date_string,
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    };
+     */
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let nextLessons = [];
     await collectionRef.where('started', '==', false).where("no_show", '==', false)
@@ -1028,6 +1091,31 @@ export async function getNextFourLessonsStudent(student_mail) {
 }
 
 export async function getMonthLessonsStudent(student_mail, month_num, year){
+    /**
+     * Function gets the student's lessons occurring in the given month (and year)
+     *
+     * returns an array of: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_date: local_date_string,
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    };
+     */
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let monthLessons = [];
     await collectionRef.where('date_utc.month', '==', month_num)
@@ -1043,6 +1131,31 @@ export async function getMonthLessonsStudent(student_mail, month_num, year){
 }
 
 export async function getWeekLessonByDateTeacher(teacher_mail, local_year, local_month, local_day){
+    /**
+     * Function gets a teacher's week lessons in the week of a given date.
+     *
+     * Returns an array of: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_date: local_date_string,
+        feedback: {
+            fields: "None"
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    };
+     */
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let weekLessons = [];
     let localDate = new Date(local_year, local_month - 1, local_day);
@@ -1063,6 +1176,12 @@ export async function getWeekLessonByDateTeacher(teacher_mail, local_year, local
 }
 
 export async function updateStudentMonthLessons(student_mail){
+    /**
+     * Function updates the lessons_this_month field under a student's doc in "students" collection.
+     *
+     * This function is meant to run at the beginning of each month.
+     * @type {Date}
+     */
     let currentDate = new Date();
     let nextMontLessons = await getMonthLessonsStudent(student_mail,
         currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear())
@@ -1077,6 +1196,11 @@ export async function updateStudentMonthLessons(student_mail){
 }
 
 export async function updateTeacherWeekLessons(teacher_mail) {
+    /**
+     * Function updates the lessons_this_week field under a teacher's doc in "teachers" collection.
+     *
+     * This function is meant to run in the beginning of each week.
+     */
     let currentDate = new Date();
     let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,
         currentDate.getUTCFullYear(), currentDate.getUTCMonth() +1, currentDate.getDate());
