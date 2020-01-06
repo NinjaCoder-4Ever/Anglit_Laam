@@ -23,7 +23,7 @@ const MONTH_DAYS = {
     9: 30,
     10: 31,
     11: 30,
-    12:31
+    12: 31
 };
 
 db.settings({ timestampsInSnapshots: true });
@@ -103,10 +103,10 @@ export async function getStudentByMail(email) {
      */
     const values = [];
     const collectionRef = db.collection('students');
-    await collectionRef.doc(email).get().then(function(doc){
-        values.push(doc.data())
-    });
-    console.log(values[0]);
+    const doc = await collectionRef.doc(email).get();
+
+    values.push(doc.data());
+
     return values[0]
 }
 
