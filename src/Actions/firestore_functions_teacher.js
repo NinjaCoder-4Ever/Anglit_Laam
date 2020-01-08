@@ -143,13 +143,11 @@ export async function getTeacherByMail(email) {
         working_days: [Sunday, Monday]
     };
      */
-    const values = [];
+
     const collectionRef = db.collection('teachers');
-    await collectionRef.doc(email).get().then(function(doc){
-        values.push(doc.data())
-    });
-    console.log(values[0]);
-    return values[0]
+    const doc = await collectionRef.doc(email).get();
+
+    return doc.data()
 }
 
 export async function updateTeacherWorkingHours(email,working_hours) {
@@ -207,15 +205,15 @@ export async function getThisWeekLessonsTeacher(email) {
      */
     const lessonsThisWeek = [];
     const collectionRef = db.collection('teachers');
-    await collectionRef.doc(email).get().then(function (doc) {
-        let lessons = doc.data().lessons_this_week;
-        let i;
-        for (i = 0; i < lessons.length; i++){
-            let lesson = lessons[i];
-            lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
-            lessonsThisWeek.push(lesson)
-        }
-    });
+    const doc = await collectionRef.doc(email).get();
+
+    let lessons = doc.data().lessons_this_week;
+    let i;
+    for (i = 0; i < lessons.length; i++){
+        let lesson = lessons[i];
+        lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
+        lessonsThisWeek.push(lesson)
+    }
 
     return lessonsThisWeek
 }
@@ -247,14 +245,14 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
      */
     const pastFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    await collectionRef.where('student_mail', '==', student_mail)
-        .where('feedback_given', '==', true).get().then(function (snapshot) {
-            snapshot.forEach(doc =>{
-                let lessonData = doc.data();
-                lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date);
-                pastFeedbacks.push(lessonData)
-            })
-        });
+    const snapshot = await collectionRef.where('student_mail', '==', student_mail)
+        .where('feedback_given', '==', true).get();
+
+    snapshot.forEach(doc =>{
+        let lessonData = doc.data();
+        lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date);
+        pastFeedbacks.push(lessonData)
+    });
 
     return pastFeedbacks
 }
@@ -287,14 +285,14 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
      */
     const futureFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    await collectionRef.where('feedback_given', '==', false)
-        .where('started', '==', true).get().then(function (snapshot) {
-            snapshot.forEach(doc =>{
-                let lessonData = doc.data();
-                lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
-                futureFeedbacks.push(lessonData)
-            })
-        });
+    const snapshot = await collectionRef.where('feedback_given', '==', false)
+        .where('started', '==', true).get();
+
+    snapshot.forEach(doc =>{
+        let lessonData = doc.data();
+        lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
+        futureFeedbacks.push(lessonData)
+    });
 
     return futureFeedbacks
 }
@@ -390,7 +388,7 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
      */
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let weekLessons = [];
-    let snapshot = await collectionRef.orderBy('date_utc.full_date')
+    const snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday)
         .where('date_utc.full_date', '<=', searchedSaturday).get();
 
@@ -497,7 +495,7 @@ async function getTeacherWorkingDaysAndHours(teacher_mail) {
      * Function returns the working hours and working days of a teacher
      */
     const docRef = db.collection('teachers').doc(teacher_mail);
-    let teacher_doc = await docRef.get();
+    const teacher_doc = await docRef.get();
     let working_days = teacher_doc.data().working_days;
     let working_hours = teacher_doc.data().working_hours;
 

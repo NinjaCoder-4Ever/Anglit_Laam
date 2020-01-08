@@ -15,7 +15,7 @@ import React, { useCallback, useContext } from "react";
 import firebase from '../Config/fire';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
-import {getUserData, getUserDataByEmail} from "../Actions/firestore_functions";
+import {getUserData} from "../Actions/firestore_functions_general";
 
 
 const useStyles = makeStyles(theme => ({

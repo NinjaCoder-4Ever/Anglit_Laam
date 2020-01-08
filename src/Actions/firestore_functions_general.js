@@ -33,11 +33,9 @@ export async function getUserData(email) {
      *
      * Returns {collection: *, email: *, uid: *}
      */
-    let returnVal = [];
-    await db.collection('users').doc(email).get().then(function (doc) {
-        returnVal.push(doc.data())
-    });
-    return returnVal[0]
+    const doc = await db.collection('users').doc(email).get();
+
+    return doc.data()
 }
 
 export async function getUerDataByUid(uid) {
@@ -47,10 +45,9 @@ export async function getUerDataByUid(uid) {
      * Returns {collection: *, email: *, uid: *}
      */
     let returnVal = [];
-    await db.collection('users').where('uid', '==', uid).get().then(function (snapshot) {
-        snapshot.forEach(doc =>{
-            returnVal.push(doc.data())
-        })
+    const snapshot = await db.collection('users').where('uid', '==', uid).get();
+    snapshot.forEach(doc =>{
+        returnVal.push(doc.data())
     });
     return returnVal[0]
 }
@@ -65,10 +62,10 @@ export async function lookup(collection, field, value) {
      */
     const values = [];
     const collectionRef = db.collection(collection);
-    await collectionRef.where(field, '==', value).get().then(function (snapshot) {
-        snapshot.docs.forEach(doc =>{
-            values.push(doc.data())
-        })
+    const snapshot = await collectionRef.where(field, '==', value).get();
+
+    snapshot.docs.forEach(doc =>{
+        values.push(doc.data())
     });
 
     return values

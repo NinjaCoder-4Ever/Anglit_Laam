@@ -76,12 +76,9 @@ export async function getStudentTeacher(student_mail) {
      *
      * Returns teachers info: {first_name: *, last_name: *, email: *}
      */
-    let teacherInfo = [];
-    await db.collection('students').doc(student_mail).get().then(function (doc) {
-        teacherInfo.push(doc.data().teacher)
-    });
+    const teacherInfo = await db.collection('students').doc(student_mail).get();
 
-    return teacherInfo[0]
+    return teacherInfo.data().teacher
 }
 
 export async function getStudentByMail(email) {
@@ -101,13 +98,10 @@ export async function getStudentByMail(email) {
         uid: uid,
     }
      */
-    const values = [];
     const collectionRef = db.collection('students');
     const doc = await collectionRef.doc(email).get();
 
-    values.push(doc.data());
-
-    return values[0]
+    return doc.data()
 }
 
 export async function updateCredits(email, addedCredits) {
@@ -153,21 +147,20 @@ export async function chooseTeacherForStudent(studentMail) {
      */
     const chosenTeacher = [];
     const teacherCollection = db.collection('teachers');
-    await teacherCollection.get().then(function (querySnapshot) {
-        let minimalStudents = 10000000000000000000;
-        querySnapshot.forEach(doc => {
-            let studentArray = doc.data().students;
-            let numberOfStudents = studentArray.length;
-            if (numberOfStudents <= minimalStudents) {
+    const snapshot = await teacherCollection.get();
+    let minimalStudents = 10000000000000000000;
+    snapshot.forEach(doc => {
+        let studentArray = doc.data().students;
+        let numberOfStudents = studentArray.length;
+        if (numberOfStudents <= minimalStudents) {
 
-                if (chosenTeacher.length > 0){
-                    chosenTeacher.pop();
-                }
-
-                chosenTeacher.push(doc.data());
-                minimalStudents = numberOfStudents;
+            if (chosenTeacher.length > 0){
+                chosenTeacher.pop();
             }
-        })
+
+            chosenTeacher.push(doc.data());
+            minimalStudents = numberOfStudents;
+        }
     });
 
     await addStudentToTeacher(chosenTeacher[0].email, studentMail);
@@ -209,15 +202,14 @@ export async function getThisMonthLessonsStudent(email){
      */
     const thisMontLessons = [];
     const collectionRef = db.collection('students');
-    await collectionRef.doc(email).get().then(function (doc) {
-        let lessons = doc.data().lessons_this_month;
-        let i;
-        for (i = 0; i<lessons.length; i++){
-            let lesson = lessons[i];
-            lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
-            thisMontLessons.push(lesson)
-        }
-    });
+    const doc = await collectionRef.doc(email).get();
+    let lessons = doc.data().lessons_this_month;
+    let i;
+    for (i = 0; i<lessons.length; i++){
+        let lesson = lessons[i];
+        lesson.local_date = convertUtcToLocalTime(lesson.date_utc.full_date_string);
+        thisMontLessons.push(lesson)
+    }
 
     return thisMontLessons
 }
@@ -250,13 +242,12 @@ export async function getAllPastLessonsForStudent(email){
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
     let today = new Date().toISOString();
-    await collectionRef.where('date_utc.full_date', '<=', today).get().then(function(snapshot){
-       snapshot.forEach(doc =>{
-           let lessonData = doc.data();
-           lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
-           pastLessons.push(lessonData)
-       })
-    });
+    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today).get();
+    snapshot.forEach(doc =>{
+        let lessonData = doc.data();
+        lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
+        pastLessons.push(lessonData)
+     });
 
     return pastLessons
 }
@@ -286,17 +277,14 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
         lesson_id: lesson_id
     }
      */
-    let lessonData = [];
     if (teacher_mail == null){
         teacher_mail = getStudentTeacher(student_mail).email;
     }
     let lesson_id = constructLessonId(student_mail, teacher_mail, convertLocalTimeToUtc(local_date));
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
-    await studentLessons.doc(lesson_id).get().then(function (doc) {
-        lessonData.push(doc.data())
-    });
+    const doc = await studentLessons.doc(lesson_id).get();
 
-    return lessonData[0]
+    return doc.data()
 }
 
 export async function setNewLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time, duration){
@@ -453,14 +441,14 @@ export async function getNextFourLessonsStudent(student_mail) {
      */
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let nextLessons = [];
-    await collectionRef.where('started', '==', false).where("no_show", '==', false)
-        .orderBy('date_utc.full_date').limit(4).get().then(function (snapshot) {
-            snapshot.forEach(doc =>{
-                let lessonInfo = doc.data();
-                lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
-                nextLessons.push(lessonInfo)
-            })
-        });
+    const snapshot = await collectionRef.where('started', '==', false).where("no_show", '==', false)
+        .orderBy('date_utc.full_date').limit(4).get();
+
+    snapshot.forEach(doc =>{
+        let lessonInfo = doc.data();
+        lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+        nextLessons.push(lessonInfo)
+    });
 
     return nextLessons
 }
@@ -493,14 +481,14 @@ export async function getMonthLessonsStudent(student_mail, month_num, year){
      */
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let monthLessons = [];
-    await collectionRef.where('date_utc.month', '==', month_num)
-        .where('date_utc.year', '==', year).get().then(function(snapshot){
-            snapshot.forEach(doc => {
-                let lessonInfo = doc.data();
-                lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
-                monthLessons.push(lessonInfo)
-            })
-        });
+    const snapshot = await collectionRef.where('date_utc.month', '==', month_num)
+        .where('date_utc.year', '==', year).get();
+
+    snapshot.forEach(doc => {
+        let lessonInfo = doc.data();
+        lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+        monthLessons.push(lessonInfo)
+    });
 
     return monthLessons
 }
