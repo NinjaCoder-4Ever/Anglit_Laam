@@ -112,10 +112,20 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, loc
 
 // gets the user's collection doc data
 // return value looks like so: {email: X, uid: Y, collection: Z}
-export async function getUserData(email) {
+export async function getUserDataByEmail(email) {
     let returnVal = [];
     db.collection('users').doc(email).get().then(function (doc) {
         returnVal.push(doc.data())
+    });
+    return returnVal[0]
+}
+
+export async function getUserDataByUID(uid) {
+    let returnVal = [];
+    db.collection('users').where('uid', '==', uid).get().then(function (snapshot) {
+        snapshot.forEach(doc =>{
+            returnVal.push(doc.data())
+        })
     });
     return returnVal[0]
 }

@@ -15,6 +15,7 @@ import React, { useCallback, useContext } from "react";
 import firebase from '../Config/fire';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
+import {getUserData, getUserDataByEmail} from "../Actions/firestore_functions";
 
 
 const useStyles = makeStyles(theme => ({
@@ -60,7 +61,22 @@ const LoginSide = ({ history }) => {
             await firebase
                 .auth()
                 .signInWithEmailAndPassword(email.value, password.value);
-            history.push("/Student/homePage");
+
+            const userType = await getUserDataByEmail(email.value).then(function (data) {
+                console.log(data.collection);
+                return data.collection
+            })
+
+            if (userType === "students") {
+                history.push("/Student/homePage");
+            } else if (userType === "teachers") {
+                history.push("/teacher/homePage");
+            } else if (userType === "admins"){
+                history.push("/admin/homePage");
+            } else {
+                throw new Error("An error has occurred, unknown user");
+            }
+
         } catch (error) {
             alert(error);
         }
