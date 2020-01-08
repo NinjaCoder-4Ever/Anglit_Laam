@@ -33,7 +33,8 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
      * Function enters a new teacher to the "teachers" collection.
      * Also enters the teacher to the "users" collection.
      */
-    working_hours = convertWorkingHoursToUTCTime(working_hours);
+    let parsed_working_hours = setWorkingHours(working_hours);
+    let working_days = setWorkingDays(parsed_working_hours);
     let newTeacherData = {
         email: email,
         first_name: firstName,
@@ -50,7 +51,8 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         },
         uid: uid,
         students: [],
-        working_hours: working_hours
+        working_hours: parsed_working_hours,
+        working_days: working_days
     };
 
     let usersData = {
@@ -67,6 +69,54 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
             console.log('Added user to users collection')
         })
     ]);
+}
+
+function setWorkingHours(working_hours){
+    /**
+     * Function gets working_hours and parses them to utc and returns a working hours struct for the teacher's working_hours field
+     *
+     * Return example: ["Sunday-12:00-21:00", "Monday-13:00-17:00"]
+     */
+    let i;
+    let currentDate = new Date();
+    let parsed_working_hours = [];
+    for (i = 0; i < 7; i++){
+        if (working_hours[WEEKDAYS[i]].from !== "00:00" && working_hours[WEEKDAYS[i]].to !== "00:00"){
+            let startTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
+                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[0]),
+                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]))
+            let endtTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
+                parseInt(working_hours[WEEKDAYS[i]].to.split(':')[0]),
+                parseInt(working_hours[WEEKDAYS[i]].to.split(':')[1]));
+            if (startTime.getUTCDay() === endtTime.getUTCDay()){
+                parsed_working_hours.push(startTime.getUTCDay() + "-" + startTime.getUTCHours() + ":" + startTime.getUTCMinutes()
+                + "-" + endtTime.getUTCHours() + ":" + endtTime.getUTCMinutes());
+            }
+            else {
+                parsed_working_hours.push(startTime.getUTCDay() + "-" + startTime.getUTCHours() + ":" + startTime.getUTCMinutes()
+                + "-00:00");
+                parsed_working_hours.push(endtTime.getUTCDay() + "-00:00-" + endtTime.getUTCHours() + ":" + endtTime.getUTCMinutes());
+            }
+        }
+    }
+}
+
+function setWorkingDays(working_hours){
+    /**
+     * gets the working days and creates working days array.
+     */
+    let i, j;
+    let workingDays = []
+    for (i=0; i< working_hours.length; i++){
+        for (j=0; j< 7; j++){
+            if (working_hours[i].includes(WEEKDAYS[j])){
+                if (!workingDays.includes(WEEKDAYS[j])){
+                    workingDays.push(WEEKDAYS[j]);
+                }
+            }
+        }
+    }
+    return workingDays
 }
 
 export async function getTeacherByMail(email) {
@@ -89,11 +139,8 @@ export async function getTeacherByMail(email) {
         },
         uid: uid,
         students: [student_mail],
-        working_hours: {"Sunday": {
-            from: "12:00",
-            to: "21:00",
-            working: true
-        }...}
+        working_hours: ["Sunday-12:00-21:00", "Monday-13:00-17:00"]
+        working_days: [Sunday, Monday]
     };
      */
     const values = [];
@@ -105,35 +152,18 @@ export async function getTeacherByMail(email) {
     return values[0]
 }
 
-function convertWorkingHoursToUTCTime(working_hours){
-    /**
-     * Convert working hours from local time to utc time.
-     *
-     * Returns: {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
-     * where the times listed are in utc.
-     */
-    let i;
-    for (i=0; i<7; i++){
-        let day_data = working_hours[WEEKDAYS[i]];
-        if (day_data.working) {
-            day_data.from = applyTimezoneoffset(day_data.from);
-            day_data.to = applyTimezoneoffset(day_data.to);
-        }
-        working_hours[WEEKDAYS[i]] = day_data;
-    }
-    return working_hours
-}
-
 export async function updateTeacherWorkingHours(email,working_hours) {
     /**
      * Function updates the teacher's working_hours fields.
      * working_hours field should have the following structure:
      * {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
      */
-    working_hours = convertWorkingHoursToUTCTime(working_hours);
+    let parsed_working_hours = setWorkingHours(working_hours);
+    let working_days = setWorkingDays(parsed_working_hours);
     const collectionRef = db.collection('teachers');
     collectionRef.doc(email).update({
-        working_hours: working_hours
+        working_hours: parsed_working_hours,
+        working_days: working_days
     }).then(function () {
         console.log("updated teachers working hours");
     });
@@ -430,6 +460,19 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
 }
 
 function parseWeeksLessons(weeksLessons) {
+    /**
+     * Function gets this weeks lessons and parses them to a structure:
+     * [
+     *  Sunday: [
+     *      {
+     *          time: 18:00,
+     *          duration: 30
+     *      }
+     *   ]
+     * ]
+     * meaning on Sunday the teacher has a lesson of 30 min starting at 18:00
+     * empty days will return empty arrays
+     */
     if (weeksLessons.length === 0){
         return {}
     }
@@ -450,6 +493,9 @@ function parseWeeksLessons(weeksLessons) {
 }
 
 async function getTeacherWorkingDaysAndHours(teacher_mail) {
+    /**
+     * Function returns the working hours and working days of a teacher
+     */
     const docRef = db.collection('teachers').doc(teacher_mail);
     let teacher_doc = await docRef.get();
     let working_days = teacher_doc.data().working_days;
@@ -459,6 +505,10 @@ async function getTeacherWorkingDaysAndHours(teacher_mail) {
 }
 
 function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
+    /**
+     * Function gets a fay and working hours and scheduled lessons for a teacher and constructs the
+     * free time struct for that day
+     */
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
     let dayLessons = weeks_lessons[WEEKDAYS[day.getUTCDay()]];
     let freeTime = [];
@@ -483,6 +533,9 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
 }
 
 function constructFreeTime(free_hours) {
+    /**
+     * Construct the free time struct out of fully parsed schedule
+     */
     let freeTimeArray = [];
     let i;
     for (i=0; i<free_hours.length-1; i++){
@@ -505,12 +558,19 @@ function constructFreeTime(free_hours) {
 }
 
 function getWorkingHoursForDay(working_hours, day) {
+    /**
+     * Function gets the working hours for a teacher and a given day and returns an array of arrays
+     * each sub-array represents all the working hour sequence for the teacher
+     * for example:
+     * [[12:00,12:30,13:00], [14:00, 14:30, 15:00]]
+     * meaning the teacher works on 2 sequences 12:00-13:00 and 14:00-15:00 on the given day
+     */
     let working_hours_array = [];
     let i;
     for (i=0; i< working_hours.length; i++){
         if (working_hours[i].includes(WEEKDAYS[day.getUTCDay()])){
-            let start = working_hours[i].split('-')[0];
-            let end = working_hours[i].split('-')[1];
+            let start = working_hours[i].split('-')[1];
+            let end = working_hours[i].split('-')[2];
             let continueCreation = true;
             let totalSchedule = [start];
 
