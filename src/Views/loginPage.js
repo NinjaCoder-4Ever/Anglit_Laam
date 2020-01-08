@@ -62,7 +62,7 @@ const LoginSide = ({ history }) => {
                 .auth()
                 .signInWithEmailAndPassword(email.value, password.value);
 
-            const userType = await getUserDataByEmail(email.value).then(function (data) {
+            const userType = await getUserData(email.value).then(function (data) {
                 console.log(data.collection);
                 return data.collection
             })
