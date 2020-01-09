@@ -501,7 +501,7 @@ export async function updateStudentMonthLessons(student_mail){
      */
     let currentDate = new Date();
     let nextMontLessons = await getMonthLessonsStudent(student_mail,
-        currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear())
+        currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear());
     const collectionRef = db.collection('students').doc(student_mail);
     let formattedMonthLessons = {};
     nextMontLessons.forEach(lesson => {
