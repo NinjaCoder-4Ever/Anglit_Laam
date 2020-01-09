@@ -1,5 +1,5 @@
 import {db} from '../Config/fire'
-import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from 'firestore_fucntions_general.js'
+import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -125,14 +125,13 @@ export async function addStudentToTeacher(teacherMail, studentMail){
     /**
      * Function adds a student mail to the teacher's student array
      */
-    const fullStudentList = [studentMail];
     const collectionRef = db.collection('teachers');
-    await collectionRef.doc(teacherMail).get().then(function (doc) {
-        fullStudentList.concat(doc.data().students)
-    });
+    const doc = await collectionRef.doc(teacherMail).get();
+    let current_student_list = doc.data().students;
+    current_student_list.push(studentMail);
 
     await collectionRef.doc(teacherMail).update({
-        "students": fullStudentList
+        "students": current_student_list
     }).then(function () {
         console.log("teacher's student list updated")
     });
