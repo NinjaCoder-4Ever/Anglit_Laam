@@ -84,7 +84,7 @@ function setWorkingHours(working_hours){
         if (working_hours[WEEKDAYS[i]].from !== "00:00" && working_hours[WEEKDAYS[i]].to !== "00:00"){
             let startTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
                 parseInt(working_hours[WEEKDAYS[i]].from.split(':')[0]),
-                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]))
+                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]));
             let endtTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
                 parseInt(working_hours[WEEKDAYS[i]].to.split(':')[0]),
                 parseInt(working_hours[WEEKDAYS[i]].to.split(':')[1]));
@@ -406,8 +406,9 @@ export async function updateTeacherWeekLessons(teacher_mail) {
      * This function is meant to run in the beginning of each week.
      */
     let currentDate = new Date();
-    let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,
-        currentDate.getUTCFullYear(), currentDate.getUTCMonth() +1, currentDate.getDate());
+    let searchedSunday = new Date(currentDate.setDate(currentDate.getUTCDate()) - currentDate.getUTCDay());
+    let searchedSaturday = new Date(searchedSunday.setDate(searchedSunday.getUTCDate() + 6));
+    let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,searchedSunday, searchedSaturday);
     const collectionRef = db.collection('teachers').doc(teacher_mail);
     let formattedWeekLessons = {};
     nextWeekLessons.forEach(lesson => {
@@ -434,7 +435,7 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
      * NOTE: All time are returned in UTC time!!!
      */
     let currentDate = new Date();
-    let searchedDate = new Date(year, month, day);
+    let searchedDate = new Date(year, month -1, day);
     let searchedSunday = new Date(searchedDate.setDate(searchedDate.getDate() - searchedDate.getUTCDay()));
     let searchedSaturday = new Date(searchedDate.setDate(searchedDate.getDate() + (6 - searchedDate.getDay())));
     let weeksLessons = parseWeeksLessons(await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday));
@@ -445,7 +446,7 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
     let teacherFreeTime = {};
     for (i =0; i<=6; i++){
         let day = new Date(searchedSunday.setDate(searchedSunday.getDate() + i));
-        let key = day.getUTCFullYear() + "-" + day.getUTCMonth() + day.getUTCDate();
+        let key = day.getUTCFullYear() + "-" + (day.getUTCMonth()+ 1) + "-" + day.getUTCDate();
         if (day < currentDate){
             teacherFreeTime[key] = [];
             continue
