@@ -13,7 +13,7 @@ import Container from '@material-ui/core/Container';
 import firebase from '../Config/fire';
 import {withRouter} from 'react-router-dom';
 import Copyright from "../Common/Copyright";
-import {setNewStudent} from "../Actions/firestore_functions";
+import {setNewStudent} from "../Actions/firestore_functions_sutdent";
 
 
 
