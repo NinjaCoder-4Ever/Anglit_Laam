@@ -1,7 +1,7 @@
 import React from "react";
 
 // react components used to create a calendar with events on it
-import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
+import {Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
 // dependency plugin for react-big-calendar
 import moment from "moment";
 // react component used to create alerts
@@ -89,15 +89,19 @@ export default function Calendar() {
                     <Card>
                         <CardBody calendar>
                             <BigCalendar
-                                selectable
+                                selectable={false}
                                 localizer={localizer}
                                 events={events}
-                                defaultView="month"
+                                defaultView="week"
                                 scrollToTime={new Date(1970, 1, 1, 6)}
                                 defaultDate={new Date()}
                                 onSelectEvent={event => selectedEvent(event)}
                                 onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
+                                views={['month','week','day']}
+                                timeslots={2}
+                                min={new Date(2017, 12, 0, 9, 0, 0)}
+                                max={new Date(2030, 12, 0, 23, 0, 0)}
                             />
                         </CardBody>
                     </Card>
