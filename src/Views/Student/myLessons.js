@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useEffect} from "react";
+import firebase from 'Config/fire';
 
 // react components used to create a calendar with events on it
 import {Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
@@ -22,6 +23,8 @@ import CardBody from "../../Components/Card/CardBody.js";
 import styles from "../../Layouts/buttonStyle";
 
 import { events as calendarEvents } from "../../Variables/general.js";
+import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
+import {getStudentByUID} from "Actions/firestore_functions_sutdent"
 
 const localizer = momentLocalizer(moment);
 
@@ -29,8 +32,52 @@ const useStyles = makeStyles(styles);
 
 export default function Calendar() {
     const classes = useStyles();
-    const [events, setEvents] = React.useState(calendarEvents);
+    const [events, setEvents] = React.useState([]);
     const [alert, setAlert] = React.useState(null);
+    const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
+    const [displayedSunday, setDisplayedSunday] = React.useState(new Date());
+    const [firstDisplay, setFirstDisplay] = React.useState(false);
+
+    React.useEffect(() => {
+        getStudentByUID(firebase.auth().currentUser.uid).then(studentData =>{
+            let teacherMail = studentData.teacher.email;
+            let displayDay = new Date(displayedSunday.toISOString());
+            displayDay.setDate(displayedSunday.getDate() - displayedSunday.getDay());
+            getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
+                displayDay.getDate(), teacherMail).then(freeTime => {
+                    setTeacherFreeTime(freeTime);
+                    setFirstDisplay(true)
+            });
+        });
+    }, []);
+
+    React.useEffect(() => {
+        console.log(teacherFreeTime);
+        console.log(firstDisplay);
+        setNetTeacherEvents();
+    }, [firstDisplay]);
+
+    function setNetTeacherEvents(){
+        var dateIndex;
+        var possibleLessonIndex;
+        for ( dateIndex in Object.keys(teacherFreeTime)){
+            var freeTimeOnDayArray = teacherFreeTime[Object.keys(teacherFreeTime)[dateIndex]];
+            var date = Object.keys(teacherFreeTime)[dateIndex];
+            for (possibleLessonIndex in freeTimeOnDayArray){
+                let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
+                let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
+                let endTime = new Date(startTime.toISOString());
+                endTime.setTime(startTime.getTime() + 30*60000);
+                let title = startTime.toString();
+                let slotInfo = {
+                    start: startTime,
+                    end: endTime,
+                    duration: possibleLesson.duration
+                };
+                addNewEvent(title, slotInfo)
+            }
+        }
+    }
     const selectedEvent = event => {
         window.alert(event.title);
     };
@@ -41,19 +88,20 @@ export default function Calendar() {
                 showCancel
                 style={{ display: "block", marginTop: "-100px" }}
                 title="Input something"
-                onConfirm={e => addNewEvent(e, slotInfo)}
+                onConfirm={title => addNewEvent(title, slotInfo)}
                 onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
                 cancelBtnCssClass={classes.button + " " + classes.danger}
             />
         );
     };
-    const addNewEvent = (e, slotInfo) => {
+    const addNewEvent = (title, slotInfo) => {
         var newEvents = events;
         newEvents.push({
-            title: e,
+            title: title,
             start: slotInfo.start,
-            end: slotInfo.end
+            end: slotInfo.end,
+            duration: slotInfo.duration
         });
         setAlert(null);
         setEvents(newEvents);
@@ -98,7 +146,7 @@ export default function Calendar() {
                                 onSelectEvent={event => selectedEvent(event)}
                                 onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
-                                views={['month','week','day']}
+                                views={['week']}
                                 timeslots={2}
                                 min={new Date(2017, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}

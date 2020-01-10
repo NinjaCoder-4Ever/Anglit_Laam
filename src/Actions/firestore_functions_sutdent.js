@@ -104,6 +104,34 @@ export async function getStudentByMail(email) {
     return doc.data()
 }
 
+export async function getStudentByUID(uid) {
+    /**
+     * Function gets all the student's data by searching it's uid.
+     *
+     * Returns mapping of all student's info.
+     * {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        lessons_this_month:[],
+        subscription: 'PAL',
+        teacher: {first_name: *, last_name: *, email: *},
+        credits: 1,
+        uid: uid,
+    }
+     */
+    let docs = [];
+    const collectionRef = db.collection('students');
+    const snapshot = await collectionRef.where('uid', '==', uid).get();
+
+    snapshot.forEach(doc =>{
+       docs.push(doc.data())
+    });
+
+    return docs[0]
+}
+
 export async function updateCredits(email, addedCredits) {
     /**
      * Function updates the amount of credits a student has.
