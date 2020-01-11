@@ -384,7 +384,7 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     }
 }
 
-export async function cancelLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time){
+export async function cancelLesson(student_mail, teacher_mail, lesson_date){
     /**
      * Function deletes an existing lesson in "student_lessons" and "teacher_lessons" collection.
      *
@@ -397,11 +397,7 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    let local_min = local_time.split(':')[1];
-    let local_hour = local_time.split(':')[0];
-    let lessonDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day),
-        parseInt(local_hour), parseInt(local_min));
-    let utcLessonDate = lessonDate.toISOString();
+    let utcLessonDate = lesson_date.toISOString();
     let lesson_id = constructLessonId(student_mail, teacher_mail, utcLessonDate);
     studentLessons.doc(lesson_id).delete().then(function () {
         console.log("Deleted lesson in student lessons")
@@ -410,7 +406,7 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
        console.log("Deleted lesson in teacher lessons")
     });
 
-    if (lessonDate.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    if (lesson_date.getUTCMonth() === currentLocalDate.getUTCMonth()){
         const studentCollectionRef = db.collection('students');
         let studentData = await studentCollectionRef.doc(student_mail).get();
         let currentMonthLessons = studentData.data().lessons_this_month;
@@ -420,11 +416,11 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
         });
     }
 
-    if (checkSameWeek(currentLocalDate, lessonDate)){
+    if (checkSameWeek(currentLocalDate, lesson_date)){
         const teacherCollectionRef = db.collection('teachers');
         let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
         let currentWeekLessons = teacherData.data().lessons_this_week;
-        delete currentWeekLessons[WEEKDAYS[lessonDate.getUTCDay()]][lesson_id];
+        delete currentWeekLessons[WEEKDAYS[lesson_date.getUTCDay()]][lesson_id];
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
         });

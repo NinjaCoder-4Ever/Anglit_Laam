@@ -20,7 +20,7 @@ import GridItem from "../../Components/Grid/GridItem";
 import Card from "../../Components/Card/Card.js";
 import CardBody from "../../Components/Card/CardBody.js";
 
-import stylesPopup from "../../Layouts/modalStyle.js";
+import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
