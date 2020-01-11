@@ -79,7 +79,8 @@ export default function Calendar() {
                                 let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
                                 let endTime = new Date(startTime.toISOString());
                                 endTime.setTime(startTime.getTime() + 30 * 60000);
-                                let title = startTime.toString();
+                                //let title = startTime.toString().slice(16,21);
+                                let title ='';
                                 let slotInfo = {
                                     start: startTime,
                                     end: endTime,
@@ -237,7 +238,10 @@ export default function Calendar() {
                 >
                     <Button onClick={() => setModal(false)}>Never Mind</Button>
                     <Button onClick={() => setModal(false)} color="success">
-                        Yes
+                        Yes, 30 min
+                    </Button>
+                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setModal(false)} color="success">
+                        Yes, 60 min
                     </Button>
                 </DialogActions>
             </Dialog>
