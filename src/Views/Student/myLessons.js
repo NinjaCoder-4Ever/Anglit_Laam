@@ -25,7 +25,7 @@ import stylesPopup from "../../Layouts/modalStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
-import {getStudentByUID} from "Actions/firestore_functions_sutdent"
+import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_sutdent"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -39,14 +39,16 @@ const localizer = momentLocalizer(moment);
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
 
-export default function Calendar() {
+
+
+export default function Calendar({history}) {
     const classes = useStyles();
     const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
     const [studentData, setstudentData] = React.useState({teacher:{email:"",
-        first_name: "", last_name:""}});
+        first_name: "", last_name:""}, email:""});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
 
     const [modal, setModal] = React.useState(false);
@@ -116,8 +118,15 @@ export default function Calendar() {
         }
     }
     const selectEvent = event => {
-        setSelectedEvent(event)
-        setModal(true)
+        setSelectedEvent(event);
+        setModal(true);
+    };
+
+    const setLesson = (duration) => {
+        setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration);
+        setModal(false);
+        history.push("/Student/homePage");
+
     };
     const addNewEventAlert = slotInfo => {
         setAlert(
@@ -237,10 +246,10 @@ export default function Calendar() {
                     className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
                 >
                     <Button onClick={() => setModal(false)}>Never Mind</Button>
-                    <Button onClick={() => setModal(false)} color="success">
+                    <Button onClick={() => setLesson(30)} color="success">
                         Yes, 30 min
                     </Button>
-                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setModal(false)} color="success">
+                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60)} color="success">
                         Yes, 60 min
                     </Button>
                 </DialogActions>
