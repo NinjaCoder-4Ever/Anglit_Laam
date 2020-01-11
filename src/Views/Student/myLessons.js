@@ -36,26 +36,41 @@ export default function Calendar() {
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
     const [displayedSunday, setDisplayedSunday] = React.useState(new Date());
-    const [firstDisplay, setFirstDisplay] = React.useState(false);
+    const [studentData, setstudentData] = React.useState({});
 
     React.useEffect(() => {
-        getStudentByUID(firebase.auth().currentUser.uid).then(studentData =>{
-            let teacherMail = studentData.teacher.email;
+        getStudentByUID(firebase.auth().currentUser.uid).then(studentInfo =>{
+            setstudentData(studentInfo);
+            let teacherMail = studentInfo.teacher.email;
             let displayDay = new Date(displayedSunday.toISOString());
             displayDay.setDate(displayedSunday.getDate() - displayedSunday.getDay());
             getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
                 displayDay.getDate(), teacherMail).then(freeTime => {
                     setTeacherFreeTime(freeTime);
-                    setFirstDisplay(true)
+                    var dateIndex;
+                    var possibleLessonIndex;
+                    for ( dateIndex in Object.keys(freeTime)){
+                        // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
+                        var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
+                        // date looks like 2020-01-31
+                        var date = Object.keys(freeTime)[dateIndex];
+                        for (possibleLessonIndex in freeTimeOnDayArray){
+                            let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
+                            let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
+                            let endTime = new Date(startTime.toISOString());
+                            endTime.setTime(startTime.getTime() + 30*60000);
+                            let title = startTime.toString();
+                            let slotInfo = {
+                                start: startTime,
+                                end: endTime,
+                                duration: possibleLesson.duration
+                            };
+                            addNewEvent(title, slotInfo)
+                        }
+                    }
             });
         });
     }, []);
-
-    React.useEffect(() => {
-        console.log(teacherFreeTime);
-        console.log(firstDisplay);
-        setNetTeacherEvents();
-    }, [firstDisplay]);
 
     function setNetTeacherEvents(){
         var dateIndex;
