@@ -98,7 +98,7 @@ button.rbc-input::-moz-focus-inner {
   -webkit-user-select: none;
   z-index: 4;
   // changing the value below will change the box size
-  min-height: 90px;
+  min-height: 5px;
 }
 .rbc-toolbar {
   display: -webkit-flex;
@@ -419,7 +419,7 @@ button.rbc-input::-moz-focus-inner {
 }
 .rbc-timeslot-group {
   border-bottom: 1px solid #ddd;
-  min-height: 40px;
+  min-height: 45px;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;

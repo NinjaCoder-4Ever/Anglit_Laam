@@ -158,12 +158,12 @@ export default function Calendar() {
                                 defaultView="week"
                                 scrollToTime={new Date(1970, 1, 1, 6)}
                                 defaultDate={new Date()}
-                                onSelectEvent={event => selectedEvent(event)}
-                                onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
+                                //onSelectEvent={event => selectedEvent(event)}
+                                //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
                                 views={['week']}
                                 timeslots={2}
-                                min={new Date(2017, 12, 0, 9, 0, 0)}
+                                min={new Date(2019, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}
                             />
                         </CardBody>
