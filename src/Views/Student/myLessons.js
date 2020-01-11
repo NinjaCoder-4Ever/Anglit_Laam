@@ -169,7 +169,7 @@ export default function Calendar({history}) {
         <div>
             <Heading
                 textAlign="center"
-                title="React Big Calendar"
+                title="Set New Lesson"
                 category={
                     <span>
             A beautiful react component made by Netanel
