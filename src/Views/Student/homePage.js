@@ -2,18 +2,12 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import Checkbox from "@material-ui/core/Checkbox";
 import logo from "assets/img/LogoText.png";
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Person from "@material-ui/icons/Person";
 import Edit from "@material-ui/icons/Edit";
 import Close from "@material-ui/icons/Close";
-import Check from "@material-ui/icons/Check";
-import Remove from "@material-ui/icons/Remove";
-import Add from "@material-ui/icons/Add";
-import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
