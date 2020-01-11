@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 
-import styles from "../../Layouts/headingStyle";
+import styles from "assets/jss/material-dashboard-pro-react/components/headingStyle.js";
 
 const useStyles = makeStyles(styles);
 
