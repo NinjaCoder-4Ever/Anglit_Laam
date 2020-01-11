@@ -455,7 +455,7 @@ button.rbc-input::-moz-focus-inner {
   display: -ms-flexbox;
   display: flex;
   max-height: 100%;
-  min-height: 20px;
+  min-height: 1px;
   -webkit-flex-flow: column wrap;
   -ms-flex-flow: column wrap;
   flex-flow: column wrap;
@@ -485,8 +485,7 @@ button.rbc-input::-moz-focus-inner {
   flex: 1 1 0;
   word-wrap: break-word;
   line-height: 1;
-  height: 100%;
-  min-height: 1em;
+  height: 1px;
 }
 .rbc-day-slot .rbc-time-slot + .rbc-time-slot {
   border-top: 1px dotted #ddd;

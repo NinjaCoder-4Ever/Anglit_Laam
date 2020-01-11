@@ -2,7 +2,7 @@ import { grayColor } from "./material-dashboard-pro-react";
 
 const headingStyle = {
   heading: {
-    marginBottom: "30px"
+    marginBottom: "1px"
   },
   rightTextAlign: {
     textAlign: "right"
