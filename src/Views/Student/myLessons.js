@@ -21,22 +21,40 @@ import Card from "../../Components/Card/Card.js";
 import CardBody from "../../Components/Card/CardBody.js";
 
 import styles from "../../Layouts/buttonStyle";
+import stylesPopup from "../../Layouts/modalStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
 import {getStudentByUID} from "Actions/firestore_functions_sutdent"
+import Button from "../../Components/CustomButtons/Button";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Close from "@material-ui/icons/Close";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Slide from "@material-ui/core/Slide";
 
 const localizer = momentLocalizer(moment);
 
 const useStyles = makeStyles(styles);
+const useStylesPopup = makeStyles(stylesPopup);
 
 export default function Calendar() {
     const classes = useStyles();
+    const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
+    const [studentData, setstudentData] = React.useState({teacher:{email:"",
+        first_name: "", last_name:""}});
+    const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
+
+    const [modal, setModal] = React.useState(false);
+
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
     const [currentDay, setDsetCurrentDay] = React.useState(new Date());
-    const [studentData, setstudentData] = React.useState({});
 
     React.useEffect(() => {
         getStudentByUID(firebase.auth().currentUser.uid).then(studentInfo =>{
@@ -96,8 +114,9 @@ export default function Calendar() {
             }
         }
     }
-    const selectedEvent = event => {
-        window.alert(event.title);
+    const selectEvent = event => {
+        setSelectedEvent(event)
+        setModal(true)
     };
     const addNewEventAlert = slotInfo => {
         setAlert(
@@ -161,7 +180,7 @@ export default function Calendar() {
                                 defaultView="week"
                                 scrollToTime={new Date(1970, 1, 1, 6)}
                                 defaultDate={new Date()}
-                                //onSelectEvent={event => selectedEvent(event)}
+                                onSelectEvent={event => selectEvent(event)}
                                 //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
                                 views={['week']}
@@ -173,6 +192,55 @@ export default function Calendar() {
                     </Card>
                 </GridItem>
             </GridContainer>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={modal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Set Lesson</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h4>Would you like to set the following lesson:</h4>
+                    <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
+                    <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>
+                    <h5>Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h5>
+                    <h5>Duration: {selectedEvent.duration.toString()}</h5>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <Button onClick={() => setModal(false)}>Never Mind</Button>
+                    <Button onClick={() => setModal(false)} color="success">
+                        Yes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
