@@ -28,7 +28,7 @@ const switchRoutes = (
             }
             return null;
         })}
-        <Redirect from="/Student" to="/Student/myLessons" />
+        <Redirect from="/Student" to="/Student/homePage" />
     </Switch>
 );
 

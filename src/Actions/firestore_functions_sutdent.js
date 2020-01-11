@@ -40,7 +40,7 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         first_name: firstName,
         last_name: lastName,
         phone_number: phoneNumber,
-        lessons_this_month:[],
+        lessons_this_month:{},
         subscription: 'PAL',
         teacher: {},
         credits: 1,
@@ -102,6 +102,34 @@ export async function getStudentByMail(email) {
     const doc = await collectionRef.doc(email).get();
 
     return doc.data()
+}
+
+export async function getStudentByUID(uid) {
+    /**
+     * Function gets all the student's data by searching it's uid.
+     *
+     * Returns mapping of all student's info.
+     * {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        lessons_this_month:[],
+        subscription: 'PAL',
+        teacher: {first_name: *, last_name: *, email: *},
+        credits: 1,
+        uid: uid,
+    }
+     */
+    let docs = [];
+    const collectionRef = db.collection('students');
+    const snapshot = await collectionRef.where('uid', '==', uid).get();
+
+    snapshot.forEach(doc =>{
+       docs.push(doc.data())
+    });
+
+    return docs[0]
 }
 
 export async function updateCredits(email, addedCredits) {
@@ -286,7 +314,7 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
     return doc.data()
 }
 
-export async function setNewLesson(student_mail, teacher_mail, local_year, local_month, local_day, local_time, duration){
+export async function setNewLesson(student_mail, teacher_mail, start_time, duration){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
      *
@@ -299,21 +327,25 @@ export async function setNewLesson(student_mail, teacher_mail, local_year, local
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    let local_min = local_time.split(':')[1];
-    let local_hour = local_time.split(':')[0];
-    let lessonDate = new Date(parseInt(local_year), parseInt(local_month) - 1, parseInt(local_day),
-        parseInt(local_hour), parseInt(local_min));
-    let utcLessonDate = lessonDate.toISOString();
+    let utcLessonDate = start_time.toISOString();
     let lesson_id = constructLessonId(student_mail, teacher_mail, utcLessonDate);
+    let hour = start_time.getUTCHours();
+    let min = start_time.getUTCMinutes();
+    if (hour < 10){
+        hour = "0" + hour;
+    }
+    if (min < 10){
+        min = "0" + min;
+    }
     let lessonInfo = {
         teacher_mail: teacher_mail,
         student_mail: student_mail,
         duration: duration,
         date_utc: {
-            year: lessonDate.getUTCFullYear(),
-            month: lessonDate.getUTCMonth() + 1,
-            day: lessonDate.getUTCDate(),
-            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            year: start_time.getUTCFullYear(),
+            month: start_time.getUTCMonth() + 1,
+            day: start_time.getUTCDate(),
+            time: hour + ":" + min,
             full_date: new Date(utcLessonDate),
             full_date_string: utcLessonDate
         },
@@ -332,26 +364,20 @@ export async function setNewLesson(student_mail, teacher_mail, local_year, local
        console.log("Lesson set in teacher lessons")
     });
 
-    if (lessonDate.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
         const studentCollectionRef = db.collection('students');
-        let currentMonthLessons = [];
-        await studentCollectionRef.doc(student_mail).get().then(function (doc) {
-            currentMonthLessons.push(doc.data().lessons_this_month)
-        });
-        currentMonthLessons = currentMonthLessons[0];
+        let studentData = await studentCollectionRef.doc(student_mail).get();
+        let currentMonthLessons = studentData.data().lessons_this_month;
         currentMonthLessons[lesson_id] = lessonInfo;
         studentCollectionRef.doc(student_mail).update({
             lessons_this_month: currentMonthLessons
         });
     }
-    if (checkSameWeek(currentLocalDate, lessonDate)){
+    if (checkSameWeek(currentLocalDate, start_time)){
         const teacherCollectionRef = db.collection('teachers');
-        let currentWeekLessons = [];
-        await  teacherCollectionRef.doc(teacher_mail).get().then(function (doc) {
-            currentWeekLessons.push(doc.data().lessons_this_week)
-        });
-        currentWeekLessons = currentWeekLessons[0];
-        currentWeekLessons[lesson_id] = lessonInfo;
+        let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
+        let currentWeekLessons = teacherData.data().lessons_this_week;
+        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = lessonInfo;
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
         });
@@ -381,16 +407,13 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
         console.log("Deleted lesson in student lessons")
     });
     teacherLessons.doc(lesson_id).delete().then(function(){
-       console.log("Deleted lessin in teacher lessons")
+       console.log("Deleted lesson in teacher lessons")
     });
 
     if (lessonDate.getUTCMonth() === currentLocalDate.getUTCMonth()){
         const studentCollectionRef = db.collection('students');
-        let currentMonthLessons = [];
-        await studentCollectionRef.doc(student_mail).get().then(function (doc) {
-            currentMonthLessons.push(doc.data().lessons_this_month)
-        });
-        currentMonthLessons = currentMonthLessons[0];
+        let studentData = await studentCollectionRef.doc(student_mail).get();
+        let currentMonthLessons = studentData.data().lessons_this_month;
         delete currentMonthLessons[lesson_id];
         studentCollectionRef.doc(student_mail).update({
             lessons_this_month: currentMonthLessons
@@ -399,12 +422,9 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
 
     if (checkSameWeek(currentLocalDate, lessonDate)){
         const teacherCollectionRef = db.collection('teachers');
-        let currentWeekLessons = [];
-        await  teacherCollectionRef.doc(teacher_mail).get().then(function (doc) {
-            currentWeekLessons.push(doc.data().lessons_this_week)
-        });
-        currentWeekLessons = currentWeekLessons[0];
-        delete currentWeekLessons[lesson_id];
+        let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
+        let currentWeekLessons = teacherData.data().lessons_this_week;
+        delete currentWeekLessons[WEEKDAYS[lessonDate.getUTCDay()]][lesson_id];
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
         });
