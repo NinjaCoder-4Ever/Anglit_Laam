@@ -16,7 +16,7 @@ import {
   blackColor,
   grayColor,
   hexToRgb
-} from "./material-dashboard-pro-react.js";
+} from "assets/jss/material-dashboard-pro-react.js";
 
 const customDropdownStyle = theme => ({
   popperClose: {

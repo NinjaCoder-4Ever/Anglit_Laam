@@ -31,9 +31,8 @@ const appStyle = theme => ({
     width: "100%",
     overflowScrolling: "touch"
   },
-  /* change the position of the context in the page*/
   content: {
-    marginTop: "10px",
+    marginTop: "70px",
     padding: "30px 15px",
     minHeight: "calc(100vh - 123px)"
   },

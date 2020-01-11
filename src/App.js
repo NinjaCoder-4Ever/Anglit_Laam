@@ -9,7 +9,7 @@ import PrivateRoute from "./Actions/privateRoute";
 /* Student imports */
 import StudentHomePage from "./Views/Student/student";
 
-import "./Layouts/scss/material-dashboard-pro-react.scss?v=1.8.0";
+import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 
 
 const App = () => {

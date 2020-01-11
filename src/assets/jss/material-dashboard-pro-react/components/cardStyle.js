@@ -9,7 +9,7 @@ import {
   blackColor,
   grayColor,
   hexToRgb
-} from "./material-dashboard-pro-react";
+} from "assets/jss/material-dashboard-pro-react.js";
 
 const cardStyle = {
   card: {

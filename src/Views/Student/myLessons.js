@@ -2,7 +2,7 @@ import React, {useEffect} from "react";
 import firebase from 'Config/fire';
 
 // react components used to create a calendar with events on it
-import {Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
+import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
 // dependency plugin for react-big-calendar
 import moment from "moment";
 // react component used to create alerts
@@ -20,8 +20,8 @@ import GridItem from "../../Components/Grid/GridItem";
 import Card from "../../Components/Card/Card.js";
 import CardBody from "../../Components/Card/CardBody.js";
 
-import styles from "../../Layouts/buttonStyle";
 import stylesPopup from "../../Layouts/modalStyle.js";
+import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"

@@ -14,6 +14,9 @@ const appStyle = theme => ({
       display: "table",
       clear: "both",
       content: '" "'
+    },
+    "& header,& header + div": {
+      direction: "rtl"
     }
   },
   mainPanel: {
@@ -25,29 +28,22 @@ const appStyle = theme => ({
     },
     overflow: "auto",
     position: "relative",
-    float: "right",
+    float: "left",
     ...transition,
     maxHeight: "100%",
     width: "100%",
     overflowScrolling: "touch"
   },
-  /* change the position of the context in the page*/
   content: {
-    marginTop: "10px",
+    marginTop: "70px",
     padding: "30px 15px",
-    minHeight: "calc(100vh - 123px)"
+    minHeight: "calc(100% - 123px)"
   },
   container: { ...containerFluid },
-  map: {
-    marginTop: "70px"
-  },
   mainPanelSidebarMini: {
     [theme.breakpoints.up("md")]: {
       width: `calc(100% - ${drawerMiniWidth}px)`
     }
-  },
-  mainPanelWithPerfectScrollbar: {
-    overflow: "hidden !important"
   }
 });
 
