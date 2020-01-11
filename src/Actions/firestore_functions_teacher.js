@@ -84,7 +84,7 @@ function setWorkingHours(working_hours){
         if (working_hours[WEEKDAYS[i]].from !== "00:00" && working_hours[WEEKDAYS[i]].to !== "00:00"){
             let startTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
                 parseInt(working_hours[WEEKDAYS[i]].from.split(':')[0]),
-                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]))
+                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]));
             let endtTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
                 parseInt(working_hours[WEEKDAYS[i]].to.split(':')[0]),
                 parseInt(working_hours[WEEKDAYS[i]].to.split(':')[1]));
@@ -168,14 +168,6 @@ export async function updateTeacherWorkingHours(email,working_hours) {
 }
 
 // ################################# LESSON FUNCTIONS #####################################
-function constructLessonId(student_mail, teacher_mail, date_utc_time){
-    /**
-     * Function returns a valid lesson id.
-     *
-     * Example: student@mail.com_teache@mail.com_2020-01-04T12:00:00.000Z
-     */
-    return student_mail + "_" + teacher_mail + "_" + date_utc_time
-}
 
 export async function getThisWeekLessonsTeacher(email) {
     /**
@@ -406,8 +398,11 @@ export async function updateTeacherWeekLessons(teacher_mail) {
      * This function is meant to run in the beginning of each week.
      */
     let currentDate = new Date();
-    let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,
-        currentDate.getUTCFullYear(), currentDate.getUTCMonth() +1, currentDate.getDate());
+    let searchedSunday = new Date(currentDate.toISOString());
+    searchedSunday = searchedSunday.setDate(searchedSunday.getUTCDate()) - searchedSunday.getUTCDay();
+    let searchedSaturday = new Date(searchedSunday.toString());
+    searchedSaturday.setDate(searchedSaturday.getDate() + 6);
+    let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,searchedSunday, searchedSaturday);
     const collectionRef = db.collection('teachers').doc(teacher_mail);
     let formattedWeekLessons = {};
     nextWeekLessons.forEach(lesson => {
@@ -434,9 +429,11 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
      * NOTE: All time are returned in UTC time!!!
      */
     let currentDate = new Date();
-    let searchedDate = new Date(year, month, day);
-    let searchedSunday = new Date(searchedDate.setDate(searchedDate.getDate() - searchedDate.getUTCDay()));
-    let searchedSaturday = new Date(searchedDate.setDate(searchedDate.getDate() + (6 - searchedDate.getDay())));
+    let searchedDate = new Date(year, month -1, day);
+    let searchedSunday = new Date(searchedDate.toISOString());
+    searchedSunday.setDate(searchedSunday.getDate()- searchedSunday.getDay());
+    let searchedSaturday = new Date(searchedSunday.toISOString());
+    searchedSaturday.setDate(searchedSaturday.getDate() + 6);
     let weeksLessons = parseWeeksLessons(await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday));
     let working = await getTeacherWorkingDaysAndHours(teacher_mail);
     let workingDays = working[0];
@@ -444,13 +441,21 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
     let i;
     let teacherFreeTime = {};
     for (i =0; i<=6; i++){
-        let day = new Date(searchedSunday.setDate(searchedSunday.getDate() + i));
-        let key = day.getUTCFullYear() + "-" + day.getUTCMonth() + day.getUTCDate();
-        if (day < currentDate){
-            teacherFreeTime[key] = [];
+        let day = new Date(searchedSunday.toISOString());
+        day.setDate(day.getDate() + i);
+        let month = day.getMonth() +1;
+        if (month < 10){
+            month = "0" + month;
+        }
+        let dayDate = day.getDate();
+        if (dayDate < 10){
+            dayDate = "0" + dayDate;
+        }
+        let key = day.getFullYear() + "-" + month + "-" + dayDate;
+        if (day.getDate() < currentDate.getDate()){
             continue
         }
-        if (workingDays.includes(WEEKDAYS[day.getUTCDay()])){
+        if (workingDays.includes(WEEKDAYS[day.getDay()])){
             teacherFreeTime[key] = getFreeTimeOnDay(workingHours, weeksLessons, day);
         }
     }
@@ -460,14 +465,14 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
 function parseWeeksLessons(weeksLessons) {
     /**
      * Function gets this weeks lessons and parses them to a structure:
-     * [
+     * {
      *  Sunday: [
      *      {
      *          time: 18:00,
      *          duration: 30
      *      }
      *   ]
-     * ]
+     * }
      * meaning on Sunday the teacher has a lesson of 30 min starting at 18:00
      * empty days will return empty arrays
      */
@@ -508,7 +513,8 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
      * free time struct for that day
      */
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
-    let dayLessons = weeks_lessons[WEEKDAYS[day.getUTCDay()]];
+    // get the day's lessons - if no lessons exist this would be undefined.
+    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
         let i, j;
@@ -516,17 +522,18 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
             if (working_hours_subarray[i] === 'busy'){
                 continue
             }
-            for (j=0; j<dayLessons.length; j++)
-                if (working_hours_subarray[i] === dayLessons[j].time){
-                    working_hours_subarray[i] = 'busy';
-                    if (dayLessons[j].duration === 60){
-                        working_hours_subarray[i + 1] = 'busy';
+            if (dayLessons) {
+                for (j = 0; j < dayLessons.length; j++)
+                    if (working_hours_subarray[i] === dayLessons[j].time) {
+                        working_hours_subarray[i] = 'busy';
+                        if (dayLessons[j].duration === 60) {
+                            working_hours_subarray[i + 1] = 'busy';
+                        }
                     }
-                }
+            }
         }
-        freeTime.concat(constructFreeTime(working_hours_subarray))
+        freeTime = freeTime.concat(constructFreeTime(working_hours_subarray))
     });
-
     return freeTime
 }
 
@@ -538,7 +545,7 @@ function constructFreeTime(free_hours) {
     let i;
     for (i=0; i<free_hours.length-1; i++){
         if (free_hours[i] !== 'busy'){
-            if (free_hours[i+1] !== 'busy'){
+            if (free_hours[i+1] !== 'busy' && i !== free_hours.length-2){
                 freeTimeArray.push({
                     time: free_hours[i],
                     duration: [30, 60]
@@ -566,14 +573,15 @@ function getWorkingHoursForDay(working_hours, day) {
     let working_hours_array = [];
     let i;
     for (i=0; i< working_hours.length; i++){
-        if (working_hours[i].includes(WEEKDAYS[day.getUTCDay()])){
-            let start = working_hours[i].split('-')[1];
-            let end = working_hours[i].split('-')[2];
+        if (working_hours[i].includes(WEEKDAYS[day.getDay()])){
+            // working_hours[i] should look like Sunday-11:00-14:00
+            let start = working_hours[i].split('-')[1]; // gets start time (11:00 in example)
+            let end = working_hours[i].split('-')[2]; // gets end time (14:00 in example)
             let continueCreation = true;
             let totalSchedule = [start];
 
             while (continueCreation){
-                let currentTime = totalSchedule[-1];
+                let currentTime = totalSchedule[totalSchedule.length-1];
                 if (currentTime === end){
                     continueCreation = false;
                 }
