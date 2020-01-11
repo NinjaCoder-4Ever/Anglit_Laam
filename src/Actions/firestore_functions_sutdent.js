@@ -377,7 +377,7 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
         const teacherCollectionRef = db.collection('teachers');
         let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
         let currentWeekLessons = teacherData.data().lessons_this_week;
-        currentWeekLessons[start_time.getUTCDay()][lesson_id] = lessonInfo;
+        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = lessonInfo;
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
         });
@@ -424,7 +424,7 @@ export async function cancelLesson(student_mail, teacher_mail, local_year, local
         const teacherCollectionRef = db.collection('teachers');
         let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
         let currentWeekLessons = teacherData.data().lessons_this_week;
-        delete currentWeekLessons[lessonDate.getUTCDay()][lesson_id];
+        delete currentWeekLessons[WEEKDAYS[lessonDate.getUTCDay()]][lesson_id];
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
         });
