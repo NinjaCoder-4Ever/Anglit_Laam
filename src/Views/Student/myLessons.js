@@ -160,7 +160,7 @@ export default function Calendar() {
         <div>
             <Heading
                 textAlign="center"
-                title="React Big Calendar"
+                title="Set New Lesson"
                 category={
                     <span>
             A beautiful react component made by Netanel
