@@ -85,6 +85,9 @@ const extendedTablesStyle = {
     ...cardTitle,
     marginTop: "15px",
     marginBottom: "0px"
+  },
+  logo:{
+    marginBottom: "20px"
   }
 };
 
