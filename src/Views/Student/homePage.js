@@ -21,7 +21,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID} from "Actions/firestore_functions_sutdent";
+import {getStudentByUID, cancelLesson} from "Actions/firestore_functions_sutdent";
 import {emailRegex} from "react-bootstrap-sweetalert/dist/constants/patterns";
 
 const useStyles = makeStyles(styles);
@@ -47,18 +47,24 @@ export default  function ExtendedTables() {
             console.log(res);
         })
         },[]);
-
+    const deleteLesson = (line) => {
+        let student_mail = studentData.email;
+        let teacher_mail = studentData.teacher.email;
+        let lesson_date = new Date(line.lesson_date);
+        console.log(line);
+        cancelLesson(student_mail, teacher_mail, lesson_date)
+    }
     const classes = useStyles();
     const simpleButtons = [
-        { color: "success", icon: Edit },
         { color: "danger", icon: Close }
-    ].map((prop, key) => {
+    ].map((prop, key ) => {
         return (
             <Button
                 color={prop.color}
                 simple
                 className={classes.actionButton}
                 key={key}
+                onClick={line => deleteLesson(line)}
             >
                 <prop.icon className={classes.icon} />
             </Button>
@@ -94,7 +100,7 @@ export default  function ExtendedTables() {
                                 "Teacher",
                                 "Date",
                                 "Duration",
-                                "Actions"
+                                "Cancel Lesson"
                             ]}
                             tableData={
                                 lessons
