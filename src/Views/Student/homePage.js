@@ -3,6 +3,7 @@ import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import logo from "assets/img/LogoText.png";
+import firebase from 'Config/fire';
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
@@ -20,7 +21,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByMail} from "Actions/firestore_functions_sutdent";
+import {getStudentByUID} from "Actions/firestore_functions_sutdent";
 import {emailRegex} from "react-bootstrap-sweetalert/dist/constants/patterns";
 
 const useStyles = makeStyles(styles);
@@ -31,14 +32,15 @@ export default  function ExtendedTables() {
         last_name: '',
         email: '',
         credits: 0,
-        lessons_this_month: [[]],
+        lessons_this_month: {},
         phone_number: '',
         subscription: '',
         teacher: {},
         uid: ''});
 
     React.useEffect(() => {
-        getStudentByMail("some@mail.com").then((res)=>{
+
+        getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
             }
@@ -63,13 +65,14 @@ export default  function ExtendedTables() {
         );
     });
 
-    const lessons = studentData.lessons_this_month.map(lesson => {
-        if(!Array.isArray(lesson))
+    const lessons = Object.keys(studentData.lessons_this_month).map(lesson_id => {
+        let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
+        let lesson_date = new Date(studentData.lessons_this_month[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
+        let duration = studentData.lessons_this_month[lesson_id].duration;
         return (
-            [lesson,lesson,simpleButtons]
+            [teacher_name, lesson_date, duration,simpleButtons]
         );
-        else
-            return []
+
     });
 
     return (
@@ -88,8 +91,9 @@ export default  function ExtendedTables() {
                     <CardBody>
                         <Table
                             tableHead={[
-                                "#",
+                                "Teacher",
                                 "Date",
+                                "Duration",
                                 "Actions"
                             ]}
                             tableData={
