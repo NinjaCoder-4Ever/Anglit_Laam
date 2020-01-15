@@ -1,5 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
+import {updateStudentMonthLessons} from "./firestore_functions_sutdent";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -52,7 +53,8 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         uid: uid,
         students: [],
         working_hours: parsed_working_hours,
-        working_days: working_days
+        working_days: working_days,
+        last_log_on: new Date()
     };
 
     let usersData = {
@@ -119,6 +121,19 @@ function setWorkingDays(working_hours){
     return workingDays
 }
 
+async function setLogOnTeacher(teacher_data){
+    let currentDate = new Date();
+    let lastLogOn = teacher_data.last_log_on;
+    if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
+        let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentDate);
+        teacher_data.lessons_this_week = newCurrentWeekLessons;
+    }
+    db.collection('teachers').doc(teacher_data.email).update({
+        last_log_on: currentDate
+    });
+    return teacher_data
+}
+
 export async function getTeacherByMail(email) {
     /**
      * Function returns the teacher's data from "teachers" collection by mail.
@@ -147,7 +162,42 @@ export async function getTeacherByMail(email) {
     const collectionRef = db.collection('teachers');
     const doc = await collectionRef.doc(email).get();
 
-    return doc.data()
+    return  await setLogOnTeacher(doc.data())
+}
+
+export async function getTeacherByUID(uid) {
+    /**
+     * Function returns the teacher's data from "teachers" collection by uid.
+     *
+     * Returns: {
+        email: email,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        lessons_this_week:{
+            'Sunday': {lesson_id:{lesson_info}},
+            'Monday': {},
+            'Tuesday': {},
+            'Wednesday': {},
+            'Thursday': {},
+            'Friday': {},
+            'Saturday': {}
+        },
+        uid: uid,
+        students: [student_mail],
+        working_hours: ["Sunday-12:00-21:00", "Monday-13:00-17:00"]
+        working_days: [Sunday, Monday]
+    };
+     */
+
+    const collectionRef = db.collection('teachers');
+    const snapshot = await collectionRef.where('uid', '==', uid).get();
+    let docs = [];
+    snapshot.forEach(doc => {
+        docs.push(doc.data())
+    });
+
+    return  await setLogOnTeacher(docs[0])
 }
 
 export async function updateTeacherWorkingHours(email,working_hours) {
@@ -443,14 +493,13 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     return weekLessons
 }
 
-export async function updateTeacherWeekLessons(teacher_mail) {
+export async function updateTeacherWeekLessons(teacher_mail, date) {
     /**
      * Function updates the lessons_this_week field under a teacher's doc in "teachers" collection.
      *
      * This function is meant to run in the beginning of each week.
      */
-    let currentDate = new Date();
-    let searchedSunday = new Date(currentDate.toISOString());
+    let searchedSunday = new Date(date.toISOString());
     searchedSunday = searchedSunday.setDate(searchedSunday.getUTCDate()) - searchedSunday.getUTCDay();
     let searchedSaturday = new Date(searchedSunday.toString());
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
@@ -458,12 +507,16 @@ export async function updateTeacherWeekLessons(teacher_mail) {
     const collectionRef = db.collection('teachers').doc(teacher_mail);
     let formattedWeekLessons = {};
     nextWeekLessons.forEach(lesson => {
-        formattedWeekLessons[lesson.lesson_id] = lesson
+        if (checkSameWeek(searchedSunday, lesson.date_utc.full_date)) {
+            formattedWeekLessons[WEEKDAYS[lesson.date_utc.full_date.getUTCDay()]][lesson.lesson_id] = lesson;
+        }
     });
 
     await collectionRef.update({
         lessons_this_week: formattedWeekLessons
-    })
+    });
+
+    return formattedWeekLessons
 }
 
 export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {

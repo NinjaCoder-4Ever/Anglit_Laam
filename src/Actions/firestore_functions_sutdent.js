@@ -45,6 +45,7 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         teacher: {},
         credits: 1,
         uid: uid,
+        last_log_on: new Date()
     };
 
     let teacherInfo = await chooseTeacherForStudent(email);
@@ -81,6 +82,21 @@ export async function getStudentTeacher(student_mail) {
     return teacherInfo.data().teacher
 }
 
+async function setLogOnStudent(student_data){
+    let currentDate = new Date();
+    let lastLogOn = student_data.last_log_on;
+    if (lastLogOn === undefined || currentDate.getMonth() !== lastLogOn.getMonth()){
+        let newCurrentMonthLessons = await updateStudentMonthLessons(student_data.email,
+            currentDate.getMonth() + 1, currentDate.getFullYear());
+        student_data.lessons_this_month = newCurrentMonthLessons;
+    }
+    db.collection('students').doc(student_data.email).update({
+        last_log_on: currentDate
+    });
+    return student_data
+}
+
+
 export async function getStudentByMail(email) {
     /**
      * Function gets all the student's data by searching it's mail.
@@ -101,7 +117,7 @@ export async function getStudentByMail(email) {
     const collectionRef = db.collection('students');
     const doc = await collectionRef.doc(email).get();
 
-    return doc.data()
+    return await setLogOnStudent(doc.data())
 }
 
 export async function getStudentByUID(uid) {
@@ -129,7 +145,7 @@ export async function getStudentByUID(uid) {
        docs.push(doc.data())
     });
 
-    return docs[0]
+    return await setLogOnStudent(docs[0])
 }
 
 export async function updateCredits(email, addedCredits) {
@@ -508,7 +524,7 @@ export async function getMonthLessonsStudent(student_mail, month_num, year){
     return monthLessons
 }
 
-export async function updateStudentMonthLessons(student_mail){
+export async function updateStudentMonthLessons(student_mail, month, year){
     /**
      * Function updates the lessons_this_month field under a student's doc in "students" collection.
      *
@@ -517,7 +533,7 @@ export async function updateStudentMonthLessons(student_mail){
      */
     let currentDate = new Date();
     let nextMontLessons = await getMonthLessonsStudent(student_mail,
-        currentDate.getUTCMonth() + 1, currentDate.getUTCFullYear());
+        month, year);
     const collectionRef = db.collection('students').doc(student_mail);
     let formattedMonthLessons = {};
     nextMontLessons.forEach(lesson => {
@@ -526,5 +542,6 @@ export async function updateStudentMonthLessons(student_mail){
     await collectionRef.update({
         lessons_this_month: formattedMonthLessons
     });
+    return formattedMonthLessons
 }
 
