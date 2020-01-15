@@ -123,9 +123,12 @@ function setWorkingDays(working_hours){
 
 async function setLogOnTeacher(teacher_data){
     let currentDate = new Date();
+    let currentSunday = new Date(currentDate);
+    currentSunday.setDate(currentSunday.getUTCDate() - currentSunday.getUTCDay());
+    currentSunday.setHours(0,0);
     let lastLogOn = teacher_data.last_log_on;
     if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
-        let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentDate);
+        let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
     }
     db.collection('teachers').doc(teacher_data.email).update({
@@ -505,7 +508,15 @@ export async function updateTeacherWeekLessons(teacher_mail, date) {
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
     let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,searchedSunday, searchedSaturday);
     const collectionRef = db.collection('teachers').doc(teacher_mail);
-    let formattedWeekLessons = {};
+    let formattedWeekLessons = {
+        'Sunday': {},
+        'Monday': {},
+        'Tuesday': {},
+        'Wednesday': {},
+        'Thursday': {},
+        'Friday': {},
+        'Saturday': {}
+    };
     nextWeekLessons.forEach(lesson => {
         if (checkSameWeek(searchedSunday, lesson.date_utc.full_date)) {
             formattedWeekLessons[WEEKDAYS[lesson.date_utc.full_date.getUTCDay()]][lesson.lesson_id] = lesson;
@@ -537,6 +548,7 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
     let searchedDate = new Date(year, month -1, day);
     let searchedSunday = new Date(searchedDate.toISOString());
     searchedSunday.setDate(searchedSunday.getDate()- searchedSunday.getDay());
+    searchedSunday.setHours(0,0);
     let searchedSaturday = new Date(searchedSunday.toISOString());
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
     let weeksLessons = parseWeeksLessons(await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday));
