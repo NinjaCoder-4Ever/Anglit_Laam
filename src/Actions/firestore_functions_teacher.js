@@ -128,7 +128,7 @@ async function setLogOnTeacher(teacher_data){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentDate);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
     }
-    db.collection('students').doc(teacher_data.email).update({
+    db.collection('teachers').doc(teacher_data.email).update({
         last_log_on: currentDate
     });
     return teacher_data
