@@ -513,6 +513,7 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
      * free time struct for that day
      */
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
+    // get the day's lessons - if no lessons exist this would be undefined.
     let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
@@ -573,8 +574,9 @@ function getWorkingHoursForDay(working_hours, day) {
     let i;
     for (i=0; i< working_hours.length; i++){
         if (working_hours[i].includes(WEEKDAYS[day.getDay()])){
-            let start = working_hours[i].split('-')[1];
-            let end = working_hours[i].split('-')[2];
+            // working_hours[i] should look like Sunday-11:00-14:00
+            let start = working_hours[i].split('-')[1]; // gets start time (11:00 in example)
+            let end = working_hours[i].split('-')[2]; // gets end time (14:00 in example)
             let continueCreation = true;
             let totalSchedule = [start];
 

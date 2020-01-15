@@ -8,7 +8,7 @@ import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
 
 // core components
-import styles from "../../Layouts/cardBodyStyle";
+import styles from "assets/jss/material-dashboard-pro-react/components/cardBodyStyle.js";
 
 const useStyles = makeStyles(styles);
 
@@ -40,9 +40,9 @@ export default function CardBody(props) {
     [className]: className !== undefined
   });
   return (
-    <div className={cardBodyClasses} {...rest}>
-      {children}
-    </div>
+      <div className={cardBodyClasses} {...rest}>
+        {children}
+      </div>
   );
 }
 

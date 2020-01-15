@@ -8,7 +8,7 @@ import { makeStyles } from "@material-ui/core/styles";
 // @material-ui/icons
 
 // core components
-import styles from "../../Layouts/cardBodyStyle";
+import styles from "assets/jss/material-dashboard-pro-react/components/cardStyle.js";
 
 const useStyles = makeStyles(styles);
 
@@ -38,7 +38,7 @@ export default function Card(props) {
     [classes.cardRaised]: raised,
     [classes.cardBackground]: background,
     [classes.cardPricingColor]:
-      (pricing && color !== undefined) || (pricing && background !== undefined),
+    (pricing && color !== undefined) || (pricing && background !== undefined),
     [classes[color]]: color,
     [classes.cardPricing]: pricing,
     [classes.cardProduct]: product,
@@ -47,9 +47,9 @@ export default function Card(props) {
     [className]: className !== undefined
   });
   return (
-    <div className={cardClasses} {...rest}>
-      {children}
-    </div>
+      <div className={cardClasses} {...rest}>
+        {children}
+      </div>
   );
 }
 
