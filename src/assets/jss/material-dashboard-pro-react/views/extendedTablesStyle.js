@@ -87,7 +87,9 @@ const extendedTablesStyle = {
     marginBottom: "0px"
   },
   logo:{
-    marginBottom: "20px"
+    marginBottom: "10px",
+    marginTop: "10px",
+    margin: 'auto'
   }
 };
 

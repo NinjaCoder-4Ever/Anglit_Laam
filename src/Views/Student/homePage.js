@@ -22,12 +22,11 @@ import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson} from "Actions/firestore_functions_sutdent";
-import {emailRegex} from "react-bootstrap-sweetalert/dist/constants/patterns";
 
 const useStyles = makeStyles(styles);
 
 export default  function ExtendedTables() {
-    const [checked, setChecked] = React.useState([]);
+    const [checked, setChecked] = React.useState(0);
     const [studentData,setStudentData] = React.useState({first_name: '',
         last_name: '',
         email: '',
@@ -47,6 +46,7 @@ export default  function ExtendedTables() {
             console.log(res);
         })
         },[]);
+
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
         let teacher_mail = studentData.teacher.email;
@@ -55,28 +55,36 @@ export default  function ExtendedTables() {
         cancelLesson(student_mail, teacher_mail, lesson_date)
     }
     const classes = useStyles();
-    const simpleButtons = [
-        { color: "danger", icon: Close }
-    ].map((prop, key ) => {
-        return (
-            <Button
-                color={prop.color}
-                simple
-                className={classes.actionButton}
-                key={key}
-                onClick={line => deleteLesson(line)}
-            >
-                <prop.icon className={classes.icon} />
-            </Button>
-        );
-    });
 
-    const lessons = Object.keys(studentData.lessons_this_month).map(lesson_id => {
+    function getSimpleButtons(line)
+    {
+        return  [
+            {color: "danger", icon: Close, data: line}
+        ].map((prop, key) => {
+            return (
+                <Button
+                    color={prop.color}
+                    simple
+                    className={classes.actionButton}
+                    key={key}
+                    onClick={() => {
+                        //TODO(yuval):
+                        //deleteLesson(prop.data); @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                        delete studentData.lessons_this_month[prop.data.index];
+                        setChecked(checked+1);
+                    }}
+                >
+                    <prop.icon className={classes.icon}/>
+                </Button>
+            );
+        });
+    }
+    let lessons = Object.keys(studentData.lessons_this_month).map((lesson_id,index) => {
         let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
         let lesson_date = new Date(studentData.lessons_this_month[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = studentData.lessons_this_month[lesson_id].duration;
         return (
-            [teacher_name, lesson_date, duration,simpleButtons]
+            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_date, index: lesson_id})]
         );
 
     });
@@ -84,8 +92,10 @@ export default  function ExtendedTables() {
     return (
         <GridContainer>
             <GridItem>
-                <img src={logo} alt="..." className={classes.logo} />
-            </GridItem>
+                <Card style={{margin: 'auto'}}>
+                    <img src={logo} alt="..." className={classes.logo} />
+                </Card>
+                </GridItem>
             <GridItem xs={12}>
                 <Card>
                     <CardHeader color="info" icon>
