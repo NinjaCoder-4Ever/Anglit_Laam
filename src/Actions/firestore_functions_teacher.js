@@ -368,6 +368,7 @@ export function setLessonStarted(start_time, teacher_mail, student_mail){
     /**
      * Function sets a lesson status to "started" in both student_lessons and teacher_lessons collections.
      */
+    let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let lesson_id = constructLessonId(student_mail, teacher_mail, start_time.toISOString());
@@ -414,6 +415,7 @@ export function setLessonNoShow(start_time, teacher_mail, student_mail){
     /**
      * Function sets a lesson status to "no_show" in both student_lessons and teacher_lessons collections.
      */
+    let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let lesson_id = constructLessonId(student_mail, teacher_mail, start_time.toISOString());
