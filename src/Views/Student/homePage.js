@@ -4,6 +4,8 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import logo from "assets/img/LogoText.png";
 import firebase from 'Config/fire';
+import SweetAlert from "react-bootstrap-sweetalert";
+
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
@@ -27,6 +29,7 @@ const useStyles = makeStyles(styles);
 
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
+    const [alert, setAlert] = React.useState(null);
     const [studentData,setStudentData] = React.useState({first_name: '',
         last_name: '',
         email: '',
@@ -52,8 +55,51 @@ export default  function ExtendedTables() {
         let teacher_mail = studentData.teacher.email;
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
-        cancelLesson(student_mail, teacher_mail, lesson_date)
+        cancelLesson(student_mail, teacher_mail, lesson_date);
+
+        delete studentData.lessons_this_month[line.index];
+        setChecked(checked+1);
     }
+
+    const hideAlert = () => {
+        setAlert(null);
+    };
+
+    const warningWithConfirmMessage = (line) => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="Are you sure?"
+                onConfirm={() => successDelete(line)}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+                cancelBtnCssClass={classes.button + " " + classes.danger}
+                confirmBtnText="Yes, delete it!"
+                cancelBtnText="Cancel"
+                showCancel
+            >
+                You will not be able to recover this imaginary file!
+            </SweetAlert>
+        );
+    };
+
+    const successDelete = (line) => {
+        deleteLesson(line);
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Deleted!"
+                onConfirm={() => hideAlert()}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Your lesson has been deleted.
+            </SweetAlert>
+        );
+    };
+
     const classes = useStyles();
 
     function getSimpleButtons(line)
@@ -68,10 +114,7 @@ export default  function ExtendedTables() {
                     className={classes.actionButton}
                     key={key}
                     onClick={() => {
-                        //TODO(yuval):
-                        //deleteLesson(prop.data); @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-                        delete studentData.lessons_this_month[prop.data.index];
-                        setChecked(checked+1);
+                        warningWithConfirmMessage(prop.data);
                     }}
                 >
                     <prop.icon className={classes.icon}/>
@@ -90,6 +133,9 @@ export default  function ExtendedTables() {
     });
 
     return (
+        <div>
+        {alert}
+
         <GridContainer>
             <GridItem>
                 <Card style={{margin: 'auto'}}>
@@ -120,5 +166,6 @@ export default  function ExtendedTables() {
                 </Card>
             </GridItem>
         </GridContainer>
+        </div>
     );
 }
