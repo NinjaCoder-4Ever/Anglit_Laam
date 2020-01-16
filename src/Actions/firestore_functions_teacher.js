@@ -126,7 +126,7 @@ async function setLogOnTeacher(teacher_data){
     let currentSunday = new Date(currentDate);
     currentSunday.setDate(currentSunday.getUTCDate() - currentSunday.getUTCDay());
     currentSunday.setHours(0,0);
-    let lastLogOn = teacher_data.last_log_on;
+    let lastLogOn = new Date(teacher_data.last_log_on.toString());
     if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
