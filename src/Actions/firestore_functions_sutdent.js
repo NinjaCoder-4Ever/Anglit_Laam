@@ -330,6 +330,34 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
     return doc.data()
 }
 
+async function checkLessonAvailability(student_mail, teacher_mail, start_time, duration) {
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    let existingLessons = [];
+
+    const snapshot = await teacherLessons.where('date_utc.full_date', '==', start_time).get();
+    snapshot.forEach(doc => {
+        existingLessons.push(doc.data());
+    });
+
+    if (existingLessons.length > 0){
+        return false
+    }
+
+    if (duration > 30){
+        let nextHalfHour = new Date(start_time.getTime() + 60000*30);
+        const snapshot = await teacherLessons.where('date_utc.full_date', '==', nextHalfHour).get();
+        snapshot.forEach(doc => {
+            existingLessons.push(doc.data());
+        });
+
+        if (existingLessons.length > 0){
+            return false
+        }
+    }
+
+    return true
+}
+
 export async function setNewLesson(student_mail, teacher_mail, start_time, duration){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
@@ -339,7 +367,12 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
      *
      * If the lesson is in the current week, it will also be entered to the teacher's lessons_this_week field under
      * the "teachers" collection.
+     *
+     * returns true if lesson has been set and false otherwise
      */
+    if (!(await checkLessonAvailability(student_mail, teacher_mail, start_time, duration))){
+        return false
+    }
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
@@ -398,6 +431,7 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
             lessons_this_week: currentWeekLessons
         });
     }
+    return true
 }
 
 export async function cancelLesson(student_mail, teacher_mail, lesson_date){

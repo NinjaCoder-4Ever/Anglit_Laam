@@ -52,6 +52,9 @@ export default function Calendar({history}) {
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
 
     const [modal, setModal] = React.useState(false);
+    const [modal2, setModal2] = React.useState(false);
+    const [modal3, setModal3] = React.useState(false);
+
 
     const Transition = React.forwardRef(function Transition(props, ref) {
         return <Slide direction="down" ref={ref} {...props} />;
@@ -63,7 +66,7 @@ export default function Calendar({history}) {
             setstudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
-            for (i=0; i<=3; i++) {
+            for (i=0; i<=4; i++) {
                 let displayDay = new Date(currentDay.toISOString());
                 displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
                 getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
@@ -96,25 +99,38 @@ export default function Calendar({history}) {
             });
     }, []);
 
-    function setNetTeacherEvents(){
-        var dateIndex;
-        var possibleLessonIndex;
-        for ( dateIndex in Object.keys(teacherFreeTime)){
-            var freeTimeOnDayArray = teacherFreeTime[Object.keys(teacherFreeTime)[dateIndex]];
-            var date = Object.keys(teacherFreeTime)[dateIndex];
-            for (possibleLessonIndex in freeTimeOnDayArray){
-                let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
-                let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
-                let endTime = new Date(startTime.toISOString());
-                endTime.setTime(startTime.getTime() + 30*60000);
-                let title = startTime.toString();
-                let slotInfo = {
-                    start: startTime,
-                    end: endTime,
-                    duration: possibleLesson.duration
-                };
-                addNewEvent(title, slotInfo)
-            }
+    function setNewTeacherEvents(){
+        let teacherMail = studentData.teacher.email;
+        let i;
+        for (i=0; i<=4; i++) {
+            let displayDay = new Date(currentDay.toISOString());
+            displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
+            getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
+                displayDay.getDate(), teacherMail).then(freeTime => {
+                setTeacherFreeTime({...freeTime, ...teacherFreeTime});
+                var dateIndex;
+                var possibleLessonIndex;
+                for (dateIndex in Object.keys(freeTime)) {
+                    // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
+                    var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
+                    // date looks like 2020-01-31
+                    var date = Object.keys(freeTime)[dateIndex];
+                    for (possibleLessonIndex in freeTimeOnDayArray) {
+                        let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
+                        let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
+                        let endTime = new Date(startTime.toISOString());
+                        endTime.setTime(startTime.getTime() + 30 * 60000);
+                        //let title = startTime.toString().slice(16,21);
+                        let title ='';
+                        let slotInfo = {
+                            start: startTime,
+                            end: endTime,
+                            duration: possibleLesson.duration
+                        };
+                        addNewEvent(title, slotInfo)
+                    }
+                }
+            });
         }
     }
     const selectEvent = event => {
@@ -123,11 +139,31 @@ export default function Calendar({history}) {
     };
 
     const setLesson = (duration) => {
-        setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration);
-        setModal(false);
-        history.push("/Student/homePage");
-
+        setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
+           if (res === true){
+               setModal(false);
+               setModal3(true);
+           }
+           else {
+               setModal(false);
+               setEvents([]);
+               setNewTeacherEvents();
+               setModal2(true);
+           }
+        });
     };
+
+    const LessonConfirmedSetAnother = () => {
+        setEvents([]);
+        setNewTeacherEvents();
+        setModal3(false);
+    };
+
+    const BackToHome = () => {
+        setModal3(false);
+        history.push("/Student/homePage");
+    };
+
     const addNewEventAlert = slotInfo => {
         setAlert(
             <SweetAlert
@@ -254,6 +290,88 @@ export default function Calendar({history}) {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={modal2}
+                transition={Transition}
+                keepMounted
+                onClose={() => setModal2(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal2(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>You just missed it...</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h4>The time slot you choose is no longer available...</h4>
+                    <h4>Please choose a different time for your lesson</h4>
+                </DialogContent>
+                <DialogActions className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}>
+                    <Button onClick={() => setModal2(false)} color="bad">OK</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={modal3}
+                transition={Transition}
+                keepMounted
+                onClose={() => LessonConfirmedSetAnother()}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal3(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Your lesson is set!n</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h4>Do you want to set another lesson or go to home page?</h4>
+                </DialogContent>
+                <DialogActions className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}>
+                    <Button onClick={() => LessonConfirmedSetAnother()} color="success">Set Another Lesson</Button>
+                    <Button onClick={() => BackToHome()} color="bad">Back To Home</Button>
+                </DialogActions>
+            </Dialog>
         </div>
-    );
+);
 }
