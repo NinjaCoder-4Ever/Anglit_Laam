@@ -399,7 +399,10 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
             full_date_string: utcLessonDate
         },
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: false,
         feedback_given: false,
@@ -496,7 +499,10 @@ export async function getNextFourLessonsStudent(student_mail) {
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: false,
         feedback_given: false,
@@ -536,7 +542,10 @@ export async function getMonthLessonsStudent(student_mail, month_num, year){
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: false,
         feedback_given: false,
