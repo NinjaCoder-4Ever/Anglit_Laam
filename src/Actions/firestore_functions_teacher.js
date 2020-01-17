@@ -240,7 +240,10 @@ export async function getThisWeekLessonsTeacher(email) {
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: false,
         feedback_given: false,
@@ -280,7 +283,10 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: true,
         feedback_given: true,
@@ -320,7 +326,10 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: true,
         feedback_given: false,
@@ -475,7 +484,10 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
         },
         local_date: local_date_string,
         feedback: {
-            fields: "None"
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
         },
         started: false,
         feedback_given: false,
