@@ -284,7 +284,7 @@ export async function getAllPastLessonsForStudent(email){
      */
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
-    let today = new Date().toISOString();
+    let today = new Date();
     const snapshot = await collectionRef.where('date_utc.full_date', '<=', today).get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
