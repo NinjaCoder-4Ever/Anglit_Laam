@@ -8,7 +8,7 @@ const PrivateRouteTeacher = ({ component: RouteComponent, ...rest }) => {
 
     const userType = async () => {
         let userData = await getUserDataByUid(currentUser.uid);
-        if (userData.collection === 'teachers')
+        if (userData.collection === 'students')
             return true;
         else
             return false;
@@ -19,7 +19,7 @@ const PrivateRouteTeacher = ({ component: RouteComponent, ...rest }) => {
             {...rest}
             render={routeProps =>
                 !!currentUser ?
-                    (userType() ? (<RouteComponent {...routeProps} />) : (<Redirect to={"/Teacher/homePage"} />))
+                    (userType() ? (<RouteComponent {...routeProps} />) : (<Redirect to={"/Student/homePage"} />))
                     :
                     (<Redirect to={"/login"} />)
             }
