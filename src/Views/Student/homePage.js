@@ -23,7 +23,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson} from "Actions/firestore_functions_student";
+import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
 
 const useStyles = makeStyles(styles);
 
@@ -47,12 +47,14 @@ export default  function ExtendedTables() {
         getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
-                // setNextLesson({date:(res.lessons_this_month.date_utc.full_date_string).toString().slice(0, 21)});
             }
             console.log(res);
-        })
-
-
+        });
+        // getNextLessonsStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
+        //     if(res != null){
+        //             setNextLesson(res);
+        //     }
+        // })
         },[]);
 
     const deleteLesson = (line) => {
