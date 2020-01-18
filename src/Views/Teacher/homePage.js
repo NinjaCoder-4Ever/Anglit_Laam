@@ -25,7 +25,7 @@ import styles from "assets/jss/material-dashboard-pro-react/components/buttonSty
 
 import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
-import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_sutdent"
+import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_student"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
