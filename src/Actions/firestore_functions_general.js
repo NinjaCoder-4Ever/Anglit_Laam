@@ -158,9 +158,9 @@ export function checkSameWeek(date1, date2){
      *
      * Returns true if both in the same week, and false otherwise.
      */
-    let sundayOfDate1 = new Date(date1.toISOString());
+    let sundayOfDate1 = new Date(date1);
     sundayOfDate1.setDate(sundayOfDate1.getUTCDate() - sundayOfDate1.getUTCDay());
-    let sundayOfDate2 = new Date(date2.toISOString());
+    let sundayOfDate2 = new Date(date2);
     sundayOfDate2.setDate(sundayOfDate2.getUTCDate() - sundayOfDate2.getUTCDay());
     return sundayOfDate1.toDateString() === sundayOfDate2.toDateString();
 }

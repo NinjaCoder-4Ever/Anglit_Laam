@@ -490,6 +490,8 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
      */
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let weekLessons = [];
+    console.log(searchedSaturday);
+    console.log(searchedSaturday.toString());
     let oneDayMore = new Date(searchedSaturday.toISOString());
     oneDayMore.setDate(oneDayMore.getUTCDate() + 2);
     const snapshot = await collectionRef.orderBy('date_utc.full_date')
@@ -511,8 +513,12 @@ export async function updateTeacherWeekLessons(teacher_mail, date) {
      */
     let searchedSunday = new Date(date.toISOString());
     searchedSunday = searchedSunday.setDate(searchedSunday.getUTCDate()) - searchedSunday.getUTCDay();
-    let searchedSaturday = new Date(searchedSunday.toString());
+    console.log(searchedSunday);
+    console.log(searchedSunday.toString());
+    let searchedSaturday = new Date(searchedSunday);
+    console.log(searchedSaturday);
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
+    console.log(searchedSaturday);
     let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,searchedSunday, searchedSaturday);
     const collectionRef = db.collection('teachers').doc(teacher_mail);
     let formattedWeekLessons = {
