@@ -85,9 +85,9 @@ export async function getStudentTeacher(student_mail) {
 async function setLogOnStudent(student_data){
     let currentDate = new Date();
     let lastLogOn = new Date();
-    if (teacher_data !== undefined){
-        if (teacher_data.last_log_on !== undefined){
-            lastLogOn = new Date(teacher_data.last_log_on.toString());
+    if (student_data !== undefined){
+        if (student_data.last_log_on !== undefined){
+            lastLogOn = new Date(student_data.last_log_on.toString());
         }
     }
     if (lastLogOn === undefined || currentDate.getMonth() !== lastLogOn.getMonth()){

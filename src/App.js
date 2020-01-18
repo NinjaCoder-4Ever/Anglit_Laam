@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom';
 import logIn from './Views/loginPage';
 import signUp from './Views/signUpPage';
 import { AuthProvider } from "./Actions/auth";
@@ -37,7 +37,8 @@ const App = () => {
                 {/* General Routing */}
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <PrivateRoute exact path='/' component = {TeacherHomePage}/>
+                <Redirect from="/" to='/Teacher/homePage'/>
+
             </Switch>
         </Router>
       </AuthProvider>

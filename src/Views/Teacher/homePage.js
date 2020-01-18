@@ -59,7 +59,7 @@ export default function Calendar({history}) {
     const [currentDay, setDsetCurrentDay] = React.useState(new Date());
 
     React.useEffect(() => {
-        getTeacherByUID(firebase.currentUser.uid).then(teacherInfo => {
+        getTeacherByUID(firebase.auth().currentUser.uid).then(teacherInfo => {
             setTeacherData(teacherInfo);
             let currentWeekLessons = teacherInfo.lessons_this_week;
 
