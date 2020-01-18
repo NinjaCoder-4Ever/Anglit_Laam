@@ -70,9 +70,10 @@ export default function Calendar({history}) {
                 for (lessonIndex in Object.keys(lessons_on_day)){
                     let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
                     let lesson_data = lessons_on_day[lesson_id];
-                    let startTime = lesson_data.date_utc.full_date;
+                    let startTime = new Date(lesson_data.date_utc.full_date_string);
                     let endTime = new Date(startTime);
                     endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                    console.log(startTime);
                     let slotInfo = {
                         start: startTime,
                         end: endTime,
@@ -101,7 +102,7 @@ export default function Calendar({history}) {
                         for (lessonIndex in Object.keys(lessons_on_day)){
                             let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
                             let lesson_data = lessons_on_day[lesson_id];
-                            let startTime = lesson_data.date_utc.full_date;
+                            let startTime = new Date(lesson_data.date_utc.full_date_string);
                             let endTime = new Date(startTime);
                             endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
                             let slotInfo = {
