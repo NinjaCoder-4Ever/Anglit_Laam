@@ -63,6 +63,7 @@ export default function Calendar({history}) {
             setTeacherData(teacherInfo);
             let currentWeekLessons = teacherInfo.lessons_this_week;
             let dayIndex;
+            // load this week.
             for (dayIndex in Object.keys(currentWeekLessons)){
                 let lessons_on_day = currentWeekLessons[WEEK[dayIndex]];
                 let lessonIndex;
@@ -70,7 +71,7 @@ export default function Calendar({history}) {
                     let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
                     let lesson_data = lessons_on_day[lesson_id];
                     let startTime = lesson_data.date_utc.full_date;
-                    let endTime = new Date(startTime.toISOString());
+                    let endTime = new Date(startTime);
                     endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
                     let slotInfo = {
                         start: startTime,
@@ -83,7 +84,40 @@ export default function Calendar({history}) {
                     addNewEvent("", slotInfo);
                 }
             }
-        })
+
+            // load Next two weeks
+            let i;
+            let thisSunday = new Date();
+            thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
+            for (i = 1; i<=2; i++){
+                let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
+                let weeksSaturday = new Date(weeksSunday);
+                weeksSaturday.setDate(weeksSaturday.getDate() + 6);
+                getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
+                    let dayIndex;
+                    for (dayIndex in Object.keys(week_lessons)){
+                        let lessons_on_day = week_lessons[WEEK[dayIndex]];
+                        let lessonIndex;
+                        for (lessonIndex in Object.keys(lessons_on_day)){
+                            let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
+                            let lesson_data = lessons_on_day[lesson_id];
+                            let startTime = lesson_data.date_utc.full_date;
+                            let endTime = new Date(startTime);
+                            endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                            let slotInfo = {
+                                start: startTime,
+                                end: endTime,
+                                duration: lesson_data.duration,
+                                student: lesson_data.student_mail,
+                                started: lesson_data.started,
+                                no_show: lesson_data.no_show
+                            };
+                            addNewEvent("", slotInfo);
+                        }
+                    }
+                });
+            }
+        });
     }, []);
 
     function setNewTeacherEvents(){
