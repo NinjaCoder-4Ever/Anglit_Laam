@@ -30,6 +30,8 @@ const useStyles = makeStyles(styles);
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
     const [alert, setAlert] = React.useState(null);
+    const [nextLesson, setNextLesson] = React.useState({date:'',
+    });
     const [studentData,setStudentData] = React.useState({first_name: '',
         last_name: '',
         email: '',
@@ -45,9 +47,12 @@ export default  function ExtendedTables() {
         getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
+                // setNextLesson({date:(res.lessons_this_month.date_utc.full_date_string).toString().slice(0, 21)});
             }
             console.log(res);
         })
+
+
         },[]);
 
     const deleteLesson = (line) => {
@@ -141,7 +146,28 @@ export default  function ExtendedTables() {
                 <Card style={{margin: 'auto'}}>
                     <img src={logo} alt="..." className={classes.logo} />
                 </Card>
-                </GridItem>
+            </GridItem>
+            <GridItem xs={12} sm={12} lg={6}>
+                <Card pricing>
+                    <CardBody pricing>
+                        <h6 className={classes.cardCategory}>SMALL COMPANY</h6>
+                        <div className={classes.icon}>
+                            {/*<Home className={classes.iconRose} />*/}
+                        </div>
+                        <h3 className={`${classes.cardTitle} ${classes.marginTop30}`}>
+                            {/*{studentData.lessons_this_month.da}*/}
+                            {nextLesson.date}
+                        </h3>
+                        <p className={classes.cardDescription}>
+                            This is good if your company size is between 2 and 10
+                            Persons.
+                        </p>
+                        <Button round color="rose">
+                            Choose plan
+                        </Button>
+                    </CardBody>
+                </Card>
+            </GridItem>
             <GridItem xs={12}>
                 <Card>
                     <CardHeader color="info" icon>
