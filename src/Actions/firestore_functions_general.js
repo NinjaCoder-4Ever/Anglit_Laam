@@ -38,7 +38,7 @@ export async function getUserData(email) {
     return doc.data()
 }
 
-export async function getUerDataByUid(uid) {
+export async function getUserDataByUid(uid) {
     /**
      * Function gets the user data from "users" collection by the uid of the user.
      *
