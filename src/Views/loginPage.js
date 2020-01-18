@@ -70,9 +70,9 @@ const LoginSide = ({ history }) => {
             if (userType === "students") {
                 history.push("/Student/homePage");
             } else if (userType === "teachers") {
-                history.push("/teacher/homePage");
+                history.push("/Teacher/homePage");
             } else if (userType === "admins"){
-                history.push("/admin/homePage");
+                history.push("/Admin/homePage");
             } else {
                 throw new Error("An error has occurred, unknown user");
             }
