@@ -24,7 +24,6 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
-import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_student"
 import {getTeacherByUID, setLessonStarted, setLessonNoShow, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -62,6 +61,7 @@ export default function Calendar({history}) {
     React.useEffect(() => {
         getTeacherByUID(firebase.currentUser.uid).then(teacherInfo => {
             setTeacherData(teacherInfo);
+            let currentWeekLessons = teacherInfo.lessons_this_week;
 
         })
     }, []);
@@ -202,7 +202,6 @@ export default function Calendar({history}) {
                     <h4>Would you like to set the following lesson:</h4>
                     <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
                     <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>
-                    <h5>Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h5>
                     <h5>Duration: {selectedEvent.duration.toString()}</h5>
                 </DialogContent>
                 <DialogActions
