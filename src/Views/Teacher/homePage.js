@@ -24,7 +24,6 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
-import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
 import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_student"
 import {getTeacherByUID, setLessonStarted, setLessonNoShow, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
 import Button from "../../Components/CustomButtons/Button";
@@ -68,38 +67,7 @@ export default function Calendar({history}) {
     }, []);
 
     function setNewTeacherEvents(){
-        let teacherMail = studentData.teacher.email;
-        let i;
-        for (i=0; i<=4; i++) {
-            let displayDay = new Date(currentDay.toISOString());
-            displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
-            getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
-                displayDay.getDate(), teacherMail).then(freeTime => {
-                setTeacherFreeTime({...freeTime, ...teacherFreeTime});
-                var dateIndex;
-                var possibleLessonIndex;
-                for (dateIndex in Object.keys(freeTime)) {
-                    // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
-                    var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
-                    // date looks like 2020-01-31
-                    var date = Object.keys(freeTime)[dateIndex];
-                    for (possibleLessonIndex in freeTimeOnDayArray) {
-                        let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
-                        let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
-                        let endTime = new Date(startTime.toISOString());
-                        endTime.setTime(startTime.getTime() + 30 * 60000);
-                        //let title = startTime.toString().slice(16,21);
-                        let title ='';
-                        let slotInfo = {
-                            start: startTime,
-                            end: endTime,
-                            duration: possibleLesson.duration
-                        };
-                        addNewEvent(title, slotInfo)
-                    }
-                }
-            });
-        }
+
     }
     const selectEvent = event => {
         setSelectedEvent(event);
@@ -107,18 +75,7 @@ export default function Calendar({history}) {
     };
 
     const setLesson = (duration) => {
-        setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
-            if (res === true){
-                setModal(false);
-                setModal3(true);
-            }
-            else {
-                setModal(false);
-                setEvents([]);
-                setNewTeacherEvents();
-                setModal2(true);
-            }
-        });
+
     };
 
     const LessonConfirmedSetAnother = () => {
