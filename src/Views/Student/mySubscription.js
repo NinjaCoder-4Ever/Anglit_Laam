@@ -23,7 +23,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_sutdent";
+import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
 
 const useStyles = makeStyles(styles);
 

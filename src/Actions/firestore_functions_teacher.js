@@ -1,6 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
-import {updateStudentMonthLessons} from "./firestore_functions_sutdent";
+import {updateStudentMonthLessons} from "./firestore_functions_student";
 
 const WEEKDAYS = {
     0: 'Sunday',
