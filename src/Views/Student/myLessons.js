@@ -48,12 +48,10 @@ export default function Calendar({history}) {
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
     const [studentData, setstudentData] = React.useState({teacher:{email:"",
-        first_name: "", last_name:""}, email:""});
+        first_name: "", last_name:""}, email:"", first_name: "", last_name: ""});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
 
     const [modal, setModal] = React.useState(false);
-    const [modal2, setModal2] = React.useState(false);
-    const [modal3, setModal3] = React.useState(false);
 
 
     const Transition = React.forwardRef(function Transition(props, ref) {
@@ -99,7 +97,7 @@ export default function Calendar({history}) {
             });
     }, []);
 
-    function setNewTeacherEvents(){
+    function setNewTeacherEvents(start_time){
         let teacherMail = studentData.teacher.email;
         let i;
         for (i=0; i<=4; i++) {
@@ -127,7 +125,10 @@ export default function Calendar({history}) {
                             end: endTime,
                             duration: possibleLesson.duration
                         };
-                        addNewEvent(title, slotInfo)
+                        if (start_time !== slotInfo.start) {
+                            console.log(start_time);
+                            addNewEvent(title, slotInfo);
+                        }
                     }
                 }
             });
@@ -142,40 +143,51 @@ export default function Calendar({history}) {
         setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
            if (res === true){
                setModal(false);
-               setModal3(true);
+               confirmAlert(selectedEvent.start);
            }
            else {
                setModal(false);
-               setEvents([]);
-               setNewTeacherEvents();
-               setModal2(true);
+               denaiedAlert(selectedEvent.start);
            }
         });
     };
 
-    const LessonConfirmedSetAnother = () => {
+    const closeAlert = () => {
         setEvents([]);
         setNewTeacherEvents();
-        setModal3(false);
+        setAlert(null);
     };
 
     const BackToHome = () => {
-        setModal3(false);
         history.push("/Student/homePage");
     };
 
-    const addNewEventAlert = slotInfo => {
+    const confirmAlert = (start_time) => {
         setAlert(
             <SweetAlert
-                input
-                showCancel
-                style={{ display: "block", marginTop: "-100px" }}
-                title="Input something"
-                onConfirm={title => addNewEvent(title, slotInfo)}
-                onCancel={() => hideAlert()}
+                success
+                style={{ display: "block"}}
+                title="Your All Set!"
+                onConfirm={(start_time) => closeAlert(start_time)}
                 confirmBtnCssClass={classes.button + " " + classes.success}
-                cancelBtnCssClass={classes.button + " " + classes.danger}
-            />
+            >
+                Lesson has been set!
+            </SweetAlert>
+        );
+    };
+
+    const denaiedAlert = (start_time) => {
+        setAlert(
+            <SweetAlert
+                error
+                style={{ display: "block"}}
+                title="Sorry... You just missed it..."
+                onConfirm={(start_time) => closeAlert(start_time)}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                The Time slot you choose is no longer available.
+                Please pick a different time.
+            </SweetAlert>
         );
     };
     const addNewEvent = (title, slotInfo) => {
@@ -208,10 +220,9 @@ export default function Calendar({history}) {
                 title="Set New Lesson"
                 category={
                     <span>
-            A beautiful react component made by Netanel
-            . Please checkout Yuval for
-              full documentation.
-          </span>
+                        Lets set a new Lesson!
+                        {studentData.first_name} {studentData.last_name}
+                    </span>
                 }
             />
             {alert}
@@ -276,7 +287,7 @@ export default function Calendar({history}) {
                     <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
                     <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>
                     <h5>Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h5>
-                    <h5>Duration: {selectedEvent.duration.toString()}</h5>
+                    <h5>Possible Durations in Minutes: {selectedEvent.duration.toString()}</h5>
                 </DialogContent>
                 <DialogActions
                     className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
@@ -288,88 +299,6 @@ export default function Calendar({history}) {
                     <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60)} color="success">
                         Yes, 60 min
                     </Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: classesPopup.center,
-                    paper: classesPopup.modal
-                }}
-                open={modal2}
-                transition={Transition}
-                keepMounted
-                onClose={() => setModal2(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={classesPopup.modalHeader}
-                >
-                    <Button
-                        justIcon
-                        className={classesPopup.modalCloseButton}
-                        key="close"
-                        aria-label="Close"
-                        color="transparent"
-                        onClick={() => setModal2(false)}
-                    >
-                        <Close className={classesPopup.modalClose} />
-                    </Button>
-                    <h3 className={classesPopup.modalTitle}>You just missed it...</h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={classesPopup.modalBody}
-                >
-                    <h4>The time slot you choose is no longer available...</h4>
-                    <h4>Please choose a different time for your lesson</h4>
-                </DialogContent>
-                <DialogActions className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}>
-                    <Button onClick={() => setModal2(false)} color="bad">OK</Button>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: classesPopup.center,
-                    paper: classesPopup.modal
-                }}
-                open={modal3}
-                transition={Transition}
-                keepMounted
-                onClose={() => LessonConfirmedSetAnother()}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={classesPopup.modalHeader}
-                >
-                    <Button
-                        justIcon
-                        className={classesPopup.modalCloseButton}
-                        key="close"
-                        aria-label="Close"
-                        color="transparent"
-                        onClick={() => setModal3(false)}
-                    >
-                        <Close className={classesPopup.modalClose} />
-                    </Button>
-                    <h3 className={classesPopup.modalTitle}>Your lesson is set!n</h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={classesPopup.modalBody}
-                >
-                    <h4>Do you want to set another lesson or go to home page?</h4>
-                </DialogContent>
-                <DialogActions className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}>
-                    <Button onClick={() => LessonConfirmedSetAnother()} color="success">Set Another Lesson</Button>
-                    <Button onClick={() => BackToHome()} color="bad">Back To Home</Button>
                 </DialogActions>
             </Dialog>
         </div>
