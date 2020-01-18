@@ -24,8 +24,7 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
-import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
-import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_sutdent"
+import {getTeacherByUID, setLessonStarted, setLessonNoShow, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -46,9 +45,7 @@ export default function Calendar({history}) {
     const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
     const [alert, setAlert] = React.useState(null);
-    const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
-    const [studentData, setstudentData] = React.useState({teacher:{email:"",
-            first_name: "", last_name:""}, email:""});
+    const [teacherData, setTeacherData] = React.useState({email:"", lessons_this_week: ""});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
 
     const [modal, setModal] = React.useState(false);
@@ -62,41 +59,10 @@ export default function Calendar({history}) {
     const [currentDay, setDsetCurrentDay] = React.useState(new Date());
 
     React.useEffect(() => {
-        getStudentByUID(firebase.auth().currentUser.uid).then(studentInfo =>{
-            setstudentData(studentInfo);
-            let teacherMail = studentInfo.teacher.email;
-            let i;
-            for (i=0; i<=4; i++) {
-                let displayDay = new Date(currentDay.toISOString());
-                displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
-                getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
-                    displayDay.getDate(), teacherMail).then(freeTime => {
-                    setTeacherFreeTime({...freeTime, ...teacherFreeTime});
-                    var dateIndex;
-                    var possibleLessonIndex;
-                    for (dateIndex in Object.keys(freeTime)) {
-                        // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
-                        var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
-                        // date looks like 2020-01-31
-                        var date = Object.keys(freeTime)[dateIndex];
-                        for (possibleLessonIndex in freeTimeOnDayArray) {
-                            let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
-                            let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
-                            let endTime = new Date(startTime.toISOString());
-                            endTime.setTime(startTime.getTime() + 30 * 60000);
-                            //let title = startTime.toString().slice(16,21);
-                            let title ='';
-                            let slotInfo = {
-                                start: startTime,
-                                end: endTime,
-                                duration: possibleLesson.duration
-                            };
-                            addNewEvent(title, slotInfo)
-                        }
-                    }
-                });
-            }
-        });
+        getTeacherByUID(firebase.currentUser.uid).then(teacherInfo => {
+            setTeacherData(teacherInfo);
+
+        })
     }, []);
 
     function setNewTeacherEvents(){
@@ -184,7 +150,9 @@ export default function Calendar({history}) {
             title: title,
             start: slotInfo.start,
             end: slotInfo.end,
-            duration: slotInfo.duration
+            duration: slotInfo.duration,
+            started: slotInfo.started,
+            no_show: slotInfo.no_show
         });
         setAlert(null);
         setEvents(newEvents);

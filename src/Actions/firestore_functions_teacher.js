@@ -126,7 +126,12 @@ async function setLogOnTeacher(teacher_data){
     let currentSunday = new Date(currentDate);
     currentSunday.setDate(currentSunday.getUTCDate() - currentSunday.getUTCDay());
     currentSunday.setHours(0,0);
-    let lastLogOn = new Date(teacher_data.last_log_on.toString());
+    let lastLogOn = new Date();
+    if (teacher_data !== undefined){
+        if (teacher_data.last_log_on !== undefined){
+            lastLogOn = new Date(teacher_data.last_log_on.toString());
+        }
+    }
     if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
@@ -240,10 +245,7 @@ export async function getThisWeekLessonsTeacher(email) {
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: false,
         feedback_given: false,
@@ -283,10 +285,7 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: true,
         feedback_given: true,
@@ -326,10 +325,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: true,
         feedback_given: false,
@@ -484,10 +480,7 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: false,
         feedback_given: false,
