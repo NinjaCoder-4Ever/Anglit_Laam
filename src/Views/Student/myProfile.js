@@ -6,7 +6,8 @@ const Home = ({ history }) => {
 
     const handleLogout = () => {
         try {
-            firebase.auth().signOut()
+            firebase.auth().signOut();
+            window.$userType = 'none';
             history.push("/login");
         } catch (error) {
             alert(error);

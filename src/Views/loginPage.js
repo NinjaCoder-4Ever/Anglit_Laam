@@ -68,10 +68,13 @@ const LoginSide = ({ history }) => {
             })
 
             if (userType === "students") {
+                window.$userType = 'students';
                 history.push("/Student/homePage");
             } else if (userType === "teachers") {
+                window.$userType = 'teachers';
                 history.push("/Teacher/homePage");
             } else if (userType === "admins"){
+                window.$userType = 'admins';
                 history.push("/Admin/homePage");
             } else {
                 throw new Error("An error has occurred, unknown user");
