@@ -531,9 +531,9 @@ export async function getNextFourLessonsStudent(student_mail) {
 
 export async function getNextLessonsStudentByUID(uid, limit) {
     /**
-     * Function returns the next four lessons in the "student_lessons" collection for a given student.
+     * Function returns the next lessons in the "student_lessons" collection for a given student.
      *
-     * Returns an array of size 4 of: {
+     * Returns an array of size the given limit: {
         teacher_mail: teacher_mail,
         student_mail: student_mail,
         duration: duration,
@@ -558,7 +558,7 @@ export async function getNextLessonsStudentByUID(uid, limit) {
         lesson_id: lesson_id
     };
      */
-    const snapshot1 = db.collection('students').where('uid', '==', uid).get();
+    const snapshot1 = await db.collection('students').where('uid', '==', uid).get();
     let docs = [];
     snapshot1.forEach(doc => {
         docs.push(doc.data())
