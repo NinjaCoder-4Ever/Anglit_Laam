@@ -37,7 +37,7 @@ const App = () => {
                 {/* General Routing */}
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <PrivateRoute exact path='/' component = {StudentHomePage}/>
+                <PrivateRoute exact path='/' component = {TeacherHomePage}/>
             </Switch>
         </Router>
       </AuthProvider>
