@@ -529,6 +529,55 @@ export async function getNextFourLessonsStudent(student_mail) {
     return nextLessons
 }
 
+export async function getNextLessonsStudentByUID(uid, limit) {
+    /**
+     * Function returns the next four lessons in the "student_lessons" collection for a given student.
+     *
+     * Returns an array of size 4 of: {
+        teacher_mail: teacher_mail,
+        student_mail: student_mail,
+        duration: duration,
+        date_utc: {
+            year: lessonDate.getUTCFullYear(),
+            month: lessonDate.getUTCMonth() + 1,
+            day: lessonDate.getUTCDate(),
+            time: lessonDate.getHours().toString() + ":" + lessonDate.getUTCMinutes().toString(),
+            full_date: new Date(utcLessonDate),
+            full_date_string: utcLessonDate
+        },
+        local_date: local_date_string,
+        feedback: {
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
+        },
+        started: false,
+        feedback_given: false,
+        no_show: false,
+        lesson_id: lesson_id
+    };
+     */
+    const snapshot1 = db.collection('students').where('uid', '==', uid).get();
+    let docs = [];
+    snapshot1.forEach(doc => {
+        docs.push(doc.data())
+    });
+    let student_mail = docs[0].student_mail;
+    const lessonscollectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
+    let nextLessons = [];
+    const snapshot = await lessonscollectionRef.where('started', '==', false).where("no_show", '==', false)
+        .orderBy('date_utc.full_date').limit(limit).get();
+
+    snapshot.forEach(doc =>{
+        let lessonInfo = doc.data();
+        lessonInfo['local_date'] = convertUtcToLocalTime(doc.data().date_utc.full_date_string);
+        nextLessons.push(lessonInfo)
+    });
+
+    return nextLessons
+}
+
 export async function getMonthLessonsStudent(student_mail, month_num, year){
     /**
      * Function gets the student's lessons occurring in the given month (and year)
