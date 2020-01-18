@@ -3,6 +3,7 @@ import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import logo from "assets/img/LogoText.png";
+import logo2 from "assets/img/logo512.png";
 import firebase from 'Config/fire';
 import SweetAlert from "react-bootstrap-sweetalert";
 
@@ -21,17 +22,20 @@ import Card from "Components/Card/Card.js";
 import CardBody from "Components/Card/CardBody.js";
 import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
+import CardAvatar from "Components/Card/CardAvatar.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
 
 const useStyles = makeStyles(styles);
-
+function openSkype(data) {
+    window.open("skype:n.sharbat?chat", '_blank');
+}
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
     const [alert, setAlert] = React.useState(null);
-    const [nextLesson, setNextLesson] = React.useState({date:'',
-    });
+    const [nextLesson, setNextLesson] = React.useState({});
+    const [nextLessonDate, setNextLessonDate] = React.useState("");
     const [studentData,setStudentData] = React.useState({first_name: '',
         last_name: '',
         email: '',
@@ -50,11 +54,13 @@ export default  function ExtendedTables() {
             }
             console.log(res);
         });
-        // getNextLessonsStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
-        //     if(res != null){
-        //             setNextLesson(res);
-        //     }
-        // })
+        getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((res)=>{
+            if(res != null){
+                setNextLesson(res);
+                    // setNextLessonDate(res[0].)
+                setNextLessonDate(new Date(res[0].date_utc.full_date_string).toString().slice(0, 21));
+            }
+        })
         },[]);
 
     const deleteLesson = (line) => {
@@ -138,34 +144,39 @@ export default  function ExtendedTables() {
         );
 
     });
-
+    // let nextLesson =
     return (
         <div>
         {alert}
 
         <GridContainer>
-            <GridItem>
-                <Card style={{margin: 'auto'}}>
-                    <img src={logo} alt="..." className={classes.logo} />
-                </Card>
-            </GridItem>
-            <GridItem xs={12} sm={12} lg={6}>
+            {/*<GridItem>*/}
+            {/*    <Card style={{margin: 'auto'}}>*/}
+            {/*        <img src={logo} alt="..." className={classes.logo} />*/}
+            {/*    </Card>*/}
+            {/*</GridItem>*/}
+            <GridItem xs={12} sm={12} lg={12}>
                 <Card pricing>
                     <CardBody pricing>
-                        <h6 className={classes.cardCategory}>SMALL COMPANY</h6>
+                        <h6 className={classes.cardCategory}>Your next lesson</h6>
                         <div className={classes.icon}>
-                            {/*<Home className={classes.iconRose} />*/}
+
                         </div>
+                        <CardAvatar testimonial testimonialFooter style={{ margin: "0 auto 25px"}} >
+
+                                <img src={logo2} alt="..." />
+
+                        </CardAvatar>
                         <h3 className={`${classes.cardTitle} ${classes.marginTop30}`}>
-                            {/*{studentData.lessons_this_month.da}*/}
-                            {nextLesson.date}
+                            {nextLessonDate}
                         </h3>
                         <p className={classes.cardDescription}>
-                            This is good if your company size is between 2 and 10
-                            Persons.
+                            do we need more data?
                         </p>
-                        <Button round color="rose">
-                            Choose plan
+                        <Button round color="info" onClick={() => {
+                            openSkype(studentData);
+                        }}>
+                            Open Skype
                         </Button>
                     </CardBody>
                 </Card>
