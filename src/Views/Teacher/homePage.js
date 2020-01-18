@@ -37,7 +37,7 @@ const localizer = momentLocalizer(moment);
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
-
+const WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 
 export default function Calendar({history}) {
@@ -62,7 +62,27 @@ export default function Calendar({history}) {
         getTeacherByUID(firebase.auth().currentUser.uid).then(teacherInfo => {
             setTeacherData(teacherInfo);
             let currentWeekLessons = teacherInfo.lessons_this_week;
-
+            let dayIndex;
+            for (dayIndex in Object.keys(currentWeekLessons)){
+                let lessons_on_day = currentWeekLessons[WEEK[dayIndex]];
+                let lessonIndex;
+                for (lessonIndex in Object.keys(lessons_on_day)){
+                    let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
+                    let lesson_data = lessons_on_day[lesson_id];
+                    let startTime = lesson_data.date_utc.full_date;
+                    let endTime = new Date(startTime.toISOString());
+                    endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                    let slotInfo = {
+                        start: startTime,
+                        end: endTime,
+                        duration: lesson_data.duration,
+                        student: lesson_data.student_mail,
+                        started: lesson_data.started,
+                        no_show: lesson_data.no_show
+                    };
+                    addNewEvent("", slotInfo);
+                }
+            }
         })
     }, []);
 
@@ -110,6 +130,7 @@ export default function Calendar({history}) {
             start: slotInfo.start,
             end: slotInfo.end,
             duration: slotInfo.duration,
+            student: slotInfo.student_mail,
             started: slotInfo.started,
             no_show: slotInfo.no_show
         });
