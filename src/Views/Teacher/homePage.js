@@ -172,6 +172,7 @@ export default function Calendar({history}) {
                 style={{ display: "block"}}
                 title="Lesson Started!"
                 onConfirm={() => setAlert(null)}
+                onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             />
         );
@@ -184,6 +185,7 @@ export default function Calendar({history}) {
                 style={{ display: "block"}}
                 title="Confirm - student did not show"
                 onConfirm={() => setAlert(null)}
+                onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             />
         );
