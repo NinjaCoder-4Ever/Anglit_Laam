@@ -1,6 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
-import {updateStudentMonthLessons} from "./firestore_functions_sutdent";
+import {updateStudentMonthLessons} from "./firestore_functions_student";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -126,7 +126,12 @@ async function setLogOnTeacher(teacher_data){
     let currentSunday = new Date(currentDate);
     currentSunday.setDate(currentSunday.getUTCDate() - currentSunday.getUTCDay());
     currentSunday.setHours(0,0);
-    let lastLogOn = new Date(teacher_data.last_log_on.toString());
+    let lastLogOn = new Date();
+    if (teacher_data !== undefined){
+        if (teacher_data.last_log_on !== undefined){
+            lastLogOn = new Date(teacher_data.last_log_on.toString());
+        }
+    }
     if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
@@ -240,10 +245,7 @@ export async function getThisWeekLessonsTeacher(email) {
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: false,
         feedback_given: false,
@@ -283,10 +285,7 @@ export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: true,
         feedback_given: true,
@@ -326,10 +325,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: true,
         feedback_given: false,
@@ -351,7 +347,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
     return futureFeedbacks
 }
 
-export function setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail){
+export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail){
     /**
      * Function sets a feedback to a given lesson both in student_lessons collection and teacher_lessons collection.
      */
@@ -373,33 +369,35 @@ export function setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_
     });
 }
 
-export function setLessonStarted(start_time, teacher_mail, student_mail){
+export async function setLessonStarted(lesson_id, teacher_mail, student_mail, start_time){
     /**
      * Function sets a lesson status to "started" in both student_lessons and teacher_lessons collections.
      */
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    let lesson_id = constructLessonId(student_mail, teacher_mail, start_time.toISOString());
 
     studentLessons.doc(lesson_id).update({
-        "started": true
+        "started": true,
+        "no_show": false
     }).then(function () {
         console.log("Lesson started status updated for student")
     });
 
     teacherLessons.doc(lesson_id).update({
-        "started": true
+        "started": true,
+        "no_show": false
     }).then(function () {
         console.log("Lesson started status updated for teacher")
     });
 
     if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
         const studentCollectionRef = db.collection('students');
-        let studentData = studentCollectionRef.doc(student_mail).get();
+        let studentData = await studentCollectionRef.doc(student_mail).get();
         let currentMonthLessons = studentData.data().lessons_this_month;
         let currentLessonInfo = currentMonthLessons[lesson_id];
         currentLessonInfo.started = true;
+        currentMonthLessons.no_show = false;
         currentMonthLessons[lesson_id] = currentLessonInfo;
         studentCollectionRef.doc(student_mail).update({
             lessons_this_month: currentMonthLessons
@@ -408,10 +406,11 @@ export function setLessonStarted(start_time, teacher_mail, student_mail){
 
     if (checkSameWeek(currentLocalDate, start_time)){
         const teacherCollectionRef = db.collection('teachers');
-        let teacherData = teacherCollectionRef.doc(teacher_mail).get();
+        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
         let currentWeekLessons = teacherData.data().lessons_this_week;
         let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
         currentLessonInfo.started = true;
+        currentLessonInfo.no_show = false;
         currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
@@ -420,33 +419,35 @@ export function setLessonStarted(start_time, teacher_mail, student_mail){
 }
 
 
-export function setLessonNoShow(start_time, teacher_mail, student_mail){
+export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, start_time){
     /**
      * Function sets a lesson status to "no_show" in both student_lessons and teacher_lessons collections.
      */
     let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    let lesson_id = constructLessonId(student_mail, teacher_mail, start_time.toISOString());
 
     studentLessons.doc(lesson_id).update({
-        "no_show": true
+        "no_show": true,
+        "started": false
     }).then(function () {
         console.log("Lesson no show status updated for student")
     });
 
     teacherLessons.doc(lesson_id).update({
-        "no_show": true
+        "no_show": true,
+        "started": false
     }).then(function () {
         console.log("Lesson no show status updated for teacher")
     });
 
     if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
         const studentCollectionRef = db.collection('students');
-        let studentData = studentCollectionRef.doc(student_mail).get();
+        let studentData = await studentCollectionRef.doc(student_mail).get();
         let currentMonthLessons = studentData.data().lessons_this_month;
         let currentLessonInfo = currentMonthLessons[lesson_id];
         currentLessonInfo.no_show = true;
+        currentLessonInfo.started = false;
         currentMonthLessons[lesson_id] = currentLessonInfo;
         studentCollectionRef.doc(student_mail).update({
             lessons_this_month: currentMonthLessons
@@ -455,10 +456,11 @@ export function setLessonNoShow(start_time, teacher_mail, student_mail){
 
     if (checkSameWeek(currentLocalDate, start_time)){
         const teacherCollectionRef = db.collection('teachers');
-        let teacherData = teacherCollectionRef.doc(teacher_mail).get();
+        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
         let currentWeekLessons = teacherData.data().lessons_this_week;
         let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
         currentLessonInfo.no_show = true;
+        currentLessonInfo.started = false;
         currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
         teacherCollectionRef.doc(teacher_mail).update({
             lessons_this_week: currentWeekLessons
@@ -484,10 +486,7 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
         },
         local_date: local_date_string,
         feedback: {
-            grammar_corrections: "",
-            pronunciation_corrections: "",
-            vocabulary: "",
-            home_work: "",
+            fields: "None"
         },
         started: false,
         feedback_given: false,
@@ -497,14 +496,15 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
      */
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let weekLessons = [];
-    let oneDayMore = new Date(searchedSaturday.toISOString());
+    let searchedSunday2 = new Date(searchedSunday);
+    let oneDayMore = new Date(searchedSaturday);
     oneDayMore.setDate(oneDayMore.getUTCDate() + 2);
     const snapshot = await collectionRef.orderBy('date_utc.full_date')
-        .where('date_utc.full_date', '>=', searchedSunday)
+        .where('date_utc.full_date', '>=', searchedSunday2)
         .where('date_utc.full_date', '<=', oneDayMore).get();
 
     snapshot.forEach(doc =>{
-        weekLessons.push(doc.data())
+        weekLessons.push(doc.data());
     });
 
     return weekLessons
@@ -518,7 +518,7 @@ export async function updateTeacherWeekLessons(teacher_mail, date) {
      */
     let searchedSunday = new Date(date.toISOString());
     searchedSunday = searchedSunday.setDate(searchedSunday.getUTCDate()) - searchedSunday.getUTCDay();
-    let searchedSaturday = new Date(searchedSunday.toString());
+    let searchedSaturday = new Date(searchedSunday);
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
     let nextWeekLessons = await getWeekLessonByDateTeacher(teacher_mail,searchedSunday, searchedSaturday);
     const collectionRef = db.collection('teachers').doc(teacher_mail);

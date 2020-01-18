@@ -1,5 +1,5 @@
 import React from 'react'
-import {getStudentByMail} from "../../Actions/firestore_functions_sutdent";
+import {getStudentByMail} from "../../Actions/firestore_functions_student";
 
 
 class Home extends React.Component {
