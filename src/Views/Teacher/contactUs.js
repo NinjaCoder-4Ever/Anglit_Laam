@@ -2,7 +2,7 @@ import React from 'react'
 import {getStudentByMail} from "../../Actions/firestore_functions_student";
 
 
-class Home extends React.Component {
+class ContactUs extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -45,4 +45,4 @@ class Home extends React.Component {
         );
     }
 }
-export default Home
+export default ContactUs;

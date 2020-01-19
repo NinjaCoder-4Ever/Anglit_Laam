@@ -17,13 +17,22 @@ import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 import {getUserDataByUid} from "./Actions/firestore_functions_general";
 
 
+import { AuthContext } from "./Actions/auth";
+
+
+
+
 const App = () => {
-    var user = firebase.auth().currentUser;
+    //var user = firebase.auth().currentUser;
     console.log('global var user:')
     console.log(window.$userType);
 
 
-    function redirectByUser () {
+    async function redirectByUser () {
+        //var user = await firebase.auth().currentUser;
+        console.log('global var user in function:')
+        console.log(window.$userType);
+        //console.log(user)
         if (window.$userType !== 'none') {
             if (window.$userType === 'students')
                 return '/Student/homePage';
@@ -32,8 +41,14 @@ const App = () => {
             if (window.$userType === 'admins')
                 return '/Admin/homePage';
         }
-        else
+        else {
+            firebase.auth().signOut();
             return '/login';
+        }
+    }
+
+    function isStudent () {
+        return true;
     }
 
 
@@ -58,10 +73,13 @@ const App = () => {
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
 
                 {/* General Routing */}
-                <Route exact path='/' component = {logIn}/>
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <Redirect from="/" to={redirectByUser} />
+
+                <Route exact path="/">
+                    {redirectByUser () === '/Student/homePage' ? <Redirect to='/Student/homePage' /> : <Redirect to='/Student/homePage' />}
+                </Route>
+
 
             </Switch>
         </Router>
