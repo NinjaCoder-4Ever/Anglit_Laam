@@ -52,7 +52,8 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
     newStudentData.teacher = {
         first_name: teacherInfo.first_name,
         last_name: teacherInfo.last_name,
-        email: teacherInfo.email
+        email: teacherInfo.email,
+        skype_username: teacherInfo.skype_username
     };
 
     let usersData = {
@@ -215,7 +216,8 @@ export async function chooseTeacherForStudent(studentMail) {
      return {
         email: chosenTeacher[0].email,
         first_name: chosenTeacher[0].first_name,
-        last_name: chosenTeacher[0].last_name
+        last_name: chosenTeacher[0].last_name,
+        skype_username: chosenTeacher[0].skype_username
     }
 }
 
@@ -414,11 +416,11 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
         no_show: false,
         lesson_id: lesson_id
     };
+    teacherLessons.doc(lesson_id).set(lessonInfo).then(function () {
+        console.log("Lesson set in teacher lessons")
+    });
     studentLessons.doc(lesson_id).set(lessonInfo).then(function () {
         console.log("Lesson set in student lessons")
-    });
-    teacherLessons.doc(lesson_id).set(lessonInfo).then(function () {
-       console.log("Lesson set in teacher lessons")
     });
 
     if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
@@ -563,7 +565,7 @@ export async function getNextLessonsStudentByUID(uid, limit) {
     snapshot1.forEach(doc => {
         docs.push(doc.data())
     });
-    let student_mail = docs[0].student_mail;
+    let student_mail = docs[0].email;
     const lessonscollectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let nextLessons = [];
     const snapshot = await lessonscollectionRef.where('started', '==', false).where("no_show", '==', false)

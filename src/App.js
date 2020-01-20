@@ -44,24 +44,23 @@ const App = () => {
                 {/* Student Routes */}
                 <PrivateRouteStudent exact path='/Student' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/homePage' component = {StudentHomePage}/>
-                <PrivateRouteStudent exact path='/student/mySubscription' component = {StudentHomePage}/>
-                <PrivateRouteStudent exact path='/Student/myLessons' component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path='/Student/setNewLesson' component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path="/Student/myFeedback" component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path='/student/mySubscriptions' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/myProfile' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/contactUs' component = {StudentHomePage}/>
 
                 {/* Teacher Routes */}
                 <PrivateRouteTeacher exact path='/Teacher' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/homePage' component = {TeacherHomePage}/>
-                <PrivateRouteTeacher exact path='/Teacher/mySchedule' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/myStudents' component = {TeacherHomePage}/>
-                <PrivateRouteTeacher exact path='/Teacher/myFeedbacks' component = {TeacherHomePage}/>
+                <PrivateRouteTeacher exact path="/Teacher/feedbackToFill" component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
 
                 {/* General Routing */}
-                <Route exact path='/' component = {logIn}/>
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <Redirect from="/" to={redirectByUser} />
+                <Redirect from="/" to= '/Teacher/homePage'/>
 
             </Switch>
         </Router>

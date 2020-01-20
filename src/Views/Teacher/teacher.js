@@ -9,8 +9,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import Sidebar from "../../Components/Sidebar/Sidebar";
 import routes from "../../teacherRoutes";
 import styles from "../../Layouts/adminStyle";
-import logo from '../../logo512.png';
-import image from '../../sidebarBackground.jpg';
+import logo from '../../assets/img/logo512.png';
+import image from '../../assets/img/sidebarBackground.jpg';
 import AdminNavbar from "../../Components/Navbars/AdminNavbar";
 
 
