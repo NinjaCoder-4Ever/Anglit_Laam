@@ -19,8 +19,9 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import Notifications from "@material-ui/icons/Notifications";
-import Unarchive from "@material-ui/icons/Unarchive";
+import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
+import Calendar from "@material-ui/icons/Today";
+import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Student/homePage'
 import SetNewLesson from './Views/Student/SetNewLesson'
@@ -40,7 +41,7 @@ const dashboardRoutes = [
     {
         path: "/setNewLesson",
         name: "Set New Lesson",
-        icon: Notifications,
+        icon: Calendar,
         component: SetNewLesson,
         layout: "/Student"
     },
@@ -54,7 +55,7 @@ const dashboardRoutes = [
     {
         path: "/mySubscriptions",
         name: "My Subscriptions",
-        icon: "content_paste",
+        icon: AccountBalance,
         component: MySubscriptions,
         layout: "/Student"
     },
@@ -68,7 +69,7 @@ const dashboardRoutes = [
     {
         path: "/contactUs",
         name: "Contact Us",
-        icon: Unarchive,
+        icon: Help,
         component: ContactUs,
         layout: "/Student"
     }

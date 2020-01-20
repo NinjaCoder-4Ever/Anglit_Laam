@@ -60,7 +60,7 @@ const App = () => {
                 {/* General Routing */}
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <Redirect from="/" to= '/Teacher/homePage'/>
+                <Redirect from="/" to= '/Student/homePage'/>
 
             </Switch>
         </Router>
