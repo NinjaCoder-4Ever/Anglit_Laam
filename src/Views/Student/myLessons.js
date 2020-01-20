@@ -64,14 +64,16 @@ export default function Calendar({history}) {
             setstudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
-            for (i=0; i<=4; i++) {
-                let displayDay = new Date(currentDay.toISOString());
-                displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
+            for (i=0; i<=2; i++) {
+                let displayDay = new Date(currentDay.toString());
+                console.log(displayDay);
+                displayDay.setDate(currentDay.getDate() - currentDay.getDay() + 7*i);
                 getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
                     displayDay.getDate(), teacherMail).then(freeTime => {
                         setTeacherFreeTime({...freeTime, ...teacherFreeTime});
                         var dateIndex;
                         var possibleLessonIndex;
+                        console.log(freeTime);
                         for (dateIndex in Object.keys(freeTime)) {
                             // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
                             var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
@@ -97,64 +99,67 @@ export default function Calendar({history}) {
             });
     }, []);
 
-    function setNewTeacherEvents(start_time){
-        let teacherMail = studentData.teacher.email;
-        let i;
-        for (i=0; i<=4; i++) {
-            let displayDay = new Date(currentDay.toISOString());
-            displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
-            getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
-                displayDay.getDate(), teacherMail).then(freeTime => {
-                setTeacherFreeTime({...freeTime, ...teacherFreeTime});
-                var dateIndex;
-                var possibleLessonIndex;
-                for (dateIndex in Object.keys(freeTime)) {
-                    // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
-                    var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
-                    // date looks like 2020-01-31
-                    var date = Object.keys(freeTime)[dateIndex];
-                    for (possibleLessonIndex in freeTimeOnDayArray) {
-                        let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
-                        let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
-                        let endTime = new Date(startTime.toISOString());
-                        endTime.setTime(startTime.getTime() + 30 * 60000);
-                        //let title = startTime.toString().slice(16,21);
-                        let title ='';
-                        let slotInfo = {
-                            start: startTime,
-                            end: endTime,
-                            duration: possibleLesson.duration
-                        };
-                        if (start_time !== slotInfo.start) {
-                            console.log(start_time);
-                            addNewEvent(title, slotInfo);
+    function setNewTeacherEvents(duration, start_time){
+        var dateIndex;
+        var possibleLessonIndex;
+        var freeTimeIndex;
+        for(freeTimeIndex in teacherFreeTime){
+            var freeTime = teacherFreeTime[freeTimeIndex];
+            for (dateIndex in Object.keys(freeTime)) {
+                // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
+                var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
+                // date looks like 2020-01-31
+                var date = Object.keys(freeTime)[dateIndex];
+                var skipTimeSlot = false;
+                for (possibleLessonIndex in freeTimeOnDayArray) {
+                    let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
+                    let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
+                    if (startTime === start_time){
+                        if (duration === 60){
+                            skipTimeSlot = true;
                         }
+                        continue
                     }
+                    if (skipTimeSlot === true){
+                        skipTimeSlot = false;
+                        continue
+                    }
+                    let endTime = new Date(startTime);
+                    endTime.setTime(startTime.getTime() + 30 * 60000);
+                    //let title = startTime.toString().slice(16,21);
+                    let title ='';
+                    let slotInfo = {
+                        start: startTime,
+                        end: endTime,
+                        duration: possibleLesson.duration
+                    };
+                    addNewEvent(title, slotInfo)
                 }
-            });
+            }
         }
+
     }
     const selectEvent = event => {
         setSelectedEvent(event);
         setModal(true);
     };
 
-    const setLesson = (duration) => {
+    const setLesson = (duration, start_time) => {
         setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
            if (res === true){
                setModal(false);
-               confirmAlert(selectedEvent.start);
+               confirmAlert();
            }
            else {
                setModal(false);
-               denaiedAlert(selectedEvent.start);
+               denaiedAlert();
            }
         });
+        setEvents([]);
+        setNewTeacherEvents(duration, start_time);
     };
 
     const closeAlert = () => {
-        setEvents([]);
-        setNewTeacherEvents();
         setAlert(null);
     };
 
@@ -162,13 +167,13 @@ export default function Calendar({history}) {
         history.push("/Student/homePage");
     };
 
-    const confirmAlert = (start_time) => {
+    const confirmAlert = () => {
         setAlert(
             <SweetAlert
                 success
                 style={{ display: "block"}}
                 title="Your All Set!"
-                onConfirm={(start_time) => closeAlert(start_time)}
+                onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
                 Lesson has been set!
@@ -176,13 +181,13 @@ export default function Calendar({history}) {
         );
     };
 
-    const denaiedAlert = (start_time) => {
+    const denaiedAlert = () => {
         setAlert(
             <SweetAlert
                 error
                 style={{ display: "block"}}
                 title="Sorry... You just missed it..."
-                onConfirm={(start_time) => closeAlert(start_time)}
+                onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
                 The Time slot you choose is no longer available.
@@ -196,7 +201,8 @@ export default function Calendar({history}) {
             title: title,
             start: slotInfo.start,
             end: slotInfo.end,
-            duration: slotInfo.duration
+            duration: slotInfo.duration,
+            color: "#194D33"
         });
         setAlert(null);
         setEvents(newEvents);
@@ -208,7 +214,7 @@ export default function Calendar({history}) {
         var backgroundColor = "event-";
         event.color
             ? (backgroundColor = backgroundColor + event.color)
-            : (backgroundColor = backgroundColor + "default");
+            : (backgroundColor = "#194D33");
         return {
             className: backgroundColor
         };

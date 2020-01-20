@@ -414,11 +414,11 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
         no_show: false,
         lesson_id: lesson_id
     };
+    teacherLessons.doc(lesson_id).set(lessonInfo).then(function () {
+        console.log("Lesson set in teacher lessons")
+    });
     studentLessons.doc(lesson_id).set(lessonInfo).then(function () {
         console.log("Lesson set in student lessons")
-    });
-    teacherLessons.doc(lesson_id).set(lessonInfo).then(function () {
-       console.log("Lesson set in teacher lessons")
     });
 
     if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
