@@ -19,7 +19,8 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
 import BubbleChart from "@material-ui/icons/BubbleChart";
-import Notifications from "@material-ui/icons/Notifications";
+import People from "@material-ui/icons/PeopleAlt";
+import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Teacher/homePage'
 import FeedbackToFill from './Views/Teacher/feedbackToFill'
@@ -44,14 +45,14 @@ const dashboardRoutes = [
     {
         path: "/myStudents",
         name: "My Students",
-        icon: "content_paste",
+        icon: People,
         component: MyStudents,
         layout: "/Teacher"
     },
     {
         path: "/contactUs",
         name: "Contact Us",
-        icon: BubbleChart,
+        icon: Help,
         component: ContactUs,
         layout: "/Teacher"
     }
