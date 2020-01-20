@@ -419,6 +419,55 @@ export async function setLessonStarted(lesson_id, teacher_mail, student_mail, st
     }
 }
 
+export async function unmarkLessonStatus(lesson_id, teacher_mail, student_mail, start_time){
+    /**
+     * Function sets a lesson status to unmarked (both not started and not " no_show")
+     * in both student_lessons and teacher_lessons collections.
+     */
+    let currentLocalDate = new Date();
+    const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+
+    studentLessons.doc(lesson_id).update({
+        "started": false,
+        "no_show": false
+    }).then(function () {
+        console.log("Lesson started status updated for student")
+    });
+
+    teacherLessons.doc(lesson_id).update({
+        "started": false,
+        "no_show": false
+    }).then(function () {
+        console.log("Lesson started status updated for teacher")
+    });
+
+    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+        const studentCollectionRef = db.collection('students');
+        let studentData = await studentCollectionRef.doc(student_mail).get();
+        let currentMonthLessons = studentData.data().lessons_this_month;
+        let currentLessonInfo = currentMonthLessons[lesson_id];
+        currentLessonInfo.started = false;
+        currentMonthLessons.no_show = false;
+        currentMonthLessons[lesson_id] = currentLessonInfo;
+        studentCollectionRef.doc(student_mail).update({
+            lessons_this_month: currentMonthLessons
+        });
+    }
+
+    if (checkSameWeek(currentLocalDate, start_time)){
+        const teacherCollectionRef = db.collection('teachers');
+        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
+        let currentWeekLessons = teacherData.data().lessons_this_week;
+        let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
+        currentLessonInfo.started = false;
+        currentLessonInfo.no_show = false;
+        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
+        teacherCollectionRef.doc(teacher_mail).update({
+            lessons_this_week: currentWeekLessons
+        });
+    }
+}
 
 export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, start_time){
     /**
