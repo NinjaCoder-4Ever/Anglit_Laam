@@ -59,10 +59,9 @@ const App = () => {
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
 
                 {/* General Routing */}
-                <Route exact path='/' component = {logIn}/>
                 <Route exact path='/login' component = {logIn}/>
                 <Route exact path='/signUp' component = {signUp}/>
-                <Redirect from="/" to={redirectByUser} />
+                <Redirect from="/" to= '/Student/homePage'/>
 
             </Switch>
         </Router>
