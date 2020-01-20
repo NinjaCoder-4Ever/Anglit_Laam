@@ -25,7 +25,7 @@ import Unarchive from "@material-ui/icons/Unarchive";
 // core components/views for userSideBar layout
 import HomePage from './Views/Student/homePage'
 import SetNewLesson from './Views/Student/SetNewLesson'
-import MyFeedbacks from './Views/Student/myFeedbacks'
+import MyFeedback from './Views/Student/myFeedback'
 import MySubscriptions from './Views/Student/mySubscriptions'
 import MyProfile from './Views/Student/myProfile'
 import ContactUs from './Views/Student/contactUs'
@@ -46,10 +46,10 @@ const dashboardRoutes = [
         layout: "/Student"
     },
     {
-        path: "/myFeedback's",
-        name: "My Feedback's",
+        path: "/myFeedback",
+        name: "My Feedback",
         icon: LibraryBooks,
-        component: MyFeedbacks,
+        component: MyFeedback,
         layout: "/Student"
     },
     {
