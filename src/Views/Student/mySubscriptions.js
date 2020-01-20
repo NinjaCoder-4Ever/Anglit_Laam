@@ -11,6 +11,7 @@ import SweetAlert from "react-bootstrap-sweetalert";
 import Assignment from "@material-ui/icons/Assignment";
 import Edit from "@material-ui/icons/Edit";
 import Close from "@material-ui/icons/Close";
+import Check from "@material-ui/icons/Check";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
@@ -26,7 +27,9 @@ import styles from "assets/jss/material-dashboard-pro-react/views/extendedTables
 import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
 
 const useStyles = makeStyles(styles);
-
+function printFeedback(feedback) {
+    return "this is feedback for the class"
+}
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
     const [alert, setAlert] = React.useState(null);
@@ -57,74 +60,47 @@ export default  function ExtendedTables() {
         });
     },[]);
 
-    const deleteLesson = (line) => {
-        let student_mail = studentData.email;
-        let teacher_mail = studentData.teacher.email;
-        let lesson_date = new Date(line.lesson_date);
-        console.log(line);
-        cancelLesson(student_mail, teacher_mail, lesson_date);
-
-        delete studentData.lessons_this_month[line.index];
-        setChecked(checked+1);
-    }
-
     const hideAlert = () => {
         setAlert(null);
     };
 
-    const warningWithConfirmMessage = (line) => {
+    const popFeedback = (line) => {
+        console.log("feedback: "+ line.feedback)
+
         setAlert(
             <SweetAlert
-                warning
+
                 style={{ display: "block"}}
-                title="Are you sure?"
-                onConfirm={() => successDelete(line)}
+                title="Feedback"
+                onConfirm={() => hideAlert()}
                 onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
-                cancelBtnCssClass={classes.button + " " + classes.danger}
-                confirmBtnText="Yes, delete it!"
-                cancelBtnText="Cancel"
-                showCancel
+                confirmBtnText="close"
             >
-                You will not be able to recover this imaginary file!
+                {printFeedback(line.lesson_data.feedback)}
             </SweetAlert>
         );
     };
 
-    const successDelete = (line) => {
-        deleteLesson(line);
-        setAlert(
-            <SweetAlert
-                success
-                style={{ display: "block"}}
-                title="Deleted!"
-                onConfirm={() => hideAlert()}
-                onCancel={() => hideAlert()}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-            >
-                Your lesson has been deleted.
-            </SweetAlert>
-        );
-    };
 
     const classes = useStyles();
 
     function getSimpleButtons(line)
     {
         return  [
-            {color: "danger", icon: Close, data: line}
+            {color: "success", icon: Check, data: line}
         ].map((prop, key) => {
             return (
                 <Button
                     color={prop.color}
-                    simple
+
                     className={classes.actionButton}
                     key={key}
                     onClick={() => {
-                        warningWithConfirmMessage(prop.data);
+                        popFeedback(prop.data);
                     }}
                 >
-                    <prop.icon className={classes.icon}/>
+                    Feedback
                 </Button>
             );
         });
@@ -134,7 +110,7 @@ export default  function ExtendedTables() {
         let lesson_date = new Date(pastLessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = pastLessons[lesson_id].duration;
         return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_date, index: lesson_id})]
+            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_date, index: lesson_id, lesson_data: pastLessons[lesson_id]})]
         );
 
     });
@@ -144,26 +120,20 @@ export default  function ExtendedTables() {
             {alert}
 
             <GridContainer>
-                <GridItem>
-                    <Card style={{margin: 'auto'}}>
-                        <img src={logo} alt="..." className={classes.logo} />
-                    </Card>
-                </GridItem>
                 <GridItem xs={12}>
                     <Card>
                         <CardHeader color="info" icon>
                             <CardIcon color="info">
                                 <Assignment />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Next Lessons</h4>
+                            <h4 className={classes.cardIconTitle}>Past Lessons</h4>
                         </CardHeader>
                         <CardBody>
                             <Table
                                 tableHead={[
                                     "Teacher",
                                     "Date",
-                                    "Duration",
-                                    "Cancel Lesson"
+                                    "Duration"
                                 ]}
                                 tableData={
                                     lessons

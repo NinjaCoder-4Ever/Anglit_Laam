@@ -9,7 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Sidebar from "../../Components/Sidebar/Sidebar";
 import routes from "../../studentRoutes";
 import styles from "../../Layouts/adminStyle";
-import logo from '../../logo512.png';
+import logo from '../../assets/img/logo512.png';
 import image from '../../sidebarBackground.jpg';
 
 

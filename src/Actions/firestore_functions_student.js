@@ -565,7 +565,7 @@ export async function getNextLessonsStudentByUID(uid, limit) {
     snapshot1.forEach(doc => {
         docs.push(doc.data())
     });
-    let student_mail = docs[0].student_mail;
+    let student_mail = docs[0].email;
     const lessonscollectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
     let nextLessons = [];
     const snapshot = await lessonscollectionRef.where('started', '==', false).where("no_show", '==', false)
