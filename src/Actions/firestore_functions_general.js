@@ -164,3 +164,12 @@ export function checkSameWeek(date1, date2){
     sundayOfDate2.setDate(sundayOfDate2.getUTCDate() - sundayOfDate2.getUTCDay());
     return sundayOfDate1.toDateString() === sundayOfDate2.toDateString();
 }
+
+export async function getFullNameByUID(uid) {
+    let userData = await getUserDataByUid(uid);
+    let docRef = await db.collection(userData.collection).doc(userData.email).get();
+    let first_name = docRef.data().first_name;
+    let last_name = docRef.data().last_name;
+
+    return first_name + " " + last_name
+}
