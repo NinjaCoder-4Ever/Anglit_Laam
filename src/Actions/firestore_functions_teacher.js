@@ -29,7 +29,7 @@ const MONTH_DAYS = {
 
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
-export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours){
+export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours, skype_username){
     /**
      * Function enters a new teacher to the "teachers" collection.
      * Also enters the teacher to the "users" collection.
@@ -54,7 +54,8 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         students: [],
         working_hours: parsed_working_hours,
         working_days: working_days,
-        last_log_on: new Date()
+        last_log_on: new Date(),
+        skype_username: skype_username
     };
 
     let usersData = {
