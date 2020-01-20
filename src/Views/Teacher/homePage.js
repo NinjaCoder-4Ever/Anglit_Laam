@@ -32,6 +32,9 @@ import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import CardHeader from "../../Components/Card/CardHeader";
+import CardIcon from "../../Components/Card/CardIcon";
+import {CalendarToday} from "@material-ui/icons";
 
 const localizer = momentLocalizer(moment);
 
@@ -149,7 +152,7 @@ export default function Calendar({history}) {
                                 lesson_id: lesson_data.lesson_id,
                                 feedback_given: lesson_data.feedback_given
                             };
-                            addNewEvent("", slotInfo);
+                            addNewEvent(lesson_data.student_mail, slotInfo);
                         }
                     });
                 }
@@ -273,17 +276,26 @@ export default function Calendar({history}) {
     };
     return (
         <div>
-            <Heading
-                textAlign="center"
-                title="My Schedule"
-                category={
-                    <span>
-                        A Look at {teacherData.first_name} {teacherData.last_name}'s Week
-                    </span>
-                }
-            />
             {alert}
             <GridContainer justify="center">
+                <GridItem xs={4} sm={4} lg={4} md={4}>
+                    <Card pricing className={classes.textCenter}>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <CalendarToday/>
+                            </CardIcon>
+                            <h2  className={classes.cardCategory}>
+                                My Schedule
+                            </h2>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <h3 className={`${classes.cardTitle}`}
+                                style={{fontSize: "20px", fontWeight: "bold",}}>
+                                A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                            </h3>
+                        </CardBody>
+                    </Card>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     <Card>
                         <CardBody calendar>
@@ -297,7 +309,7 @@ export default function Calendar({history}) {
                                 onSelectEvent={event => selectEvent(event)}
                                 //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
-                                views={['week']}
+                                views={["day", 'week']}
                                 timeslots={2}
                                 min={new Date(2019, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}
