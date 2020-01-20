@@ -59,7 +59,7 @@ export default  function ExtendedTables() {
             if(res != null){
                 setNextLesson(res);
                     // setNextLessonDate(res[0].)
-                setNextLessonDate(new Date(res[0].date_utc.full_date_string).toString().slice(0, 21));
+                setNextLessonDate(new Date(res[0].date_utc.full_date_string));
             }
         })
         },[]);
@@ -70,8 +70,16 @@ export default  function ExtendedTables() {
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
+        if (new Date(lesson_date) === new Date(nextLessonDate)){
+            delete nextLesson[Object.keys(nextLesson)[0]];
+            let nextLessonData = nextLesson[Object.keys(nextLesson)[0]];
+            console.log(nextLessonData);
+            setNextLessonDate(new Date(nextLessonData.date_utc.full_date_string).toString().slice(0, 21));
+        }
+        else {
+            delete nextLesson[line.index];
+        }
 
-        delete studentData.lessons_this_month[line.index];
         setChecked(checked+1);
     };
 
@@ -138,10 +146,11 @@ export default  function ExtendedTables() {
     }
     let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
         let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
+        let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
         let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = nextLesson[lesson_id].duration;
         return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_date, index: lesson_id})]
+            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
         );
 
     });
@@ -160,6 +169,7 @@ export default  function ExtendedTables() {
                         <h3 className={classes.cardCategory}>Your next lesson</h3>
                     </CardHeader>
                     <CardBody pricing>
+                        <h6 className={classes.cardCategory}>Your next lesson</h6>
                         <div className={classes.icon}>
 
                         </div>
@@ -170,7 +180,7 @@ export default  function ExtendedTables() {
                         </CardAvatar>
                         <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
                             style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
-                            {nextLessonDate}
+                            {nextLessonDate.toString().slice(0, 21)}
                         </h1>
                         <Button round color="info" onClick={() => {
                             openSkype(studentData);
