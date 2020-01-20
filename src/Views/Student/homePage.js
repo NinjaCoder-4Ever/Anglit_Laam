@@ -150,11 +150,6 @@ export default  function ExtendedTables() {
         {alert}
 
         <GridContainer>
-            {/*<GridItem>*/}
-            {/*    <Card style={{margin: 'auto'}}>*/}
-            {/*        <img src={logo} alt="..." className={classes.logo} />*/}
-            {/*    </Card>*/}
-            {/*</GridItem>*/}
             <GridItem xs={12} sm={12} lg={12}>
                 <Card pricing>
                     <CardBody pricing>
@@ -167,12 +162,10 @@ export default  function ExtendedTables() {
                                 <img src={logo2} alt="..." />
 
                         </CardAvatar>
-                        <h3 className={`${classes.cardTitle} ${classes.marginTop30}`}>
+                        <h3 className={`${classes.cardTitle} ${classes.marginTop30}`}
+                            style={{fontSize: "20px", fontWeight: "bold", marginBottom: "10x" }}>
                             {nextLessonDate}
                         </h3>
-                        <p className={classes.cardDescription}>
-                            do we need more data?
-                        </p>
                         <Button round color="info" onClick={() => {
                             openSkype(studentData);
                         }}>

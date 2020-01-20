@@ -120,13 +120,6 @@ export default  function ExtendedTables() {
             {alert}
 
             <GridContainer>
-                <GridItem>
-                    <Card style={{margin: 'auto'}}>
-                        <CardBody>
-                            <img src={logo} alt="..." className={classes.logo} />
-                        </CardBody>
-                    </Card>
-                </GridItem>
                 <GridItem xs={12}>
                     <Card>
                         <CardHeader color="info" icon>
