@@ -19,6 +19,7 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
 import BubbleChart from "@material-ui/icons/BubbleChart";
+import Notifications from "@material-ui/icons/Notifications";
 // core components/views for userSideBar layout
 import HomePage from './Views/Teacher/homePage'
 import FeedbackToFill from './Views/Teacher/feedbackToFill'
