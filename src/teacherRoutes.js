@@ -35,7 +35,7 @@ const dashboardRoutes = [
     },
     {
         path: "feedbackToFill",
-        name: "My Feedback",
+        name: "Feedback To Fill",
         icon: LibraryBooks,
         component: FeedbackToFill,
         layout: "/Teacher"
