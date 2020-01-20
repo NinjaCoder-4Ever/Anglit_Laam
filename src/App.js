@@ -44,8 +44,9 @@ const App = () => {
                 {/* Student Routes */}
                 <PrivateRouteStudent exact path='/Student' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/homePage' component = {StudentHomePage}/>
-                <PrivateRouteStudent exact path='/student/mySubscription' component = {StudentHomePage}/>
-                <PrivateRouteStudent exact path='/Student/myLessons' component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path='/Student/setNewLesson' component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path="/Student/myFeedback's" component = {StudentHomePage}/>
+                <PrivateRouteStudent exact path='/student/mySubscriptions' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/myProfile' component = {StudentHomePage}/>
                 <PrivateRouteStudent exact path='/Student/contactUs' component = {StudentHomePage}/>
 
@@ -54,7 +55,7 @@ const App = () => {
                 <PrivateRouteTeacher exact path='/Teacher/homePage' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/mySchedule' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/myStudents' component = {TeacherHomePage}/>
-                <PrivateRouteTeacher exact path='/Teacher/myFeedbacks' component = {TeacherHomePage}/>
+                <PrivateRouteTeacher exact path="/Teacher/myFeedback's" component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
 
                 {/* General Routing */}
