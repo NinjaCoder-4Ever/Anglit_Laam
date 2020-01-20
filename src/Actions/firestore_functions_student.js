@@ -52,7 +52,8 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
     newStudentData.teacher = {
         first_name: teacherInfo.first_name,
         last_name: teacherInfo.last_name,
-        email: teacherInfo.email
+        email: teacherInfo.email,
+        skype_username: teacherInfo.skype_username
     };
 
     let usersData = {
@@ -215,7 +216,8 @@ export async function chooseTeacherForStudent(studentMail) {
      return {
         email: chosenTeacher[0].email,
         first_name: chosenTeacher[0].first_name,
-        last_name: chosenTeacher[0].last_name
+        last_name: chosenTeacher[0].last_name,
+        skype_username: chosenTeacher[0].skype_username
     }
 }
 
