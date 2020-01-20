@@ -12,10 +12,10 @@ import CardAvatar from "Components/Card/CardAvatar.js";
 const useStyles = makeStyles(styles);
 
 export default function RoundLogo(props) {
-    const { width, height, ...rest } = props;
+    const { width, height, objectstyle, ...rest } = props;
     return(
-        <CardAvatar testimonial testimonialFooter style={{ margin: "0 auto 25px", width: "min-content"}} >
-            <img src={logo2} alt="..." style={{ height: height, width: width}}/>
+        <CardAvatar testimonial testimonialFooter style={objectstyle} >
+            <img src={logo2} alt="..." style={{ height: height, width: width}} />
         </CardAvatar>
     )
 }
@@ -23,4 +23,5 @@ export default function RoundLogo(props) {
 RoundLogo.propTypes = {
     height: PropTypes.string,
     width: PropTypes.string,
+    objectstyle: PropTypes.object,
 };

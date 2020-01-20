@@ -2,7 +2,6 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo2 from "assets/img/logo512.png";
 import firebase from 'Config/fire';
 import SweetAlert from "react-bootstrap-sweetalert";
 
@@ -157,7 +156,7 @@ export default  function ExtendedTables() {
                         <div className={classes.icon}>
 
                         </div>
-                        <RoundLogo width={"100px"} height={"100px"}>
+                        <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
                         </RoundLogo>
                         <h3 className={`${classes.cardTitle} ${classes.marginTop30}`}
                             style={{fontSize: "20px", fontWeight: "bold", marginBottom: "10x" }}>

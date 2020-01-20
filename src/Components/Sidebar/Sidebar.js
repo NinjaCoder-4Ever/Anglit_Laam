@@ -13,6 +13,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Icon from "@material-ui/core/Icon";
 // core components
 import styles from "../../Layouts/sidebarStyle";
+import RoundLogo from "../RoundLogo";
 
 const useStyles = makeStyles(styles);
 
@@ -69,9 +70,13 @@ export default function Sidebar(props) {
         })}
         target="_blank"
       >
-        <div className={classes.logoImage}>
-          <img src={logo} alt="logo" className={classes.img} />
-      </div>
+      {/*  <div className={classes.logoImage}>*/}
+      {/*    <img src={logo} alt="logo" className={classes.img} />*/}
+      {/*</div>*/}
+      <RoundLogo height={"35px"} width={"35px"} objectstyle={{margin: "0 10px 0 0",
+          float: "left",
+          width: "min-content"}}>
+      </RoundLogo>
         {logoText}
       </a>
     </div>
