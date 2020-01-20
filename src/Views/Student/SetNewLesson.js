@@ -33,6 +33,9 @@ import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import CardHeader from "../../Components/Card/CardHeader";
+import CardIcon from "../../Components/Card/CardIcon";
+import {CalendarToday, InsertInvitation} from "@material-ui/icons";
 
 const localizer = momentLocalizer(moment);
 
@@ -243,6 +246,24 @@ export default function Calendar({history}) {
             />
             {alert}
             <GridContainer justify="center">
+                <GridItem xs={10} sm={10} lg={10} md={10}>
+                    <Card pricing className={classes.textCenter}>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <InsertInvitation/>
+                            </CardIcon>
+                            <h2  className={classes.cardCategory}>
+                                Lets Set a New Lesson!
+                            </h2>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <h3 className={`${classes.cardTitle}`}
+                                style={{fontSize: "20px", fontWeight: "bold",}}>
+                                Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s Available Time!
+                            </h3>
+                        </CardBody>
+                    </Card>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     <Card>
                         <CardBody calendar>
@@ -256,7 +277,7 @@ export default function Calendar({history}) {
                                 onSelectEvent={event => selectEvent(event)}
                                 //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
-                                views={['week']}
+                                views={["day", 'week']}
                                 timeslots={2}
                                 min={new Date(2019, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}
