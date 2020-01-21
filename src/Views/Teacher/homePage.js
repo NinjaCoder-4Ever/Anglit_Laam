@@ -24,7 +24,7 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
 import { events as calendarEvents } from "../../Variables/general.js";
-import {getTeacherByUID, setLessonStarted, setLessonNoShow, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
+import {getTeacherByUID, setLessonStarted, setLessonNoShow, unmarkLessonStatus, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -32,6 +32,9 @@ import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import CardHeader from "../../Components/Card/CardHeader";
+import CardIcon from "../../Components/Card/CardIcon";
+import {CalendarToday} from "@material-ui/icons";
 
 const localizer = momentLocalizer(moment);
 
@@ -45,7 +48,8 @@ export default function Calendar({history}) {
     const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
     const [alert, setAlert] = React.useState(null);
-    const [teacherData, setTeacherData] = React.useState({email:"", lessons_this_week: ""});
+    const [teacherData, setTeacherData] = React.useState({email:"", lessons_this_week: "",
+        first_name: "", last_name: ""});
     const [selectedEvent, setSelectedEvent] = React.useState({
         lesson_id:"",
         student_mail: "",
@@ -69,64 +73,93 @@ export default function Calendar({history}) {
             let currentWeekLessons = teacherInfo.lessons_this_week;
             let dayIndex;
             // load this week.
-            for (dayIndex in Object.keys(currentWeekLessons)){
-                let lessons_on_day = currentWeekLessons[WEEK[dayIndex]];
-                let lessonIndex;
-                for (lessonIndex in Object.keys(lessons_on_day)){
-                    let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
-                    let lesson_data = lessons_on_day[lesson_id];
-                    let startTime = new Date(lesson_data.date_utc.full_date_string);
-                    let endTime = new Date(startTime);
-                    endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
-                    let slotInfo = {
-                        start: startTime,
-                        end: endTime,
-                        duration: lesson_data.duration,
-                        student_mail: lesson_data.student_mail,
-                        started: lesson_data.started,
-                        no_show: lesson_data.no_show,
-                        lesson_id: lesson_data.lesson_id,
-                        feedback_given: lesson_data.feedback_given
-                    };
-                    addNewEvent("", slotInfo);
-                }
-            }
-
-            // load Next two weeks
             let i;
-            let thisSunday = new Date();
-            thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
-            for (i = 1; i<=2; i++) {
-                let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
-                let weeksSaturday = new Date(weeksSunday);
-                weeksSaturday.setDate(weeksSaturday.getDate() + 6);
-                getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
-                    let dayIndex;
-                    for (dayIndex in week_lessons) {
-                        let lesson_data = week_lessons[dayIndex];
-                        let startTime = new Date(lesson_data.date_utc.full_date_string);
-                        let endTime = new Date(startTime);
-                        endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
-                        let slotInfo = {
-                            start: startTime,
-                            end: endTime,
-                            duration: lesson_data.duration,
-                            student_mail: lesson_data.student_mail,
-                            started: lesson_data.started,
-                            no_show: lesson_data.no_show,
-                            lesson_id: lesson_data.lesson_id,
-                            feedback_given: lesson_data.feedback_given
-                        };
-                        addNewEvent("", slotInfo);
+            for (i = 0; i<=4; i++) {
+                if (i === 0) {
+                    for (dayIndex in Object.keys(currentWeekLessons)) {
+                        let lessons_on_day = currentWeekLessons[WEEK[dayIndex]];
+                        let lessonIndex;
+                        for (lessonIndex in Object.keys(lessons_on_day)) {
+                            let lesson_id = Object.keys(lessons_on_day)[lessonIndex];
+                            let lesson_data = lessons_on_day[lesson_id];
+                            let startTime = new Date(lesson_data.date_utc.full_date_string);
+                            let endTime = new Date(startTime);
+                            endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                            let slotInfo = {
+                                start: startTime,
+                                end: endTime,
+                                duration: lesson_data.duration,
+                                student_mail: lesson_data.student_mail,
+                                started: lesson_data.started,
+                                no_show: lesson_data.no_show,
+                                lesson_id: lesson_data.lesson_id,
+                                feedback_given: lesson_data.feedback_given
+                            };
+                            addNewEvent("", slotInfo);
+                        }
                     }
-                });
+                }
+                if (i === 1 || i === 2) {
+                    // load Next two weeks
+                    let thisSunday = new Date();
+                    thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
+                    let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
+                    let weeksSaturday = new Date(weeksSunday);
+                    weeksSaturday.setDate(weeksSaturday.getDate() + 6);
+                    getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
+                        let dayIndex;
+                        for (dayIndex in week_lessons) {
+                            let lesson_data = week_lessons[dayIndex];
+                            let startTime = new Date(lesson_data.date_utc.full_date_string);
+                            let endTime = new Date(startTime);
+                            endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                            let slotInfo = {
+                                start: startTime,
+                                end: endTime,
+                                duration: lesson_data.duration,
+                                student_mail: lesson_data.student_mail,
+                                started: lesson_data.started,
+                                no_show: lesson_data.no_show,
+                                lesson_id: lesson_data.lesson_id,
+                                feedback_given: lesson_data.feedback_given
+                            };
+                            addNewEvent("", slotInfo);
+                        }
+                    });
+                }
+
+                if (i === 3 || i === 4 ) {
+                    // load 2 weeks back
+                    let j = i - 2;
+                    let thisSunday = new Date();
+                    thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
+                    let weeksSunday = thisSunday.setDate(thisSunday.getDate() - (j * 7));
+                    let weeksSaturday = new Date(weeksSunday);
+                    getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
+                        let dayIndex;
+                        for (dayIndex in week_lessons) {
+                            let lesson_data = week_lessons[dayIndex];
+                            let startTime = new Date(lesson_data.date_utc.full_date_string);
+                            let endTime = new Date(startTime);
+                            endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
+                            let slotInfo = {
+                                start: startTime,
+                                end: endTime,
+                                duration: lesson_data.duration,
+                                student_mail: lesson_data.student_mail,
+                                started: lesson_data.started,
+                                no_show: lesson_data.no_show,
+                                lesson_id: lesson_data.lesson_id,
+                                feedback_given: lesson_data.feedback_given
+                            };
+                            addNewEvent(lesson_data.student_mail, slotInfo);
+                        }
+                    });
+                }
             }
         });
     }, []);
 
-    function setNewTeacherEvents(){
-
-    }
     const selectEvent = event => {
         setSelectedEvent(event);
         wasFeedbackGiven(event);
@@ -148,6 +181,15 @@ export default function Calendar({history}) {
         selectedEvent.started = false;
         setModal(false);
         noShowAlert();
+    };
+
+    const unmarkLesson = () => {
+        let start_time = new Date(selectedEvent.start);
+        unmarkLessonStatus(selectedEvent.lesson_id, teacherData.email, selectedEvent.student_mail, start_time);
+        selectedEvent.no_show = false;
+        selectedEvent.started = false;
+        setModal(false);
+        unmarkAlert();
     };
 
     const wasFeedbackGiven =(event) => {
@@ -183,7 +225,20 @@ export default function Calendar({history}) {
             <SweetAlert
                 warning
                 style={{ display: "block"}}
-                title="Confirm - student did not show"
+                title="Ohh The Student Did Not Show..."
+                onConfirm={() => setAlert(null)}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            />
+        );
+    };
+
+    const unmarkAlert = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Lesson Status Reset"
                 onConfirm={() => setAlert(null)}
                 onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
@@ -221,19 +276,26 @@ export default function Calendar({history}) {
     };
     return (
         <div>
-            <Heading
-                textAlign="center"
-                title="Set New Lesson"
-                category={
-                    <span>
-            A beautiful react component made by Netanel
-            . Please checkout Yuval for
-              full documentation.
-          </span>
-                }
-            />
             {alert}
             <GridContainer justify="center">
+                <GridItem xs={4} sm={4} lg={4} md={4}>
+                    <Card pricing className={classes.textCenter}>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <CalendarToday/>
+                            </CardIcon>
+                            <h2  className={classes.cardCategory}>
+                                My Schedule
+                            </h2>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <h3 className={`${classes.cardTitle}`}
+                                style={{fontSize: "20px", fontWeight: "bold",}}>
+                                A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                            </h3>
+                        </CardBody>
+                    </Card>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     <Card>
                         <CardBody calendar>
@@ -247,7 +309,7 @@ export default function Calendar({history}) {
                                 onSelectEvent={event => selectEvent(event)}
                                 //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
-                                views={['week']}
+                                views={["day", 'week']}
                                 timeslots={2}
                                 min={new Date(2019, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}
@@ -297,12 +359,15 @@ export default function Calendar({history}) {
                     <h5>Feedback Given? {feedbackStatus}</h5>
                 </DialogContent>
                 <DialogActions
-                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                    className={classesPopup.modalFooterCenter + " " +
+                    classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <Button  disabled={selectedEvent.started}
-                             onClick={() => setLessonToStarted()} color="success">Mark Lesson as Started</Button>
+                             onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
                     <Button disabled={selectedEvent.no_show}
-                            onClick={() => setLessonToNoShow()} color="danger">Mark Lesson as No Show</Button>
+                            onClick={() => setLessonToNoShow()} color="danger">Student No Show</Button>
+                    <Button disabled={!selectedEvent.no_show && !selectedEvent.started}
+                            onClick={() => unmarkLesson()} color="default">Unmark</Button>
                 </DialogActions>
             </Dialog>
         </div>

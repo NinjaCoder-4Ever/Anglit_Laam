@@ -10,7 +10,8 @@ import Sidebar from "../../Components/Sidebar/Sidebar";
 import routes from "../../teacherRoutes";
 import styles from "../../Layouts/adminStyle";
 import logo from '../../assets/img/logo512.png';
-import image from '../../sidebarBackground.jpg';
+import image from '../../assets/img/sidebarBackground.jpg';
+import AdminNavbar from "../../Components/Navbars/AdminNavbar";
 
 
 let ps;
@@ -42,14 +43,37 @@ export default function Admin({ ...rest }) {
     // states and functions
     //const [image, setImage] = React.useState(bgImage);
     const [mobileOpen, setMobileOpen] = React.useState(false);
-
+    const [miniActive, setMiniActive] = React.useState(false);
+    const [bgColor, setBgColor] = React.useState("black");
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };
+    const sidebarMinimize = () => {
+        setMiniActive(!miniActive);
+    };
+
     const resizeFunction = () => {
         if (window.innerWidth >= 960) {
             setMobileOpen(false);
         }
+    };
+    const getActiveRoute = routes => {
+        let activeRoute = "Default Brand Text";
+        for (let i = 0; i < routes.length; i++) {
+            if (routes[i].collapse) {
+                let collapseActiveRoute = getActiveRoute(routes[i].views);
+                if (collapseActiveRoute !== activeRoute) {
+                    return collapseActiveRoute;
+                }
+            } else {
+                if (
+                    window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
+                ) {
+                    return routes[i].name;
+                }
+            }
+        }
+        return activeRoute;
     };
     // initialize and destroy the PerfectScrollbar plugin
     React.useEffect(() => {
@@ -80,8 +104,18 @@ export default function Admin({ ...rest }) {
                 open={mobileOpen}
                 color={"blue"}
                 {...rest}
+                bgColor={bgColor}
+                miniActive={miniActive}
+                {...rest}
             />
             <div className={classes.mainPanel} ref={mainPanel}>
+                <AdminNavbar
+                    sidebarMinimize={sidebarMinimize.bind(this)}
+                    miniActive={miniActive}
+                    brandText={getActiveRoute(routes)}
+                    handleDrawerToggle={handleDrawerToggle}
+                    {...rest}
+                />
                 {
                     <div className={classes.content}>
                         <div className={classes.container}>{switchRoutes}</div>

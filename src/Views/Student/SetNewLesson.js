@@ -33,6 +33,9 @@ import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
+import CardHeader from "../../Components/Card/CardHeader";
+import CardIcon from "../../Components/Card/CardIcon";
+import {CalendarToday, InsertInvitation} from "@material-ui/icons";
 
 const localizer = momentLocalizer(moment);
 
@@ -64,14 +67,16 @@ export default function Calendar({history}) {
             setstudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
-            for (i=0; i<=4; i++) {
-                let displayDay = new Date(currentDay.toISOString());
-                displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
+            for (i=0; i<=2; i++) {
+                let displayDay = new Date(currentDay.toString());
+                console.log(displayDay);
+                displayDay.setDate(currentDay.getDate() - currentDay.getDay() + 7*i);
                 getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
                     displayDay.getDate(), teacherMail).then(freeTime => {
                         setTeacherFreeTime({...freeTime, ...teacherFreeTime});
                         var dateIndex;
                         var possibleLessonIndex;
+                        console.log(freeTime);
                         for (dateIndex in Object.keys(freeTime)) {
                             // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
                             var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
@@ -97,7 +102,7 @@ export default function Calendar({history}) {
             });
     }, []);
 
-    function setNewTeacherEvents(start_time){
+    function setNewTeacherEvents(duration, start_time){
         let teacherMail = studentData.teacher.email;
         let i;
         for (i=0; i<=4; i++) {
@@ -113,10 +118,23 @@ export default function Calendar({history}) {
                     var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
                     // date looks like 2020-01-31
                     var date = Object.keys(freeTime)[dateIndex];
+                    var skipNextSlotToken = false;
                     for (possibleLessonIndex in freeTimeOnDayArray) {
                         let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
                         let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
-                        let endTime = new Date(startTime.toISOString());
+                        let endTime = new Date(startTime);
+                        console.log("# " +startTime);
+                        console.log("* " +start_time);
+                        if (start_time === startTime){
+                            if (duration === 60){
+                                skipNextSlotToken = true
+                            }
+                            continue
+                        }
+                        if (skipNextSlotToken){
+                            skipNextSlotToken = false;
+                            continue
+                        }
                         endTime.setTime(startTime.getTime() + 30 * 60000);
                         //let title = startTime.toString().slice(16,21);
                         let title ='';
@@ -125,36 +143,37 @@ export default function Calendar({history}) {
                             end: endTime,
                             duration: possibleLesson.duration
                         };
-                        if (start_time !== slotInfo.start) {
-                            console.log(start_time);
-                            addNewEvent(title, slotInfo);
-                        }
+                        addNewEvent(title, slotInfo);
                     }
                 }
             });
         }
     }
+
     const selectEvent = event => {
         setSelectedEvent(event);
         setModal(true);
     };
 
-    const setLesson = (duration) => {
+    const setLesson = (duration, start_time) => {
         setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
            if (res === true){
                setModal(false);
-               confirmAlert(selectedEvent.start);
+               setEvents([]);
+               setNewTeacherEvents(duration, start_time);
+               confirmAlert();
            }
            else {
                setModal(false);
-               denaiedAlert(selectedEvent.start);
+               setEvents([]);
+               setNewTeacherEvents(duration, start_time);
+               denaiedAlert();
            }
         });
+
     };
 
     const closeAlert = () => {
-        setEvents([]);
-        setNewTeacherEvents();
         setAlert(null);
     };
 
@@ -162,13 +181,13 @@ export default function Calendar({history}) {
         history.push("/Student/homePage");
     };
 
-    const confirmAlert = (start_time) => {
+    const confirmAlert = () => {
         setAlert(
             <SweetAlert
                 success
                 style={{ display: "block"}}
                 title="Your All Set!"
-                onConfirm={(start_time) => closeAlert(start_time)}
+                onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
                 Lesson has been set!
@@ -176,13 +195,13 @@ export default function Calendar({history}) {
         );
     };
 
-    const denaiedAlert = (start_time) => {
+    const denaiedAlert = () => {
         setAlert(
             <SweetAlert
                 error
                 style={{ display: "block"}}
                 title="Sorry... You just missed it..."
-                onConfirm={(start_time) => closeAlert(start_time)}
+                onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
                 The Time slot you choose is no longer available.
@@ -196,7 +215,7 @@ export default function Calendar({history}) {
             title: title,
             start: slotInfo.start,
             end: slotInfo.end,
-            duration: slotInfo.duration
+            duration: slotInfo.duration,
         });
         setAlert(null);
         setEvents(newEvents);
@@ -227,6 +246,24 @@ export default function Calendar({history}) {
             />
             {alert}
             <GridContainer justify="center">
+                <GridItem xs={10} sm={10} lg={10} md={10}>
+                    <Card pricing className={classes.textCenter}>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <InsertInvitation/>
+                            </CardIcon>
+                            <h2  className={classes.cardCategory}>
+                                Lets Set a New Lesson!
+                            </h2>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <h3 className={`${classes.cardTitle}`}
+                                style={{fontSize: "20px", fontWeight: "bold",}}>
+                                Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s Available Time!
+                            </h3>
+                        </CardBody>
+                    </Card>
+                </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     <Card>
                         <CardBody calendar>
@@ -240,7 +277,7 @@ export default function Calendar({history}) {
                                 onSelectEvent={event => selectEvent(event)}
                                 //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
                                 eventPropGetter={eventColors}
-                                views={['week']}
+                                views={["day", 'week']}
                                 timeslots={2}
                                 min={new Date(2019, 12, 0, 9, 0, 0)}
                                 max={new Date(2030, 12, 0, 23, 0, 0)}
@@ -293,10 +330,10 @@ export default function Calendar({history}) {
                     className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
                 >
                     <Button onClick={() => setModal(false)}>Never Mind</Button>
-                    <Button onClick={() => setLesson(30)} color="success">
+                    <Button onClick={() => setLesson(30, selectedEvent.start)} color="success">
                         Yes, 30 min
                     </Button>
-                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60)} color="success">
+                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60, selectedEvent.start)} color="success">
                         Yes, 60 min
                     </Button>
                 </DialogActions>

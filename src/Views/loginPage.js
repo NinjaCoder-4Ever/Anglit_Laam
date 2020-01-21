@@ -17,13 +17,15 @@ import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
 import {getUserData} from "../Actions/firestore_functions_general";
 
+import backgroundPic from '../assets/img/AnglitLaam.jpg'
+
 
 const useStyles = makeStyles(theme => ({
     root: {
         height: '100vh',
     },
     image: {
-        backgroundImage: 'url(https://source.unsplash.com/random)',
+        backgroundImage: `url(${backgroundPic})`,
         backgroundRepeat: 'no-repeat',
         backgroundColor:
             theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
@@ -117,7 +119,7 @@ const LoginSide = ({ history }) => {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Login
+                        Anglit Laam - Login
                     </Typography>
                     <form onSubmit={handleLogin} className={classes.form} noValidate>
                         <TextField

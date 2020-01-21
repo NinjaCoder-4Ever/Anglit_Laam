@@ -419,6 +419,55 @@ export async function setLessonStarted(lesson_id, teacher_mail, student_mail, st
     }
 }
 
+export async function unmarkLessonStatus(lesson_id, teacher_mail, student_mail, start_time){
+    /**
+     * Function sets a lesson status to unmarked (both not started and not " no_show")
+     * in both student_lessons and teacher_lessons collections.
+     */
+    let currentLocalDate = new Date();
+    const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+
+    studentLessons.doc(lesson_id).update({
+        "started": false,
+        "no_show": false
+    }).then(function () {
+        console.log("Lesson started status updated for student")
+    });
+
+    teacherLessons.doc(lesson_id).update({
+        "started": false,
+        "no_show": false
+    }).then(function () {
+        console.log("Lesson started status updated for teacher")
+    });
+
+    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+        const studentCollectionRef = db.collection('students');
+        let studentData = await studentCollectionRef.doc(student_mail).get();
+        let currentMonthLessons = studentData.data().lessons_this_month;
+        let currentLessonInfo = currentMonthLessons[lesson_id];
+        currentLessonInfo.started = false;
+        currentMonthLessons.no_show = false;
+        currentMonthLessons[lesson_id] = currentLessonInfo;
+        studentCollectionRef.doc(student_mail).update({
+            lessons_this_month: currentMonthLessons
+        });
+    }
+
+    if (checkSameWeek(currentLocalDate, start_time)){
+        const teacherCollectionRef = db.collection('teachers');
+        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
+        let currentWeekLessons = teacherData.data().lessons_this_week;
+        let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
+        currentLessonInfo.started = false;
+        currentLessonInfo.no_show = false;
+        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
+        teacherCollectionRef.doc(teacher_mail).update({
+            lessons_this_week: currentWeekLessons
+        });
+    }
+}
 
 export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, start_time){
     /**
@@ -584,9 +633,15 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
             dayDate = "0" + dayDate;
         }
         let key = day.getFullYear() + "-" + month + "-" + dayDate;
-        if (day.getDate() < currentDate.getDate()){
+        // if the day is today and the teacher is working on that day check only future hours.
+        if (day.toDateString() === currentDate.toDateString() && workingDays.includes(WEEKDAYS[day.getDay()])){
+            teacherFreeTime[key] = getFreeTimeToday(workingHours, weeksLessons, day);
+        }
+        // if the day is before today - dont display it.
+        if (day < currentDate){
             continue
         }
+        // if it is a future day and the teacher is working on that day - get all possible hours
         if (workingDays.includes(WEEKDAYS[day.getDay()])){
             teacherFreeTime[key] = getFreeTimeOnDay(workingHours, weeksLessons, day);
         }
@@ -637,6 +692,62 @@ async function getTeacherWorkingDaysAndHours(teacher_mail) {
     let working_hours = teacher_doc.data().working_hours;
 
     return [working_days, working_hours]
+}
+
+function checkIfBeforeNow(currentHour, currentMin, time){
+    /**
+     * Get current hour and min and a time string (XX:XX)
+     * check if the time is before the current time.
+     *
+     * if so - return true, else return false
+     */
+    let hour = parseInt(time.split(":")[0]);
+    let min = parseInt(time.split(":")[1]);
+
+    if (hour < currentHour){
+        return true
+    }
+    if (hour > currentHour){
+        return false
+    }
+    if (min < currentMin){
+        return true
+    }
+    return false
+}
+
+function getFreeTimeToday(working_hours, weeks_lessons, day) {
+    let currentDate = new Date();
+    let currentHour = currentDate.getUTCHours();
+    let currentMin = currentDate.getUTCMinutes();
+    let working_hours_array = getWorkingHoursForDay(working_hours, day);
+    // get the day's lessons - if no lessons exist this would be undefined.
+    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
+    let freeTime = [];
+    working_hours_array.forEach(working_hours_subarray => {
+        let i, j;
+        for (i=0; i< working_hours_subarray.length; i++){
+            if (working_hours_subarray[i] === 'busy'){
+                continue
+            }
+            if (checkIfBeforeNow(currentHour, currentMin, working_hours_subarray[i])){
+                console.log(working_hours_subarray[i]);
+                working_hours_subarray[i] = 'busy';
+                continue
+            }
+            if (dayLessons) {
+                for (j = 0; j < dayLessons.length; j++)
+                    if (working_hours_subarray[i] === dayLessons[j].time) {
+                        working_hours_subarray[i] = 'busy';
+                        if (dayLessons[j].duration === 60) {
+                            working_hours_subarray[i + 1] = 'busy';
+                        }
+                    }
+            }
+        }
+        freeTime = freeTime.concat(constructFreeTime(working_hours_subarray))
+    });
+    return freeTime
 }
 
 function getFreeTimeOnDay(working_hours, weeks_lessons, day) {

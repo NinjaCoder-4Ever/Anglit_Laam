@@ -127,7 +127,7 @@ button.rbc-input::-moz-focus-inner {
   font-size: 1.8em;
 }
 .rbc-toolbar button {
-  @include btn-styles($brand-primary);
+  @include btn-styles($brand-darkBlue);
   border-width: 2px;
   font-weight: 400;
   font-size: 14px;
@@ -666,7 +666,7 @@ button.rbc-input::-moz-focus-inner {
       0 7px 10px -5px rgba(233, 30, 99, 0.4);
   }
   &.event-default {
-    background-color: #999999;
+    background-color: $cyan;
     box-shadow: 0 4px 20px 0px rgba(0, 0, 0, 0.14),
       0 7px 10px -5px rgba(153, 153, 153, 0.4);
   }
