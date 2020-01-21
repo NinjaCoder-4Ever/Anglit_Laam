@@ -365,7 +365,7 @@ export default function Calendar({history}) {
                     <Button  disabled={selectedEvent.started}
                              onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
                     <Button disabled={selectedEvent.no_show}
-                            onClick={() => setLessonToNoShow()} color="danger">Student No Show</Button>
+                            onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
                     <Button disabled={!selectedEvent.no_show && !selectedEvent.started}
                             onClick={() => unmarkLesson()} color="default">Unmark</Button>
                 </DialogActions>
