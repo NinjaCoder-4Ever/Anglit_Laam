@@ -47,18 +47,18 @@ const dashboardRoutes = [
     },
     {
         path: "/myFeedback",
-        name: "My Feedback",
+        name: "Lessons & Feedbacks",
         icon: LibraryBooks,
         component: MyFeedback,
         layout: "/Student"
     },
-    {
-        path: "/mySubscriptions",
-        name: "My Subscriptions",
-        icon: AccountBalance,
-        component: MySubscriptions,
-        layout: "/Student"
-    },
+    // {
+    //     path: "/mySubscriptions",
+    //     name: "My Subscriptions",
+    //     icon: AccountBalance,
+    //     component: MySubscriptions,
+    //     layout: "/Student"
+    // },
     {
         path: "/myProfile",
         name: "My Profile",
