@@ -278,15 +278,15 @@ export default function Calendar({history}) {
         <div>
             {alert}
             <GridContainer justify="center">
-                <GridItem xs={4} sm={4} lg={4} md={4}>
+                <GridItem xs={5} sm={5} lg={5} md={5}>
                     <Card pricing className={classes.textCenter}>
                         <CardHeader color="info">
                             <CardIcon color="rose">
                                 <CalendarToday/>
                             </CardIcon>
-                            <h2  className={classes.cardCategory}>
+                            <h3  className={classes.cardCategory}>
                                 My Schedule
-                            </h2>
+                            </h3>
                         </CardHeader>
                         <CardBody pricing>
                             <h3 className={`${classes.cardTitle}`}

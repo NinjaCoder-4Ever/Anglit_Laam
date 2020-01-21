@@ -55,10 +55,12 @@ export default  function ExtendedTables() {
             console.log(res);
         });
         getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((res)=>{
-            if(res != null){
+            if(res !== null && res !== undefined){
                 setNextLesson(res);
                     // setNextLessonDate(res[0].)
-                setNextLessonDate(new Date(res[0].date_utc.full_date_string));
+                if (res[0] !== null && res[0] !== undefined) {
+                    setNextLessonDate(new Date(res[0].date_utc.full_date_string));
+                }
             }
         })
         },[]);

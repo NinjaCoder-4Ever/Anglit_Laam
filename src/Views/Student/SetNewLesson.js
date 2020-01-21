@@ -53,6 +53,7 @@ export default function Calendar({history}) {
     const [studentData, setstudentData] = React.useState({teacher:{email:"",
         first_name: "", last_name:""}, email:"", first_name: "", last_name: ""});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
+    const [possibleStratTimes, setPossibleStartTimes] = React.useState([]);
 
     const [modal, setModal] = React.useState(false);
 
@@ -67,6 +68,7 @@ export default function Calendar({history}) {
             setstudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
+            let possbleStarts = [];
             for (i=0; i<=2; i++) {
                 let displayDay = new Date(currentDay.toString());
                 console.log(displayDay);
@@ -94,9 +96,11 @@ export default function Calendar({history}) {
                                     end: endTime,
                                     duration: possibleLesson.duration
                                 };
-                                addNewEvent(title, slotInfo)
+                                addNewEvent(title, slotInfo);
+                                possbleStarts.push(startTime);
                             }
                         }
+                        setPossibleStartTimes(possbleStarts);
                     });
                 }
             });
@@ -105,6 +109,7 @@ export default function Calendar({history}) {
     function setNewTeacherEvents(duration, start_time){
         let teacherMail = studentData.teacher.email;
         let i;
+        let currentEvents = [];
         for (i=0; i<=4; i++) {
             let displayDay = new Date(currentDay.toISOString());
             displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
@@ -143,10 +148,33 @@ export default function Calendar({history}) {
                             end: endTime,
                             duration: possibleLesson.duration
                         };
-                        addNewEvent(title, slotInfo);
+                        if (!possibleStratTimes.includes(startTime)){
+                            addNewEvent(title, slotInfo);
+                        }
+                        currentEvents.push(slotInfo)
                     }
                 }
             });
+            // clear existing
+            setEvents([]);
+            let currentEventIndex;
+            let pastEventIndex;
+            let modifiedEvents =[];
+            for (pastEventIndex in events){
+                let keepEvent = false;
+                let pastStartTime = events[pastEventIndex].start;
+                for (currentEventIndex=0; currentEventIndex < currentEvents.length; currentEventIndex++){
+                    let currentStartTime = currentEvents[currentEventIndex].start;
+                    if (pastStartTime === currentStartTime){
+                        keepEvent = true;
+                        break
+                    }
+                }
+                if (keepEvent){
+                    modifiedEvents.push(events[pastEventIndex])
+                }
+            }
+            setEvents(modifiedEvents)
         }
     }
 
@@ -159,13 +187,11 @@ export default function Calendar({history}) {
         setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
            if (res === true){
                setModal(false);
-               setEvents([]);
                setNewTeacherEvents(duration, start_time);
                confirmAlert();
            }
            else {
                setModal(false);
-               setEvents([]);
                setNewTeacherEvents(duration, start_time);
                denaiedAlert();
            }
@@ -234,27 +260,17 @@ export default function Calendar({history}) {
     };
     return (
         <div>
-            <Heading
-                textAlign="center"
-                title="Set New Lesson"
-                category={
-                    <span>
-                        Lets set a new Lesson!
-                        {studentData.first_name} {studentData.last_name}
-                    </span>
-                }
-            />
             {alert}
             <GridContainer justify="center">
-                <GridItem xs={10} sm={10} lg={10} md={10}>
+                <GridItem xs={5} sm={5} lg={5} md={5}>
                     <Card pricing className={classes.textCenter}>
                         <CardHeader color="info">
                             <CardIcon color="rose">
                                 <InsertInvitation/>
                             </CardIcon>
-                            <h2  className={classes.cardCategory}>
+                            <h3  className={classes.cardCategory}>
                                 Lets Set a New Lesson!
-                            </h2>
+                            </h3>
                         </CardHeader>
                         <CardBody pricing>
                             <h3 className={`${classes.cardTitle}`}
