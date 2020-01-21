@@ -109,8 +109,7 @@ export default function Calendar({history}) {
     function setNewTeacherEvents(duration, start_time){
         let teacherMail = studentData.teacher.email;
         let i;
-        let currentEvents = [];
-        for (i=0; i<=4; i++) {
+        for (i=0; i<=3; i++) {
             let displayDay = new Date(currentDay.toISOString());
             displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
             getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
@@ -151,30 +150,9 @@ export default function Calendar({history}) {
                         if (!possibleStratTimes.includes(startTime)){
                             addNewEvent(title, slotInfo);
                         }
-                        currentEvents.push(slotInfo)
                     }
                 }
             });
-            // clear existing
-            setEvents([]);
-            let currentEventIndex;
-            let pastEventIndex;
-            let modifiedEvents =[];
-            for (pastEventIndex in events){
-                let keepEvent = false;
-                let pastStartTime = events[pastEventIndex].start;
-                for (currentEventIndex=0; currentEventIndex < currentEvents.length; currentEventIndex++){
-                    let currentStartTime = currentEvents[currentEventIndex].start;
-                    if (pastStartTime === currentStartTime){
-                        keepEvent = true;
-                        break
-                    }
-                }
-                if (keepEvent){
-                    modifiedEvents.push(events[pastEventIndex])
-                }
-            }
-            setEvents(modifiedEvents)
         }
     }
 
@@ -184,6 +162,7 @@ export default function Calendar({history}) {
     };
 
     const setLesson = (duration, start_time) => {
+        setEvents([]);
         setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
            if (res === true){
                setModal(false);
@@ -243,7 +222,6 @@ export default function Calendar({history}) {
             end: slotInfo.end,
             duration: slotInfo.duration,
         });
-        setAlert(null);
         setEvents(newEvents);
     };
     const hideAlert = () => {
