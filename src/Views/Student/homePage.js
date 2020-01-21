@@ -2,8 +2,6 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "assets/img/LogoText.png";
-import logo2 from "assets/img/logo512.png";
 import firebase from 'Config/fire';
 import SweetAlert from "react-bootstrap-sweetalert";
 
@@ -23,6 +21,7 @@ import CardBody from "Components/Card/CardBody.js";
 import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 import CardAvatar from "Components/Card/CardAvatar.js";
+import RoundLogo from "Components/RoundLogo.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
@@ -173,11 +172,8 @@ export default  function ExtendedTables() {
                         <div className={classes.icon}>
 
                         </div>
-                        <CardAvatar testimonial testimonialFooter style={{ margin: "0 auto 25px"}} >
-
-                                <img src={logo2} alt="..." />
-
-                        </CardAvatar>
+                        <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
+                        </RoundLogo>
                         <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
                             style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
                             {nextLessonDate.toString().slice(0, 21)}

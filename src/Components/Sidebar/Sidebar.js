@@ -18,6 +18,7 @@ import sidebarStyle from "../../assets/jss/material-dashboard-pro-react/componen
 import avatar from "../../assets/img/UserAvatar0.png";
 import cx from "classnames";
 import AdminNavbarLinks from "../Navbars/AdminNavbarLinks.js";
+import RoundLogo from "../RoundLogo";
 var ps;
 
 class SidebarWrapper extends React.Component {
