@@ -146,7 +146,7 @@ export default  function ExtendedTables() {
         });
     }
     let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
-        let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
+        let teacher_name = nextLesson[lesson_id].teacher_name;
         let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
         let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = nextLesson[lesson_id].duration;

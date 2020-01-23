@@ -53,6 +53,7 @@ export default function Calendar({history}) {
     const [selectedEvent, setSelectedEvent] = React.useState({
         lesson_id:"",
         student_mail: "",
+        student_name: "",
         start: "",
         duration: "",
         feedback_given: false,
@@ -90,6 +91,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -118,6 +120,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -147,6 +150,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -254,6 +258,7 @@ export default function Calendar({history}) {
             end: slotInfo.end,
             duration: slotInfo.duration,
             student_mail: slotInfo.student_mail,
+            student_name: slotInfo.student_name,
             started: slotInfo.started,
             no_show: slotInfo.no_show,
             lesson_id: slotInfo.lesson_id,
@@ -352,7 +357,8 @@ export default function Calendar({history}) {
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>Student: {selectedEvent.student_mail}</h5>
+                    <h5>Student Mail: {selectedEvent.student_mail}</h5>
+                    <h5>Student Name: {selectedEvent.student_name}</h5>
                     <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
                     <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>
                     <h5>Duration: {selectedEvent.duration.toString()}</h5>

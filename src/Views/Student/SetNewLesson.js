@@ -163,7 +163,10 @@ export default function Calendar({history}) {
 
     const setLesson = (duration, start_time) => {
         setEvents([]);
-        setNewLesson(studentData.email, studentData.teacher.email, selectedEvent.start, duration).then(res => {
+        let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
+        let student_name = studentData.first_name + " " + studentData.last_name;
+        setNewLesson(studentData.email, studentData.teacher.email,
+            selectedEvent.start, duration, student_name, teacher_name).then(res => {
            if (res === true){
                setModal(false);
                setNewTeacherEvents(duration, start_time);

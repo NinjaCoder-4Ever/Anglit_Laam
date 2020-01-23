@@ -365,7 +365,7 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     return true
 }
 
-export async function setNewLesson(student_mail, teacher_mail, start_time, duration){
+export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
      *
@@ -395,7 +395,9 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     }
     let lessonInfo = {
         teacher_mail: teacher_mail,
+        teacher_name: teacher_name,
         student_mail: student_mail,
+        student_name: student_name,
         duration: duration,
         date_utc: {
             year: start_time.getUTCFullYear(),
