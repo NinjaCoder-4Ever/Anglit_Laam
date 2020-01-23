@@ -32,6 +32,7 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import teacher from "../Teacher/teacher";
+import {isDate} from "moment";
 
 
 const useStyles = makeStyles(styles);
@@ -74,6 +75,10 @@ export default  function ExtendedTables() {
                     // setNextLessonDate(res[0].)
                 if (res[0] !== null && res[0] !== undefined) {
                     setNextLessonDate(new Date(res[0].date_utc.full_date_string));
+                }
+                else {
+                    noNextLessonAlert();
+                    setNextLesson("No Next Lesson... Go Ahead and Set your Next Lesson")
                 }
             }
         })
@@ -127,6 +132,21 @@ export default  function ExtendedTables() {
         );
     };
 
+    const noNextLessonAlert = () => {
+        setAlert(
+            <SweetAlert
+                info
+                style={{ display: "block"}}
+                title="We See You Dont Have Future Lessons..."
+                onConfirm={() => goToSetLesson()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+                confirmBtnText=""
+            >
+                Lets Go Ahead and Set You a New Lesson!
+            </SweetAlert>
+        );
+    };
+
     const successDelete = (line) => {
         deleteLesson(line);
         setAlert(
@@ -144,6 +164,15 @@ export default  function ExtendedTables() {
     };
 
     const classes = useStyles();
+
+    const nextLessonMessage = () => {
+      if (isDate(nextLessonDate)){
+          return nextLessonDate.toString().slice(0, 21)
+      }
+      else{
+          return nextLessonDate
+      }
+    };
 
     function getSimpleButtons(line)
     {
@@ -203,12 +232,17 @@ export default  function ExtendedTables() {
                         </RoundLogo>
                         <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
                             style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
-                            {nextLessonDate.toString().slice(0, 21)}
+                            {nextLessonMessage()}
                         </h1>
                         <Button round color="info" onClick={() => {
                             openSkype(studentData);
                         }}>
                             Open Skype
+                        </Button>
+                        <Button round color="rose" onClick={() => {
+                            goToSetLesson();
+                        }}>
+                            Lets Set a New Lesson!
                         </Button>
                     </CardBody>
                 </Card>
