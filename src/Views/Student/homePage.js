@@ -24,13 +24,20 @@ import CardAvatar from "Components/Card/CardAvatar.js";
 import RoundLogo from "Components/RoundLogo.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
+import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID, updateFirstTimeEntry} from "Actions/firestore_functions_student";
 import {CalendarToday, School} from "@material-ui/icons";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import teacher from "../Teacher/teacher";
+
 
 const useStyles = makeStyles(styles);
-function openSkype(data) {
-    window.open("skype:n.sharbat?chat", '_blank');
-}
+
+const useStylesPopup = makeStyles(stylesPopup);
+
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
     const [alert, setAlert] = React.useState(null);
@@ -43,14 +50,21 @@ export default  function ExtendedTables() {
         lessons_this_month: {},
         phone_number: '',
         subscription: '',
-        teacher: {},
+        teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''});
+    const [modal, setModal] = React.useState(false);
+    const classesPopup = useStylesPopup();
+
 
     React.useEffect(() => {
 
         getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
+                if (res.first_time || res.first_time === undefined){
+                    updateFirstTimeEntry(res.email);
+                    setModal(true);
+                }
             }
             console.log(res);
         });
@@ -64,6 +78,12 @@ export default  function ExtendedTables() {
             }
         })
         },[]);
+
+    const openSkype = () => {
+        let skype_user = studentData.teacher.skype_username;
+        let url = "skype:" + {skype_user} + "?chat";
+        window.open(url, '_blank');
+    };
 
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
@@ -145,6 +165,11 @@ export default  function ExtendedTables() {
             );
         });
     }
+
+    const goToSetLesson = () => {
+        history.push("/Student/SetNewLesson");
+    };
+
     let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
         let teacher_name = nextLesson[lesson_id].teacher_name;
         let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
@@ -212,6 +237,55 @@ export default  function ExtendedTables() {
                 </Card>
             </GridItem>
         </GridContainer>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={modal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Welcome To Anglit Laam!</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h4>Say hello to your Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h4>
+                    <h5>Feel Free to send him a mail: {studentData.teacher.email}</h5>
+                    <h5>Or Send him a message by Skype.
+
+                    </h5>
+                    <h5>We hope you will enjoy our service!</h5>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <Button onClick={() => goToSetLesson()} color="info">
+                        Lets Set Your First Lesson!
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

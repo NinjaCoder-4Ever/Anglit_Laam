@@ -45,7 +45,8 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         teacher: {},
         credits: 1,
         uid: uid,
-        last_log_on: new Date()
+        last_log_on: new Date(),
+        first_time: true,
     };
 
     let teacherInfo = await chooseTeacherForStudent(email);
@@ -70,6 +71,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             console.log('Added user to users collection')
         })
     ]);
+}
+
+export function updateFirstTimeEntry(student_mail) {
+    db.collection('students').doc(student_mail).update({
+        first_time: false
+    });
 }
 
 export async function getStudentTeacher(student_mail) {
