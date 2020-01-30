@@ -47,6 +47,16 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         uid: uid,
         last_log_on: new Date(),
         first_time: true,
+        last_feedback_given: {
+            lesson_id: "",
+            lesson_date: "",
+            teacher_mail: "",
+            teacher_name: "",
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
+        }
     };
 
     let teacherInfo = await chooseTeacherForStudent(email);
