@@ -33,13 +33,14 @@ import DialogActions from "@material-ui/core/DialogActions";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import teacher from "../Teacher/teacher";
 import {isDate} from "moment";
+import Transition from "react-transition-group/Transition";
 
 
 const useStyles = makeStyles(styles);
 
 const useStylesPopup = makeStyles(stylesPopup);
 
-export default  function ExtendedTables() {
+export default  function ExtendedTables({history}) {
     const [checked, setChecked] = React.useState(0);
     const [alert, setAlert] = React.useState(null);
     const [nextLesson, setNextLesson] = React.useState({});
@@ -58,30 +59,34 @@ export default  function ExtendedTables() {
 
 
     React.useEffect(() => {
-
         getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
+                // Check First Entry.
                 if (res.first_time || res.first_time === undefined){
                     updateFirstTimeEntry(res.email);
+                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
                     setModal(true);
+                }
+                // If not first entry - get next lessons.
+                else{
+                    getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((lessons)=>{
+                        if(lessons !== null && lessons !== undefined){
+                            setNextLesson(lessons);
+                            // setNextLessonDate(res[0].)
+                            if (lessons[0] !== null && lessons[0] !== undefined) {
+                                setNextLessonDate(new Date(lessons[0].date_utc.full_date_string));
+                            }
+                            else {
+                                noNextLessonAlert();
+                                setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                            }
+                        }
+                    })
                 }
             }
             console.log(res);
         });
-        getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((res)=>{
-            if(res !== null && res !== undefined){
-                setNextLesson(res);
-                    // setNextLessonDate(res[0].)
-                if (res[0] !== null && res[0] !== undefined) {
-                    setNextLessonDate(new Date(res[0].date_utc.full_date_string));
-                }
-                else {
-                    noNextLessonAlert();
-                    setNextLesson("No Next Lesson... Go Ahead and Set your Next Lesson")
-                }
-            }
-        })
         },[]);
 
     const openSkype = () => {
@@ -109,10 +114,6 @@ export default  function ExtendedTables() {
         setChecked(checked+1);
     };
 
-    const hideAlert = () => {
-        setAlert(null);
-    };
-
     const warningWithConfirmMessage = (line) => {
         setAlert(
             <SweetAlert
@@ -132,6 +133,10 @@ export default  function ExtendedTables() {
         );
     };
 
+    const hideAlert = () => {
+        setAlert(null)
+    };
+
     const noNextLessonAlert = () => {
         setAlert(
             <SweetAlert
@@ -139,10 +144,14 @@ export default  function ExtendedTables() {
                 style={{ display: "block"}}
                 title="We See You Dont Have Future Lessons..."
                 onConfirm={() => goToSetLesson()}
+                onCancel={() => hideAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
-                confirmBtnText=""
+                confirmBtnText="Lets Go Ahead and Set You a New Lesson!"
+                showCancelButton={true}
+                cancelBtnCssClass={classes.button + " " + classes.default}
+                cancelBtnText="I'll Set a Lesson Later..."
+                showCancel
             >
-                Lets Go Ahead and Set You a New Lesson!
             </SweetAlert>
         );
     };
