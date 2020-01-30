@@ -31,7 +31,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
-import teacher from "../Teacher/teacher";
 import {isDate} from "moment";
 import Transition from "react-transition-group/Transition";
 
@@ -233,9 +232,7 @@ export default  function ExtendedTables({history}) {
                         <h3 className={classes.cardCategory}>Your next lesson</h3>
                     </CardHeader>
                     <CardBody pricing>
-                        <h6 className={classes.cardCategory}>Your next lesson</h6>
                         <div className={classes.icon}>
-
                         </div>
                         <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
                         </RoundLogo>
