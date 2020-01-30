@@ -47,6 +47,16 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         uid: uid,
         last_log_on: new Date(),
         first_time: true,
+        last_feedback_given: {
+            lesson_id: "",
+            lesson_date: "",
+            teacher_mail: "",
+            teacher_name: "",
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
+        }
     };
 
     let teacherInfo = await chooseTeacherForStudent(email);
@@ -299,7 +309,9 @@ export async function getAllPastLessonsForStudent(email){
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
     let today = new Date();
-    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today).get();
+    let lastYear = new Date().setFullYear(today.getFullYear() - 1);
+    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
+        .where("date_utc.full_date", ">=", lastYear).orderBy("date_utc.full_date").get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
         lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
