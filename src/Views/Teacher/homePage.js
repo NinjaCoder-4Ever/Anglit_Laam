@@ -75,6 +75,8 @@ export default function Calendar({history}) {
             let dayIndex;
             // load this week.
             let i;
+            let thisSunday = new Date();
+            thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
             for (i = 0; i<=4; i++) {
                 if (i === 0) {
                     for (dayIndex in Object.keys(currentWeekLessons)) {
@@ -103,9 +105,9 @@ export default function Calendar({history}) {
                 }
                 if (i === 1 || i === 2) {
                     // load Next two weeks
-                    let thisSunday = new Date();
                     thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
                     let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
+                    weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
                     weeksSaturday.setDate(weeksSaturday.getDate() + 6);
                     getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
@@ -134,9 +136,8 @@ export default function Calendar({history}) {
                 if (i === 3 || i === 4 ) {
                     // load 2 weeks back
                     let j = i - 2;
-                    let thisSunday = new Date();
-                    thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
                     let weeksSunday = thisSunday.setDate(thisSunday.getDate() - (j * 7));
+                    weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
                     getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
                         let dayIndex;
