@@ -133,7 +133,7 @@ async function setLogOnTeacher(teacher_data){
             lastLogOn = new Date(teacher_data.last_log_on.toString());
         }
     }
-    if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
+    if (lastLogOn === undefined || !checkSameWeek(currentDate, lastLogOn)){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
     }
@@ -548,15 +548,17 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     let weekLessons = [];
     let searchedSunday2 = new Date(searchedSunday);
     let oneDayMore = new Date(searchedSaturday);
-    oneDayMore.setDate(oneDayMore.getUTCDate() + 2);
+    oneDayMore.setDate(oneDayMore.getDate() + 1);
+    console.log("first Date: " + searchedSunday2.toString());
+    console.log("last Date: " + oneDayMore.toString());
     const snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday2)
-        .where('date_utc.full_date', '<=', oneDayMore).get();
+        .where('date_utc.full_date', '<', oneDayMore).get();
 
     snapshot.forEach(doc =>{
         weekLessons.push(doc.data());
     });
-
+    console.log(weekLessons);
     return weekLessons
 }
 
