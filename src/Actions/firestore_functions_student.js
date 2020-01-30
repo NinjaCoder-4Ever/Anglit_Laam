@@ -299,7 +299,9 @@ export async function getAllPastLessonsForStudent(email){
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
     let today = new Date();
-    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today).get();
+    let lastYear = new Date().setFullYear(today.getFullYear() - 1);
+    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
+        .where("date_utc.full_date", ">=", lastYear).orderBy("date_utc.full_date").get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
         lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
