@@ -53,7 +53,7 @@ export default function Calendar({history}) {
     const [studentData, setstudentData] = React.useState({teacher:{email:"",
         first_name: "", last_name:""}, email:"", first_name: "", last_name: ""});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
-    const [possibleStratTimes, setPossibleStartTimes] = React.useState([]);
+    const [getEvents, setGetEvents] = React.useState(true);
 
     const [modal, setModal] = React.useState(false);
 
@@ -68,7 +68,7 @@ export default function Calendar({history}) {
             setstudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
-            let possbleStarts = [];
+            let newEvents = [];
             for (i=0; i<=2; i++) {
                 let displayDay = new Date(currentDay.toString());
                 console.log(displayDay);
@@ -90,25 +90,25 @@ export default function Calendar({history}) {
                                 let endTime = new Date(startTime.toISOString());
                                 endTime.setTime(startTime.getTime() + 30 * 60000);
                                 //let title = startTime.toString().slice(16,21);
-                                let title ='';
                                 let slotInfo = {
+                                    title: '',
                                     start: startTime,
                                     end: endTime,
                                     duration: possibleLesson.duration
                                 };
-                                addNewEvent(title, slotInfo);
-                                possbleStarts.push(startTime);
+                                newEvents.push(slotInfo);
                             }
                         }
-                        setPossibleStartTimes(possbleStarts);
+                        setEvents(newEvents);
                     });
                 }
             });
-    }, []);
+    }, [getEvents]);
 
-    function setNewTeacherEvents(duration, start_time){
+    function setNewTeacherEvents(){
         let teacherMail = studentData.teacher.email;
         let i;
+        let newEvents = [];
         for (i=0; i<=3; i++) {
             let displayDay = new Date(currentDay.toISOString());
             displayDay.setDate(currentDay.getDate() - currentDay.getDate() + 7*i);
@@ -122,36 +122,23 @@ export default function Calendar({history}) {
                     var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];
                     // date looks like 2020-01-31
                     var date = Object.keys(freeTime)[dateIndex];
-                    var skipNextSlotToken = false;
                     for (possibleLessonIndex in freeTimeOnDayArray) {
                         let possibleLesson = freeTimeOnDayArray[possibleLessonIndex];
                         let startTime = new Date(date + "T" + possibleLesson.time + ":00.000Z");
                         let endTime = new Date(startTime);
-                        console.log("# " +startTime);
-                        console.log("* " +start_time);
-                        if (start_time === startTime){
-                            if (duration === 60){
-                                skipNextSlotToken = true
-                            }
-                            continue
-                        }
-                        if (skipNextSlotToken){
-                            skipNextSlotToken = false;
-                            continue
-                        }
                         endTime.setTime(startTime.getTime() + 30 * 60000);
                         //let title = startTime.toString().slice(16,21);
-                        let title ='';
                         let slotInfo = {
+                            title:'',
                             start: startTime,
                             end: endTime,
                             duration: possibleLesson.duration
                         };
-                        if (!possibleStratTimes.includes(startTime)){
-                            addNewEvent(title, slotInfo);
-                        }
+                        newEvents.push(slotInfo)
                     }
                 }
+                console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~here!");
+                setEvents(newEvents)
             });
         }
     }
@@ -161,7 +148,7 @@ export default function Calendar({history}) {
         setModal(true);
     };
 
-    const setLesson = (duration, start_time) => {
+    const setLesson = (duration) => {
         setEvents([]);
         let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
         let student_name = studentData.first_name + " " + studentData.last_name;
@@ -169,14 +156,13 @@ export default function Calendar({history}) {
             selectedEvent.start, duration, student_name, teacher_name).then(res => {
            if (res === true){
                setModal(false);
-               setNewTeacherEvents(duration, start_time);
                confirmAlert();
            }
            else {
                setModal(false);
-               setNewTeacherEvents(duration, start_time);
                denaiedAlert();
            }
+            setGetEvents(!getEvents);
         });
 
     };
@@ -327,10 +313,10 @@ export default function Calendar({history}) {
                     className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
                 >
                     <Button onClick={() => setModal(false)}>Never Mind</Button>
-                    <Button onClick={() => setLesson(30, selectedEvent.start)} color="success">
+                    <Button onClick={() => setLesson(30)} color="success">
                         Yes, 30 min
                     </Button>
-                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60, selectedEvent.start)} color="success">
+                    <Button disabled={!selectedEvent.duration.includes(60)} onClick={() => setLesson(60)} color="success">
                         Yes, 60 min
                     </Button>
                 </DialogActions>
