@@ -35,6 +35,7 @@ import Slide from "@material-ui/core/Slide";
 import CardHeader from "../../Components/Card/CardHeader";
 import CardIcon from "../../Components/Card/CardIcon";
 import {CalendarToday} from "@material-ui/icons";
+import Loader from "Components/Loader/Loader.js";
 
 const localizer = momentLocalizer(moment);
 
@@ -47,6 +48,7 @@ export default function Calendar({history}) {
     const classes = useStyles();
     const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [teacherData, setTeacherData] = React.useState({email:"", lessons_this_week: "",
         first_name: "", last_name: ""});
@@ -162,6 +164,7 @@ export default function Calendar({history}) {
                     });
                 }
             }
+            setLoading(false);
         });
     }, []);
 
@@ -295,34 +298,42 @@ export default function Calendar({history}) {
                             </h3>
                         </CardHeader>
                         <CardBody pricing>
-                            <h3 className={`${classes.cardTitle}`}
-                                style={{fontSize: "20px", fontWeight: "bold",}}>
-                                A Look at {teacherData.first_name} {teacherData.last_name}'s Week
-                            </h3>
+
+                            {
+                                loading == true ?
+                                    <Loader width={'20%'}/>:
+                                    <h3 className={`${classes.cardTitle}`}
+                                        style={{fontSize: "20px", fontWeight: "bold",}}>
+                                        A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                                    </h3>
+                            }
                         </CardBody>
                     </Card>
                 </GridItem>
-                <GridItem xs={12} sm={12} md={10}>
-                    <Card>
-                        <CardBody calendar>
-                            <BigCalendar
-                                selectable={false}
-                                localizer={localizer}
-                                events={events}
-                                defaultView="week"
-                                scrollToTime={new Date(1970, 1, 1, 6)}
-                                defaultDate={new Date()}
-                                onSelectEvent={event => selectEvent(event)}
-                                //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
-                                eventPropGetter={eventColors}
-                                views={["day", 'week']}
-                                timeslots={2}
-                                min={new Date(2019, 12, 0, 9, 0, 0)}
-                                max={new Date(2030, 12, 0, 23, 0, 0)}
-                            />
-                        </CardBody>
-                    </Card>
-                </GridItem>
+                {
+                    loading == false &&
+                    <GridItem xs={12} sm={12} md={10}>
+                        <Card>
+                            <CardBody calendar>
+                                <BigCalendar
+                                    selectable={false}
+                                    localizer={localizer}
+                                    events={events}
+                                    defaultView="week"
+                                    scrollToTime={new Date(1970, 1, 1, 6)}
+                                    defaultDate={new Date()}
+                                    onSelectEvent={event => selectEvent(event)}
+                                    //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
+                                    eventPropGetter={eventColors}
+                                    views={["day", 'week']}
+                                    timeslots={2}
+                                    min={new Date(2019, 12, 0, 9, 0, 0)}
+                                    max={new Date(2030, 12, 0, 23, 0, 0)}
+                                />
+                            </CardBody>
+                        </Card>
+                    </GridItem>
+                }
             </GridContainer>
 
             <Dialog
