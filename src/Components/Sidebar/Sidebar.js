@@ -18,6 +18,9 @@ import sidebarStyle from "../../assets/jss/material-dashboard-pro-react/componen
 import avatar from "../../assets/img/UserAvatar0.png";
 import cx from "classnames";
 import AdminNavbarLinks from "../Navbars/AdminNavbarLinks.js";
+
+import {getFullNameByUID} from "Actions/firestore_functions_general.js"
+import firebase from "firebase";
 import RoundLogo from "../RoundLogo";
 var ps;
 
@@ -29,6 +32,7 @@ class SidebarWrapper extends React.Component {
                 suppressScrollX: true,
                 suppressScrollY: false
             });
+
         }
     }
     componentWillUnmount() {
@@ -54,9 +58,17 @@ class Sidebar extends React.Component {
         this.state = {
             openAvatar: false,
             miniActive: true,
+            username: "",
             ...this.getCollapseStates(props.routes)
         };
     }
+    connectData(name){
+        this.setState({userName: name});
+    }
+    componentDidMount() {
+        getFullNameByUID(firebase.auth().currentUser.uid).then(this.connectData.bind(this))
+    }
+
     mainPanel = React.createRef();
     // this creates the intial state of this component based on the collapse routes
     // that it gets through this.props.routes
@@ -355,7 +367,7 @@ class Sidebar extends React.Component {
                         >
                             <ListItemText
                                 /* This is where the user name should be used */
-                                primary={rtlActive ? "تانيا أندرو" : "Tania Andrew"}
+                                primary={rtlActive ? "تانيا أندرو" : this.state.userName}
                                 secondary={
                                     <b
                                         className={

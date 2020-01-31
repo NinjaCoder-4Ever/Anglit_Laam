@@ -133,7 +133,7 @@ async function setLogOnTeacher(teacher_data){
             lastLogOn = new Date(teacher_data.last_log_on.toString());
         }
     }
-    if (lastLogOn === undefined || checkSameWeek(currentDate, lastLogOn)){
+    if (lastLogOn === undefined || !checkSameWeek(currentDate, lastLogOn)){
         let newCurrentWeekLessons = await updateTeacherWeekLessons(teacher_data.email, currentSunday);
         teacher_data.lessons_this_week = newCurrentWeekLessons;
     }
@@ -269,7 +269,7 @@ export async function getThisWeekLessonsTeacher(email) {
     return lessonsThisWeek
 }
 
-export async function getStudentsPastFeedbackssForTeacher(teacher_mail, student_mail){
+export async function getStudentsPastFeedbackForTeacher(teacher_mail, student_mail){
     /**
      * Function returns all the past lessons a teacher had given a given student where a feedback was given.
      * Returns: and array of {
@@ -368,6 +368,24 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
     }).then(function () {
         console.log("Feedback updated for teacher")
     });
+
+    let lessonInfo = await studentLessons.doc(lesson_id).get();
+    let studentInfo = await db.collection('students').doc(student_mail).get();
+    if (studentInfo.data().last_feedback_given.lesson_date < lessonInfo.data().date_utc.full_date){
+        let last_feedback_updated = {
+            lesson_id: lesson_id,
+            lesson_date: lessonInfo.data().date_utc.full_date,
+            teacher_mail: lessonInfo.data().teacher_mail,
+            teacher_name: lessonInfo.data().teacher_name,
+            grammar_corrections: lessonInfo.data().feedback.grammar_corrections,
+            pronunciation_corrections: lessonInfo.data().feedback.pronunciation_corrections,
+            vocabulary: lessonInfo.data().feedback.vocabulary,
+            home_work: lessonInfo.data().feedback.home_work,
+        };
+        db.collection('student').doc(student_mail).update({
+            last_feedback_given: last_feedback_updated
+        });
+    }
 }
 
 export async function setLessonStarted(lesson_id, teacher_mail, student_mail, start_time){
@@ -548,15 +566,17 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     let weekLessons = [];
     let searchedSunday2 = new Date(searchedSunday);
     let oneDayMore = new Date(searchedSaturday);
-    oneDayMore.setDate(oneDayMore.getUTCDate() + 2);
+    oneDayMore.setDate(oneDayMore.getDate() + 1);
+    console.log("first Date: " + searchedSunday2.toString());
+    console.log("last Date: " + oneDayMore.toString());
     const snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday2)
-        .where('date_utc.full_date', '<=', oneDayMore).get();
+        .where('date_utc.full_date', '<', oneDayMore).get();
 
     snapshot.forEach(doc =>{
         weekLessons.push(doc.data());
     });
-
+    console.log(weekLessons);
     return weekLessons
 }
 

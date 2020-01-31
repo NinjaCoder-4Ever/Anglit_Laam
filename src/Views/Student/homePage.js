@@ -25,14 +25,22 @@ import RoundLogo from "Components/RoundLogo.js";
 import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
+import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID, updateFirstTimeEntry} from "Actions/firestore_functions_student";
 import {CalendarToday, School} from "@material-ui/icons";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
+import {isDate} from "moment";
+import Transition from "react-transition-group/Transition";
+
 
 const useStyles = makeStyles(styles);
-function openSkype(data) {
-    window.open("skype:n.sharbat?chat", '_blank');
-}
-export default  function ExtendedTables() {
+
+const useStylesPopup = makeStyles(stylesPopup);
+
+export default  function ExtendedTables({history}) {
     const [checked, setChecked] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
@@ -45,26 +53,49 @@ export default  function ExtendedTables() {
         lessons_this_month: {},
         phone_number: '',
         subscription: '',
-        teacher: {},
+        teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''});
+    const [modal, setModal] = React.useState(false);
+    const classesPopup = useStylesPopup();
+
 
     React.useEffect(() => {
-
         getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
             if(res != null){
                 setStudentData(res);
+                // Check First Entry.
+                if (res.first_time || res.first_time === undefined){
+                    updateFirstTimeEntry(res.email);
+                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                    setModal(true);
+                }
+                // If not first entry - get next lessons.
+                else{
+                    getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((lessons)=>{
+                        if(lessons !== null && lessons !== undefined){
+                            setNextLesson(lessons);
+                            // setNextLessonDate(res[0].)
+                            if (lessons[0] !== null && lessons[0] !== undefined) {
+                                setNextLessonDate(new Date(lessons[0].date_utc.full_date_string));
+                            }
+                            else {
+                                noNextLessonAlert();
+                                setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                            }
+                        }
+                    })
+                }
             }
+            setLoading(false);
             console.log(res);
         });
-        getNextLessonsStudentByUID(firebase.auth().currentUser.uid,10).then((res)=>{
-            if(res != null){
-                setNextLesson(res);
-                    // setNextLessonDate(res[0].)
-                setNextLessonDate(new Date(res[0].date_utc.full_date_string));
-                setLoading(false);
-            }
-        })
         },[]);
+
+    const openSkype = () => {
+        let skype_user = studentData.teacher.skype_username;
+        let url = "skype:" + {skype_user} + "?chat";
+        window.open(url, '_blank');
+    };
 
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
@@ -85,10 +116,6 @@ export default  function ExtendedTables() {
         setChecked(checked+1);
     };
 
-    const hideAlert = () => {
-        setAlert(null);
-    };
-
     const warningWithConfirmMessage = (line) => {
         setAlert(
             <SweetAlert
@@ -104,6 +131,29 @@ export default  function ExtendedTables() {
                 showCancel
             >
                 You will not be able to recover this imaginary file!
+            </SweetAlert>
+        );
+    };
+
+    const hideAlert = () => {
+        setAlert(null)
+    };
+
+    const noNextLessonAlert = () => {
+        setAlert(
+            <SweetAlert
+                info
+                style={{ display: "block"}}
+                title="We See You Dont Have Future Lessons..."
+                onConfirm={() => goToSetLesson()}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+                confirmBtnText="Lets Go Ahead and Set You a New Lesson!"
+                showCancelButton={true}
+                cancelBtnCssClass={classes.button + " " + classes.default}
+                cancelBtnText="I'll Set a Lesson Later..."
+                showCancel
+            >
             </SweetAlert>
         );
     };
@@ -126,6 +176,15 @@ export default  function ExtendedTables() {
 
     const classes = useStyles();
 
+    const nextLessonMessage = () => {
+      if (isDate(nextLessonDate)){
+          return nextLessonDate.toString().slice(0, 21)
+      }
+      else{
+          return nextLessonDate
+      }
+    };
+
     function getSimpleButtons(line)
     {
         return  [
@@ -146,8 +205,13 @@ export default  function ExtendedTables() {
             );
         });
     }
+
+    const goToSetLesson = () => {
+        history.push("/Student/SetNewLesson");
+    };
+
     let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
-        let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
+        let teacher_name = nextLesson[lesson_id].teacher_name;
         let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
         let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = nextLesson[lesson_id].duration;
@@ -170,20 +234,23 @@ export default  function ExtendedTables() {
                         <h3 className={classes.cardCategory}>Your next lesson</h3>
                     </CardHeader>
                     <CardBody pricing>
-                        <h6 className={classes.cardCategory}>Your next lesson</h6>
                         <div className={classes.icon}>
-
                         </div>
                         <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
                         </RoundLogo>
                         <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
                             style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
-                            {nextLessonDate.toString().slice(0, 21)}
+                            {nextLessonMessage()}
                         </h1>
                         <Button round color="info" onClick={() => {
                             openSkype(studentData);
                         }}>
                             Open Skype
+                        </Button>
+                        <Button round color="rose" onClick={() => {
+                            goToSetLesson();
+                        }}>
+                            Lets Set a New Lesson!
                         </Button>
                     </CardBody>
                 </Card>
@@ -216,6 +283,55 @@ export default  function ExtendedTables() {
                 </Card>
             </GridItem>
         </GridContainer>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={modal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Welcome To Anglit Laam!</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h4>Say hello to your Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h4>
+                    <h5>Feel Free to send him a mail: {studentData.teacher.email}</h5>
+                    <h5>Or Send him a message by Skype.
+
+                    </h5>
+                    <h5>We hope you will enjoy our service!</h5>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <Button onClick={() => goToSetLesson()} color="info">
+                        Lets Set Your First Lesson!
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

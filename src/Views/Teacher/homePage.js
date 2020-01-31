@@ -53,6 +53,7 @@ export default function Calendar({history}) {
     const [selectedEvent, setSelectedEvent] = React.useState({
         lesson_id:"",
         student_mail: "",
+        student_name: "",
         start: "",
         duration: "",
         feedback_given: false,
@@ -74,6 +75,8 @@ export default function Calendar({history}) {
             let dayIndex;
             // load this week.
             let i;
+            let thisSunday = new Date();
+            thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
             for (i = 0; i<=4; i++) {
                 if (i === 0) {
                     for (dayIndex in Object.keys(currentWeekLessons)) {
@@ -90,6 +93,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -101,9 +105,9 @@ export default function Calendar({history}) {
                 }
                 if (i === 1 || i === 2) {
                     // load Next two weeks
-                    let thisSunday = new Date();
                     thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
                     let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
+                    weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
                     weeksSaturday.setDate(weeksSaturday.getDate() + 6);
                     getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
@@ -118,6 +122,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -131,9 +136,8 @@ export default function Calendar({history}) {
                 if (i === 3 || i === 4 ) {
                     // load 2 weeks back
                     let j = i - 2;
-                    let thisSunday = new Date();
-                    thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
                     let weeksSunday = thisSunday.setDate(thisSunday.getDate() - (j * 7));
+                    weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
                     getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
                         let dayIndex;
@@ -147,6 +151,7 @@ export default function Calendar({history}) {
                                 end: endTime,
                                 duration: lesson_data.duration,
                                 student_mail: lesson_data.student_mail,
+                                student_name: lesson_data.student_name,
                                 started: lesson_data.started,
                                 no_show: lesson_data.no_show,
                                 lesson_id: lesson_data.lesson_id,
@@ -254,6 +259,7 @@ export default function Calendar({history}) {
             end: slotInfo.end,
             duration: slotInfo.duration,
             student_mail: slotInfo.student_mail,
+            student_name: slotInfo.student_name,
             started: slotInfo.started,
             no_show: slotInfo.no_show,
             lesson_id: slotInfo.lesson_id,
@@ -278,15 +284,15 @@ export default function Calendar({history}) {
         <div>
             {alert}
             <GridContainer justify="center">
-                <GridItem xs={4} sm={4} lg={4} md={4}>
+                <GridItem xs={5} sm={5} lg={5} md={5}>
                     <Card pricing className={classes.textCenter}>
                         <CardHeader color="info">
                             <CardIcon color="rose">
                                 <CalendarToday/>
                             </CardIcon>
-                            <h2  className={classes.cardCategory}>
+                            <h3  className={classes.cardCategory}>
                                 My Schedule
-                            </h2>
+                            </h3>
                         </CardHeader>
                         <CardBody pricing>
                             <h3 className={`${classes.cardTitle}`}
@@ -352,7 +358,8 @@ export default function Calendar({history}) {
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>Student: {selectedEvent.student_mail}</h5>
+                    <h5>Student Mail: {selectedEvent.student_mail}</h5>
+                    <h5>Student Name: {selectedEvent.student_name}</h5>
                     <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
                     <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>
                     <h5>Duration: {selectedEvent.duration.toString()}</h5>
@@ -365,7 +372,7 @@ export default function Calendar({history}) {
                     <Button  disabled={selectedEvent.started}
                              onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
                     <Button disabled={selectedEvent.no_show}
-                            onClick={() => setLessonToNoShow()} color="danger">Student No Show</Button>
+                            onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
                     <Button disabled={!selectedEvent.no_show && !selectedEvent.started}
                             onClick={() => unmarkLesson()} color="default">Unmark</Button>
                 </DialogActions>

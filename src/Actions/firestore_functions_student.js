@@ -45,7 +45,18 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         teacher: {},
         credits: 1,
         uid: uid,
-        last_log_on: new Date()
+        last_log_on: new Date(),
+        first_time: true,
+        last_feedback_given: {
+            lesson_id: "",
+            lesson_date: "",
+            teacher_mail: "",
+            teacher_name: "",
+            grammar_corrections: "",
+            pronunciation_corrections: "",
+            vocabulary: "",
+            home_work: "",
+        }
     };
 
     let teacherInfo = await chooseTeacherForStudent(email);
@@ -70,6 +81,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             console.log('Added user to users collection')
         })
     ]);
+}
+
+export function updateFirstTimeEntry(student_mail) {
+    db.collection('students').doc(student_mail).update({
+        first_time: false
+    });
 }
 
 export async function getStudentTeacher(student_mail) {
@@ -292,7 +309,9 @@ export async function getAllPastLessonsForStudent(email){
     const pastLessons = [];
     const collectionRef = db.collection('students').doc(email).collection('student_lessons');
     let today = new Date();
-    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today).get();
+    let lastYear = new Date().setFullYear(today.getFullYear() - 1);
+    const snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
+        .where("date_utc.full_date", ">=", lastYear).orderBy("date_utc.full_date").get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
         lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
@@ -365,7 +384,7 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     return true
 }
 
-export async function setNewLesson(student_mail, teacher_mail, start_time, duration){
+export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
      *
@@ -395,7 +414,9 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     }
     let lessonInfo = {
         teacher_mail: teacher_mail,
+        teacher_name: teacher_name,
         student_mail: student_mail,
+        student_name: student_name,
         duration: duration,
         date_utc: {
             year: start_time.getUTCFullYear(),
