@@ -22,6 +22,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 import CardAvatar from "Components/Card/CardAvatar.js";
 import RoundLogo from "Components/RoundLogo.js";
+import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID} from "Actions/firestore_functions_student";
@@ -33,6 +34,7 @@ function openSkype(data) {
 }
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
+    const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [nextLesson, setNextLesson] = React.useState({});
     const [nextLessonDate, setNextLessonDate] = React.useState("");
@@ -59,6 +61,7 @@ export default  function ExtendedTables() {
                 setNextLesson(res);
                     // setNextLessonDate(res[0].)
                 setNextLessonDate(new Date(res[0].date_utc.full_date_string));
+                setLoading(false);
             }
         })
         },[]);
@@ -153,7 +156,6 @@ export default  function ExtendedTables() {
         );
 
     });
-    // let nextLesson =
     return (
         <div>
         {alert}
@@ -194,19 +196,23 @@ export default  function ExtendedTables() {
                         </CardIcon>
                         <h4 className={classes.cardIconTitle}>Next Lessons</h4>
                     </CardHeader>
-                    <CardBody>
-                        <Table
-                            tableHead={[
-                                "Teacher",
-                                "Date",
-                                "Duration",
-                                "Cancel Lesson"
-                            ]}
-                            tableData={
-                                lessons
-                            }
-                        />
-                    </CardBody>
+                    {
+                        loading == true ?
+                            <Loader width={'20%'}/>:
+                            <CardBody>
+                                <Table
+                                    tableHead={[
+                                        "Teacher",
+                                        "Date",
+                                        "Duration",
+                                        "Cancel Lesson"
+                                    ]}
+                                    tableData={
+                                        lessons
+                                    }
+                                />
+                            </CardBody>
+                    }
                 </Card>
             </GridItem>
         </GridContainer>
