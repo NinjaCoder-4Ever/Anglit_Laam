@@ -567,8 +567,6 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     let searchedSunday2 = new Date(searchedSunday);
     let oneDayMore = new Date(searchedSaturday);
     oneDayMore.setDate(oneDayMore.getDate() + 1);
-    console.log("first Date: " + searchedSunday2.toString());
-    console.log("last Date: " + oneDayMore.toString());
     const snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday2)
         .where('date_utc.full_date', '<', oneDayMore).get();
@@ -576,7 +574,6 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     snapshot.forEach(doc =>{
         weekLessons.push(doc.data());
     });
-    console.log(weekLessons);
     return weekLessons
 }
 
