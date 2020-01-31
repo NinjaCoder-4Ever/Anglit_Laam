@@ -23,6 +23,7 @@ import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
+import Loader from "Components/Loader/Loader.js";
 
 const useStyles = makeStyles(styles);
 function printFeedback(feedback) {
@@ -30,6 +31,7 @@ function printFeedback(feedback) {
 }
 export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
+    const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [studentData,setStudentData] = React.useState({first_name: '',
         last_name: '',
@@ -55,6 +57,7 @@ export default  function ExtendedTables() {
                 setPastLessons(res);
             }
             console.log('past lessons: '+res);
+            setLoading(false);
         });
     },[]);
 
@@ -126,18 +129,22 @@ export default  function ExtendedTables() {
                             </CardIcon>
                             <h4 className={classes.cardIconTitle}>Past Lessons</h4>
                         </CardHeader>
-                        <CardBody>
-                            <Table
-                                tableHead={[
-                                    "Teacher",
-                                    "Date",
-                                    "Duration"
-                                ]}
-                                tableData={
-                                    lessons
-                                }
-                            />
-                        </CardBody>
+                        {
+                            loading == true ?
+                                <Loader width={'20%'}/>:
+                                <CardBody>
+                                    <Table
+                                        tableHead={[
+                                            "Teacher",
+                                            "Date",
+                                            "Duration"
+                                        ]}
+                                        tableData={
+                                            lessons
+                                        }
+                                    />
+                                </CardBody>
+                        }
                     </Card>
                 </GridItem>
             </GridContainer>
