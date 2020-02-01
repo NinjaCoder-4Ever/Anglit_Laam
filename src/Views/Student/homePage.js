@@ -1,4 +1,3 @@
-
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -104,7 +103,7 @@ export default  function ExtendedTables({history}) {
             setLoading(false);
             console.log(res);
         });
-        },[]);
+    },[]);
 
     const openSkype = () => {
         let skype_user = studentData.teacher.skype_username;
@@ -192,12 +191,12 @@ export default  function ExtendedTables({history}) {
     const classes = useStyles();
 
     const nextLessonMessage = () => {
-      if (isDate(nextLessonDate)){
-          return nextLessonDate.toString().slice(0, 21)
-      }
-      else{
-          return nextLessonDate
-      }
+        if (isDate(nextLessonDate)){
+            return nextLessonDate.toString().slice(0, 21)
+        }
+        else{
+            return nextLessonDate
+        }
     };
 
     function getSimpleButtons(line)
@@ -235,72 +234,63 @@ export default  function ExtendedTables({history}) {
 
     return (
         <div>
-        {alert}
+            {alert}
 
-        <GridContainer justify="center">
-            <GridItem xs={6} sm={6} lg={6}>
-                <Card pricing>
-                    <CardHeader color="info">
-                        <CardIcon color="rose">
-                            <School/>
-                        </CardIcon>
-                        <h3 className={classes.cardCategory}>Your next lesson</h3>
-                    </CardHeader>
-                    <CardBody pricing>
-                        <div className={classes.icon}>
-                        </div>
-                        <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
-                        </RoundLogo>
+            <GridContainer justify="center">
+                <GridItem xs={6} sm={6} lg={6}>
+                    <Card pricing>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <School/>
+                            </CardIcon>
+                            <h3 className={classes.cardCategory}>Your next lesson</h3>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <div className={classes.icon}>
+                            </div>
+                            <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
+                            </RoundLogo>
+                            <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
+                                style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
+                                {nextLessonMessage()}
+                            </h1>
+                            <Button round color="info" onClick={() => {
+                                openSkype(studentData);
+                            }}>
+                                Open Skype
+                            </Button>
+                            {buttonLesson}
+                        </CardBody>
+                    </Card>
+                </GridItem>
+                <GridItem xs={12}>
+                    <Card>
+                        <CardHeader color="info" icon>
+                            <CardIcon color="info">
+                                <Assignment />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Next Lessons</h4>
+                        </CardHeader>
                         {
-                            loading != true && nextLessonDate != null &&
-                            <>
-                                <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
-                                    style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x"}}>
-                                    {nextLessonMessage()}
-                                </h1>
-                                {
-                                    lessons.length !== 0 ?
-                                        <Button round color="info" onClick={() => {
-                                            openSkype(studentData);
-                                        }}>
-                                            Open Skype
-                                        </Button>
-                                        :
-                                        {buttonLesson}
-                                }
-                            </>
+                            loading === true ?
+                                <Loader width={'20%'}/>:
+                                <CardBody>
+                                    <Table
+                                        tableHead={[
+                                            "Teacher",
+                                            "Date",
+                                            "Duration",
+                                            "Cancel Lesson"
+                                        ]}
+                                        tableData={
+                                            nextLessonsTable
+                                        }
+                                    />
+                                </CardBody>
                         }
-                    </CardBody>
-                </Card>
-            </GridItem>
-            <GridItem xs={12}>
-                <Card>
-                    <CardHeader color="info" icon>
-                        <CardIcon color="info">
-                            <Assignment />
-                        </CardIcon>
-                        <h4 className={classes.cardIconTitle}>Next Lessons</h4>
-                    </CardHeader>
-                    {
-                        loading === true ?
-                            <Loader width={'20%'}/>:
-                            <CardBody>
-                                <Table
-                                    tableHead={[
-                                        "Teacher",
-                                        "Date",
-                                        "Duration",
-                                        "Cancel Lesson"
-                                    ]}
-                                    tableData={
-                                        nextLessonsTable
-                                    }
-                                />
-                            </CardBody>
-                    }
-                </Card>
-            </GridItem>
-        </GridContainer>
+                    </Card>
+                </GridItem>
+            </GridContainer>
 
             <Dialog
                 classes={{
