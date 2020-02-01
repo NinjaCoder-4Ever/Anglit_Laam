@@ -94,7 +94,6 @@ export default  function ExtendedTables(callback, deps) {
             );
         });
     }
-    });
 
     const modalPopUp = (lessonData) => {
         setSelectedLesson(lessonData);
