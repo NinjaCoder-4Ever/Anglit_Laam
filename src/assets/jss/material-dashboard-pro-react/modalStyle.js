@@ -2,7 +2,7 @@ import { grayColor } from "assets/jss/material-dashboard-pro-react.js";
 
 const modalStyle = theme => ({
   modalRoot: {
-    overflow: "auto",
+    overflow: "scroll",
     alignItems: "unset",
     justifyContent: "unset"
   },

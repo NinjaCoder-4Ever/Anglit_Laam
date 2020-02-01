@@ -25,9 +25,7 @@ import {getTeacherByUID, getFeedbackNecessaryLessonsForTeacher, setFeedbackForLe
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
-import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-import InputLabel from "@material-ui/core/InputLabel";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Transition from "react-transition-group/Transition";
@@ -166,6 +164,7 @@ export default  function ExtendedTables(callback, deps) {
                 onClose={() => setModal(false)}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
+                fullScreen = {true}
             >
                 <DialogTitle
                     id="classic-modal-slide-title"
