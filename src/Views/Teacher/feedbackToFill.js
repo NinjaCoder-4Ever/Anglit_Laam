@@ -79,7 +79,7 @@ export default  function ExtendedTables(callback, deps) {
     function getSimpleButtons(lessonData)
     {
         return  [
-            {color: "success", icon: Check, data: lessonData}
+            {color: "info", icon: Check, data: lessonData}
         ].map((prop, key) => {
             return (
                 <Button
