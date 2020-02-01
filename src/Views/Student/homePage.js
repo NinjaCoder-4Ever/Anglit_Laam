@@ -251,25 +251,16 @@ export default  function ExtendedTables({history}) {
                         </div>
                         <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
                         </RoundLogo>
-                        {
-                            loading != true && nextLessonDate != null &&
-                            <>
-                                <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
-                                    style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x"}}>
-                                    {nextLessonMessage()}
-                                </h1>
-                                {
-                                    lessons.length !== 0 ?
-                                        <Button round color="info" onClick={() => {
-                                            openSkype(studentData);
-                                        }}>
-                                            Open Skype
-                                        </Button>
-                                        :
-                                        {buttonLesson}
-                                }
-                            </>
-                        }
+                        <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
+                            style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
+                            {nextLessonMessage()}
+                        </h1>
+                        <Button round color="info" onClick={() => {
+                            openSkype(studentData);
+                        }}>
+                            Open Skype
+                        </Button>
+                        {buttonLesson}
                     </CardBody>
                 </Card>
             </GridItem>
