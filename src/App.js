@@ -14,7 +14,6 @@ import StudentHomePage from "./Views/Student/student";
 import TeacherHomePage from "./Views/Teacher/teacher";
 
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
-import {getUserDataByUid} from "./Actions/firestore_functions_general";
 
 
 const App = () => {
@@ -54,7 +53,7 @@ const App = () => {
                 <PrivateRouteTeacher exact path='/Teacher' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/homePage' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/myStudents' component = {TeacherHomePage}/>
-                <PrivateRouteTeacher exact path="/Teacher/feedbackToFill" component = {TeacherHomePage}/>
+                <PrivateRouteTeacher exact path='/Teacher/feedbackToFill' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
 
                 {/* General Routing */}

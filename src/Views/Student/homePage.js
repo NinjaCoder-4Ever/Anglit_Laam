@@ -1,4 +1,3 @@
-
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
@@ -22,6 +21,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 import CardAvatar from "Components/Card/CardAvatar.js";
 import RoundLogo from "Components/RoundLogo.js";
+import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID, updateFirstTimeEntry} from "Actions/firestore_functions_student";
@@ -41,6 +41,7 @@ const useStylesPopup = makeStyles(stylesPopup);
 
 export default  function ExtendedTables({history}) {
     const [checked, setChecked] = React.useState(0);
+    const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [nextLesson, setNextLesson] = React.useState({});
     const [nextLessonDate, setNextLessonDate] = React.useState("");
@@ -54,6 +55,8 @@ export default  function ExtendedTables({history}) {
         teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''});
     const [modal, setModal] = React.useState(false);
+    const [nextLessonsTable, setNextLessonsTable] = React.useState([[]]);
+    const [buttonLesson, setButtonLesson] = React.useState(null);
     const classesPopup = useStylesPopup();
 
 
@@ -64,7 +67,8 @@ export default  function ExtendedTables({history}) {
                 // Check First Entry.
                 if (res.first_time || res.first_time === undefined){
                     updateFirstTimeEntry(res.email);
-                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson");
+                    setLessonsButton();
                     setModal(true);
                 }
                 // If not first entry - get next lessons.
@@ -79,14 +83,27 @@ export default  function ExtendedTables({history}) {
                             else {
                                 noNextLessonAlert();
                                 setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                                setLessonsButton();
                             }
+
+                            let lessonsTable = Object.keys(lessons).map((lesson_id,index) => {
+                                let teacher_name = lessons[lesson_id].teacher_name;
+                                let lesson_full_date = new Date(lessons[lesson_id].date_utc.full_date_string);
+                                let lesson_date = new Date(lessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
+                                let duration = lessons[lesson_id].duration;
+                                return (
+                                    [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
+                                );
+                            });
+                            setNextLessonsTable(lessonsTable)
                         }
                     })
                 }
             }
+            setLoading(false);
             console.log(res);
         });
-        },[]);
+    },[]);
 
     const openSkype = () => {
         let skype_user = studentData.teacher.skype_username;
@@ -174,12 +191,12 @@ export default  function ExtendedTables({history}) {
     const classes = useStyles();
 
     const nextLessonMessage = () => {
-      if (isDate(nextLessonDate)){
-          return nextLessonDate.toString().slice(0, 21)
-      }
-      else{
-          return nextLessonDate
-      }
+        if (isDate(nextLessonDate)){
+            return nextLessonDate.toString().slice(0, 21)
+        }
+        else{
+            return nextLessonDate
+        }
     };
 
     function getSimpleButtons(line)
@@ -207,76 +224,73 @@ export default  function ExtendedTables({history}) {
         history.push("/Student/SetNewLesson");
     };
 
-    let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
-        let teacher_name = nextLesson[lesson_id].teacher_name;
-        let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
-        let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
-        let duration = nextLesson[lesson_id].duration;
-        return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
-        );
+    const setLessonsButton = () => {
+        setButtonLesson (<Button round color="rose" onClick={() => {
+            goToSetLesson();
+        }}>
+            Lets Set a New Lesson!
+        </Button>)
+    };
 
-    });
-    // let nextLesson =
     return (
         <div>
-        {alert}
+            {alert}
 
-        <GridContainer justify="center">
-            <GridItem xs={6} sm={6} lg={6}>
-                <Card pricing>
-                    <CardHeader color="info">
-                        <CardIcon color="rose">
-                            <School/>
-                        </CardIcon>
-                        <h3 className={classes.cardCategory}>Your next lesson</h3>
-                    </CardHeader>
-                    <CardBody pricing>
-                        <div className={classes.icon}>
-                        </div>
-                        <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
-                        </RoundLogo>
-                        <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
-                            style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
-                            {nextLessonMessage()}
-                        </h1>
-                        <Button round color="info" onClick={() => {
-                            openSkype(studentData);
-                        }}>
-                            Open Skype
-                        </Button>
-                        <Button round color="rose" onClick={() => {
-                            goToSetLesson();
-                        }}>
-                            Lets Set a New Lesson!
-                        </Button>
-                    </CardBody>
-                </Card>
-            </GridItem>
-            <GridItem xs={12}>
-                <Card>
-                    <CardHeader color="info" icon>
-                        <CardIcon color="info">
-                            <Assignment />
-                        </CardIcon>
-                        <h4 className={classes.cardIconTitle}>Next Lessons</h4>
-                    </CardHeader>
-                    <CardBody>
-                        <Table
-                            tableHead={[
-                                "Teacher",
-                                "Date",
-                                "Duration",
-                                "Cancel Lesson"
-                            ]}
-                            tableData={
-                                lessons
-                            }
-                        />
-                    </CardBody>
-                </Card>
-            </GridItem>
-        </GridContainer>
+            <GridContainer justify="center">
+                <GridItem xs={6} sm={6} lg={6}>
+                    <Card pricing>
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
+                                <School/>
+                            </CardIcon>
+                            <h3 className={classes.cardCategory}>Your next lesson</h3>
+                        </CardHeader>
+                        <CardBody pricing>
+                            <div className={classes.icon}>
+                            </div>
+                            <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
+                            </RoundLogo>
+                            <h1 className={`${classes.cardTitle} ${classes.marginTop30}`}
+                                style={{fontSize: "25px", fontWeight: "bold", marginBottom: "10x" }}>
+                                {nextLessonMessage()}
+                            </h1>
+                            <Button round color="info" onClick={() => {
+                                openSkype(studentData);
+                            }}>
+                                Open Skype
+                            </Button>
+                            {buttonLesson}
+                        </CardBody>
+                    </Card>
+                </GridItem>
+                <GridItem xs={12}>
+                    <Card>
+                        <CardHeader color="info" icon>
+                            <CardIcon color="info">
+                                <Assignment />
+                            </CardIcon>
+                            <h4 className={classes.cardIconTitle}>Next Lessons</h4>
+                        </CardHeader>
+                        {
+                            loading === true ?
+                                <Loader width={'20%'}/>:
+                                <CardBody>
+                                    <Table
+                                        tableHead={[
+                                            "Teacher",
+                                            "Date",
+                                            "Duration",
+                                            "Cancel Lesson"
+                                        ]}
+                                        tableData={
+                                            nextLessonsTable
+                                        }
+                                    />
+                                </CardBody>
+                        }
+                    </Card>
+                </GridItem>
+            </GridContainer>
 
             <Dialog
                 classes={{

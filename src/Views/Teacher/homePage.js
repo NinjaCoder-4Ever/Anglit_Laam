@@ -35,6 +35,7 @@ import Slide from "@material-ui/core/Slide";
 import CardHeader from "../../Components/Card/CardHeader";
 import CardIcon from "../../Components/Card/CardIcon";
 import {CalendarToday} from "@material-ui/icons";
+import Loader from "Components/Loader/Loader.js";
 
 const localizer = momentLocalizer(moment);
 
@@ -47,6 +48,7 @@ export default function Calendar({history}) {
     const classes = useStyles();
     const classesPopup = useStylesPopup();
     const [events, setEvents] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [teacherData, setTeacherData] = React.useState({email:"", lessons_this_week: "",
         first_name: "", last_name: ""});
@@ -69,6 +71,7 @@ export default function Calendar({history}) {
     });
 
     React.useEffect(() => {
+        let newEvents = [];
         getTeacherByUID(firebase.auth().currentUser.uid).then(teacherInfo => {
             setTeacherData(teacherInfo);
             let currentWeekLessons = teacherInfo.lessons_this_week;
@@ -77,7 +80,7 @@ export default function Calendar({history}) {
             let i;
             let thisSunday = new Date();
             thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
-            for (i = 0; i<=4; i++) {
+            for (i = 0; i<=5; i++) {
                 if (i === 0) {
                     for (dayIndex in Object.keys(currentWeekLessons)) {
                         let lessons_on_day = currentWeekLessons[WEEK[dayIndex]];
@@ -89,6 +92,7 @@ export default function Calendar({history}) {
                             let endTime = new Date(startTime);
                             endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
                             let slotInfo = {
+                                title: "",
                                 start: startTime,
                                 end: endTime,
                                 duration: lesson_data.duration,
@@ -99,14 +103,14 @@ export default function Calendar({history}) {
                                 lesson_id: lesson_data.lesson_id,
                                 feedback_given: lesson_data.feedback_given
                             };
-                            addNewEvent("", slotInfo);
+                            newEvents.push(slotInfo);
                         }
                     }
                 }
                 if (i === 1 || i === 2) {
                     // load Next two weeks
-                    thisSunday.setDate(thisSunday.getDate() - thisSunday.getDay());
-                    let weeksSunday = thisSunday.setDate(thisSunday.getDate() + (i * 7));
+                    let weeksSunday = new Date(thisSunday);
+                    weeksSunday = weeksSunday.setDate(weeksSunday.getDate() + (i * 7));
                     weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
                     weeksSaturday.setDate(weeksSaturday.getDate() + 6);
@@ -118,6 +122,7 @@ export default function Calendar({history}) {
                             let endTime = new Date(startTime);
                             endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
                             let slotInfo = {
+                                title: "",
                                 start: startTime,
                                 end: endTime,
                                 duration: lesson_data.duration,
@@ -128,7 +133,7 @@ export default function Calendar({history}) {
                                 lesson_id: lesson_data.lesson_id,
                                 feedback_given: lesson_data.feedback_given
                             };
-                            addNewEvent("", slotInfo);
+                            newEvents.push(slotInfo);
                         }
                     });
                 }
@@ -136,9 +141,11 @@ export default function Calendar({history}) {
                 if (i === 3 || i === 4 ) {
                     // load 2 weeks back
                     let j = i - 2;
-                    let weeksSunday = thisSunday.setDate(thisSunday.getDate() - (j * 7));
+                    let weeksSunday = new Date(thisSunday);
+                    weeksSunday = weeksSunday.setDate(weeksSunday.getDate() - (j * 7));
                     weeksSunday = new Date(weeksSunday).setHours(0,0, 0);
                     let weeksSaturday = new Date(weeksSunday);
+                    weeksSaturday.setDate(weeksSaturday.getDate() + 6);
                     getWeekLessonByDateTeacher(teacherInfo.email, weeksSunday, weeksSaturday).then(week_lessons => {
                         let dayIndex;
                         for (dayIndex in week_lessons) {
@@ -147,6 +154,7 @@ export default function Calendar({history}) {
                             let endTime = new Date(startTime);
                             endTime.setTime(startTime.getTime() + lesson_data.duration * 60000);
                             let slotInfo = {
+                                title: "",
                                 start: startTime,
                                 end: endTime,
                                 duration: lesson_data.duration,
@@ -157,11 +165,13 @@ export default function Calendar({history}) {
                                 lesson_id: lesson_data.lesson_id,
                                 feedback_given: lesson_data.feedback_given
                             };
-                            addNewEvent(lesson_data.student_mail, slotInfo);
+                            newEvents.push(slotInfo);
                         }
                     });
                 }
+                setEvents(newEvents);
             }
+            setLoading(false);
         });
     }, []);
 
@@ -295,34 +305,42 @@ export default function Calendar({history}) {
                             </h3>
                         </CardHeader>
                         <CardBody pricing>
-                            <h3 className={`${classes.cardTitle}`}
-                                style={{fontSize: "20px", fontWeight: "bold",}}>
-                                A Look at {teacherData.first_name} {teacherData.last_name}'s Week
-                            </h3>
+
+                            {
+                                loading === true ?
+                                    <Loader width={'20%'}/>:
+                                    <h3 className={`${classes.cardTitle}`}
+                                        style={{fontSize: "20px", fontWeight: "bold",}}>
+                                        A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                                    </h3>
+                            }
                         </CardBody>
                     </Card>
                 </GridItem>
-                <GridItem xs={12} sm={12} md={10}>
-                    <Card>
-                        <CardBody calendar>
-                            <BigCalendar
-                                selectable={false}
-                                localizer={localizer}
-                                events={events}
-                                defaultView="week"
-                                scrollToTime={new Date(1970, 1, 1, 6)}
-                                defaultDate={new Date()}
-                                onSelectEvent={event => selectEvent(event)}
-                                //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
-                                eventPropGetter={eventColors}
-                                views={["day", 'week']}
-                                timeslots={2}
-                                min={new Date(2019, 12, 0, 9, 0, 0)}
-                                max={new Date(2030, 12, 0, 23, 0, 0)}
-                            />
-                        </CardBody>
-                    </Card>
-                </GridItem>
+                {
+                    loading == false &&
+                    <GridItem xs={12} sm={12} md={10}>
+                        <Card>
+                            <CardBody calendar>
+                                <BigCalendar
+                                    selectable={false}
+                                    localizer={localizer}
+                                    events={events}
+                                    defaultView="week"
+                                    scrollToTime={new Date(1970, 1, 1, 6)}
+                                    defaultDate={new Date()}
+                                    onSelectEvent={event => selectEvent(event)}
+                                    //onSelectSlot={slotInfo => addNewEventAlert(slotInfo)}
+                                    eventPropGetter={eventColors}
+                                    views={["day", 'week']}
+                                    timeslots={2}
+                                    min={new Date(2019, 12, 0, 9, 0, 0)}
+                                    max={new Date(2030, 12, 0, 23, 0, 0)}
+                                />
+                            </CardBody>
+                        </Card>
+                    </GridItem>
+                }
             </GridContainer>
 
             <Dialog

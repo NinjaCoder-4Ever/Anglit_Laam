@@ -18,14 +18,13 @@
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import BubbleChart from "@material-ui/icons/BubbleChart";
 import People from "@material-ui/icons/PeopleAlt";
 import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Teacher/homePage'
 import FeedbackToFill from './Views/Teacher/feedbackToFill'
 import MyStudents from './Views/Teacher/myStudents'
-import ContactUs from './Views/Teacher/contactUs'
+import ContactUs from './Views/Teacher/contactUs';
 
 const dashboardRoutes = [
     {
@@ -36,7 +35,7 @@ const dashboardRoutes = [
         layout: "/Teacher"
     },
     {
-        path: "feedbackToFill",
+        path: "/feedbackToFill",
         name: "Feedback To Fill",
         icon: LibraryBooks,
         component: FeedbackToFill,
