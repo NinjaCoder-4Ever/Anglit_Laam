@@ -56,6 +56,8 @@ export default  function ExtendedTables({history}) {
         teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''});
     const [modal, setModal] = React.useState(false);
+    const [nextLessonsTable, setNextLessonsTable] = React.useState([[]]);
+    const [buttonLesson, setButtonLesson] = React.useState(null);
     const classesPopup = useStylesPopup();
 
 
@@ -66,7 +68,8 @@ export default  function ExtendedTables({history}) {
                 // Check First Entry.
                 if (res.first_time || res.first_time === undefined){
                     updateFirstTimeEntry(res.email);
-                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson");
+                    setLessonsButton();
                     setModal(true);
                 }
                 // If not first entry - get next lessons.
@@ -81,7 +84,19 @@ export default  function ExtendedTables({history}) {
                             else {
                                 noNextLessonAlert();
                                 setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                                setLessonsButton();
                             }
+
+                            let lessonsTable = Object.keys(lessons).map((lesson_id,index) => {
+                                let teacher_name = lessons[lesson_id].teacher_name;
+                                let lesson_full_date = new Date(lessons[lesson_id].date_utc.full_date_string);
+                                let lesson_date = new Date(lessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
+                                let duration = lessons[lesson_id].duration;
+                                return (
+                                    [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
+                                );
+                            });
+                            setNextLessonsTable(lessonsTable)
                         }
                     })
                 }
@@ -210,16 +225,14 @@ export default  function ExtendedTables({history}) {
         history.push("/Student/SetNewLesson");
     };
 
-    let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
-        let teacher_name = nextLesson[lesson_id].teacher_name;
-        let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
-        let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
-        let duration = nextLesson[lesson_id].duration;
-        return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
-        );
+    const setLessonsButton = () => {
+        setButtonLesson (<Button round color="rose" onClick={() => {
+            goToSetLesson();
+        }}>
+            Lets Set a New Lesson!
+        </Button>)
+    };
 
-    });
     return (
         <div>
         {alert}
@@ -238,7 +251,6 @@ export default  function ExtendedTables({history}) {
                         </div>
                         <RoundLogo width={"100px"} height={"100px"} objectstyle={{ margin: "0 auto 25px", width: "min-content"}}>
                         </RoundLogo>
-
                         {
                             loading != true && nextLessonDate != null &&
                             <>
@@ -254,11 +266,7 @@ export default  function ExtendedTables({history}) {
                                             Open Skype
                                         </Button>
                                         :
-                                        <Button round color="info" onClick={() => {
-                                            goToSetLesson();
-                                        }}>
-                                            Lets Set a New Lesson!
-                                        </Button>
+                                        {buttonLesson}
                                 }
                             </>
                         }
@@ -274,7 +282,7 @@ export default  function ExtendedTables({history}) {
                         <h4 className={classes.cardIconTitle}>Next Lessons</h4>
                     </CardHeader>
                     {
-                        loading == true ?
+                        loading === true ?
                             <Loader width={'20%'}/>:
                             <CardBody>
                                 <Table
@@ -285,7 +293,7 @@ export default  function ExtendedTables({history}) {
                                         "Cancel Lesson"
                                     ]}
                                     tableData={
-                                        lessons
+                                        nextLessonsTable
                                     }
                                 />
                             </CardBody>

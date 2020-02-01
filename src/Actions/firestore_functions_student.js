@@ -58,8 +58,9 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             home_work: "",
         }
     };
+    let student_name = firstName + " " + lastName;
 
-    let teacherInfo = await chooseTeacherForStudent(email);
+    let teacherInfo = await chooseTeacherForStudent(email, student_name);
     newStudentData.teacher = {
         first_name: teacherInfo.first_name,
         last_name: teacherInfo.last_name,
@@ -188,14 +189,20 @@ export async function updateCredits(email, addedCredits) {
     });
 }
 
-export async function addStudentToTeacher(teacherMail, studentMail){
+export async function addStudentToTeacher(teacherMail, studentMail, studentName){
     /**
      * Function adds a student mail to the teacher's student array
      */
     const collectionRef = db.collection('teachers');
     const doc = await collectionRef.doc(teacherMail).get();
     let current_student_list = doc.data().students;
-    current_student_list.push(studentMail);
+
+    let studentInfo = {
+        student_mail: studentMail,
+        student_name: studentName
+    };
+
+    current_student_list.push(studentInfo);
 
     await collectionRef.doc(teacherMail).update({
         "students": current_student_list
@@ -204,7 +211,7 @@ export async function addStudentToTeacher(teacherMail, studentMail){
     });
 }
 
-export async function chooseTeacherForStudent(studentMail) {
+export async function chooseTeacherForStudent(studentMail, studentName) {
     /**
      * Function goes through all the teachers in the "teachers" collection and and brings back the info about
      * the teacher with the least amount of students.
@@ -229,7 +236,7 @@ export async function chooseTeacherForStudent(studentMail) {
         }
     });
 
-    await addStudentToTeacher(chosenTeacher[0].email, studentMail);
+    await addStudentToTeacher(chosenTeacher[0].email, studentMail, studentName);
      return {
         email: chosenTeacher[0].email,
         first_name: chosenTeacher[0].first_name,
