@@ -71,7 +71,8 @@ export default  function ExtendedTables(callback, deps) {
                     feedbacksInfo.push(lessonArray);
                 });
                 setFeedbacks(feedbacksInfo);
-        });
+            });
+        })
     },[]);
 
 
