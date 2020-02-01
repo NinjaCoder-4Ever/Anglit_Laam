@@ -4,7 +4,6 @@ import React, {useCallback} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import firebase from 'Config/fire';
 
-
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
 import Check from "@material-ui/icons/Check";
@@ -21,7 +20,8 @@ import CardHeader from "Components/Card/CardHeader.js";
 
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getTeacherByUID, getFeedbackNecessaryLessonsForTeacher, setFeedbackForLesson} from "Actions/firestore_functions_teacher";
+import {getTeacherByUID, getFeedbackNecessaryLessonsForTeacher, setFeedbackForLesson,
+    saveFeedback} from "Actions/firestore_functions_teacher";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -32,10 +32,6 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Transition from "react-transition-group/Transition";
 
-
-function printFeedback(feedback) {
-    return "this is feedback for the class"
-}
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
 
@@ -67,12 +63,11 @@ export default  function ExtendedTables(callback, deps) {
             getFeedbackNecessaryLessonsForTeacher(teacherInfo.email).then(lessons => {
                 let feedbacksInfo = [];
                 lessons.forEach(lesson => {
-                    let lessonArray = [
-                        lesson.student_name,
-                        lesson.date_utc.full_date,
-                        lesson.duration,
-                        getSimpleButtons(lesson)
-                    ];
+                    let lessonArray = [];
+                    lessonArray.push(lesson.student_name);
+                    lessonArray.push(new Date(lesson.date_utc.full_date_string).toString());
+                    lessonArray.push(lesson.duration);
+                    lessonArray.push(getSimpleButtons(lesson));
                     feedbacksInfo.push(lessonArray);
                 });
                 setFeedbacks(feedbacksInfo);
@@ -105,17 +100,23 @@ export default  function ExtendedTables(callback, deps) {
         setModal(true);
     };
 
-    const submitFeedback =(lessonData, grammar, pronunciation, vocabulary, home_work) => {
-        let student_mail = lessonData.student_mail;
-        let teacher_mail = lessonData.teacher_mail;
-        let lesson_id = lessonData.lesson_id;
+    const submitFeedback =(grammar, pronunciation, vocabulary, home_work, save=false) => {
+        let student_mail = selectedLesson.student_mail;
+        let teacher_mail = selectedLesson.teacher_mail;
+        let lesson_id = selectedLesson.lesson_id;
         let feedback = {
-            grammar_corrections: grammar,
-            pronunciation_corrections: pronunciation,
-            vocabulary: vocabulary,
-            home_work: home_work,
+            grammar_corrections: grammar.value,
+            pronunciation_corrections: pronunciation.value,
+            vocabulary: vocabulary.value,
+            home_work: home_work.value,
         };
-        setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
+
+        if (save){
+            saveFeedback(feedback, lesson_id, teacher_mail);
+        }
+        else {
+            setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
+        }
     };
 
     const handleSubmit = useCallback(event => {
@@ -124,7 +125,7 @@ export default  function ExtendedTables(callback, deps) {
             student_name, lesson_date, grammar_corrections, pronunciation_corrections,
             vocabulary, home_work
         } = event.target.elements;
-        submitFeedback(selectedLesson, grammar_corrections, pronunciation_corrections, vocabulary, home_work);
+        submitFeedback(grammar_corrections, pronunciation_corrections, vocabulary, home_work);
     }, deps);
 
     return (
@@ -259,15 +260,24 @@ export default  function ExtendedTables(callback, deps) {
                                 />
                             </Grid>
                         </Grid>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="info"
-                            className={classes.submit}
-                        >
-                            Submit Feedback
-                        </Button>
+                        <Grid>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="info"
+                                className={classes.submit}
+                            >
+                                Submit Feedback
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="default"
+                                className={classes.submit}
+                            >
+                                Save Feedback
+                            </Button>
+                        </Grid>
                     </form>
                 </DialogContent>
             </Dialog>

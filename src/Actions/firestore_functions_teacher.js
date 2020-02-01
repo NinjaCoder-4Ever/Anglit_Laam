@@ -388,6 +388,15 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
     }
 }
 
+export async function saveFeedback(feedback, lesson_id, teacher_mail) {
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    teacherLessons.doc(lesson_id).update({
+        "feedback": feedback,
+    }).then(function () {
+        console.log("Feedback updated for teacher")
+    });
+}
+
 export async function setLessonStarted(lesson_id, teacher_mail, student_mail, start_time){
     /**
      * Function sets a lesson status to "started" in both student_lessons and teacher_lessons collections.
