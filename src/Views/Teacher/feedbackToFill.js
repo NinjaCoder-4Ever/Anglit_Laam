@@ -155,8 +155,7 @@ export default  function ExtendedTables(callback, deps) {
 
             <Dialog
                 classes={{
-                    root: classesPopup.center,
-                    paper: classesPopup.modal
+                    root: classesPopup.center
                 }}
                 open={modal}
                 transition={Transition}
