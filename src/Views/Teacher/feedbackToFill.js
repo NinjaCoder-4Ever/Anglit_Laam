@@ -118,6 +118,7 @@ export default  function ExtendedTables(callback, deps) {
     };
 
     const handleSubmit = useCallback(event => {
+        console.log("submit");
         event.preventDefault();
         const {
             student_name, lesson_date, grammar_corrections, pronunciation_corrections,
@@ -125,6 +126,17 @@ export default  function ExtendedTables(callback, deps) {
         } = event.target.elements;
         submitFeedback(grammar_corrections, pronunciation_corrections, vocabulary, home_work);
     }, deps);
+
+    const handleSave = useCallback(event => {
+        console.log("save");
+        event.preventDefault();
+        const {
+            student_name, lesson_date, grammar_corrections, pronunciation_corrections,
+            vocabulary, home_work
+        } = event.target.elements;
+        submitFeedback(grammar_corrections, pronunciation_corrections, vocabulary, home_work);
+    }, deps);
+
 
     return (
         <div>
@@ -268,7 +280,7 @@ export default  function ExtendedTables(callback, deps) {
                                 Submit Feedback
                             </Button>
                             <Button
-                                type="submit"
+                                onClick={handleSave.bind(this)}
                                 variant="contained"
                                 color="default"
                                 className={classes.submit}
