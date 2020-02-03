@@ -25,7 +25,7 @@ import styles from "assets/jss/material-dashboard-pro-react/components/buttonSty
 
 import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
-import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_student"
+import {getStudentByUID, setNewLesson, updateCredits} from "Actions/firestore_functions_student"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -53,7 +53,7 @@ export default function Calendar({history}) {
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
     const [studentData, setstudentData] = React.useState({teacher:{email:"",
-        first_name: "", last_name:""}, email:"", first_name: "", last_name: ""});
+        first_name: "", last_name:""}, email:"", first_name: "", last_name: "", credits: null});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
     const [getEvents, setGetEvents] = React.useState(true);
 
@@ -167,7 +167,11 @@ export default function Calendar({history}) {
            }
             setGetEvents(!getEvents);
         });
-
+        updateCredits(studentData.email, studentData.credits - 1).then(res => {
+            const data = studentData;
+            data.credits = studentData.credits - 1;
+            setstudentData(data);
+        });
     };
 
     const closeAlert = () => {
@@ -245,18 +249,27 @@ export default function Calendar({history}) {
                         <CardBody pricing>
                             {
                                 loading == true ?
-                                    <Loader width={'20%'}/>:
-                                    <h3 className={`${classes.cardTitle}`}
-                                        style={{fontSize: "20px", fontWeight: "bold",}}>
-                                        Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s Available Time!
-                                    </h3>
+                                    <Loader width={'20%'}/> :
+                                    studentData.credits > 0 ?
+                                        <h3 className={`${classes.cardTitle}`}
+                                            style={{fontSize: "16px",}}>
+                                            Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s
+                                            schedule, please choose a free time.
+                                            Currently you have {studentData.credits} credits.
+                                        </h3>
+                                        :
+                                        <h3 className={`${classes.cardTitle}`}
+                                            style={{fontSize: "16px",}}>
+                                            Currently you have don't have any credits, please update your subscription.
+                                        </h3>
+
                             }
                         </CardBody>
                     </Card>
                 </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     {
-                        loading == false &&
+                        loading == false && studentData.credits > 0 &&
                         <Card>
                             <CardBody calendar>
                                 <BigCalendar
