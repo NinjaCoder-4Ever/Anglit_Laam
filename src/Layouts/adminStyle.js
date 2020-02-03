@@ -3,7 +3,7 @@ import {
   drawerMiniWidth,
   transition,
   containerFluid
-} from "./material-dashboard-pro-react";
+} from "assets/jss/material-dashboard-pro-react.js";
 
 const appStyle = theme => ({
   wrapper: {
@@ -31,8 +31,9 @@ const appStyle = theme => ({
     width: "100%",
     overflowScrolling: "touch"
   },
+  /* change the position of the context in the page*/
   content: {
-    marginTop: "70px",
+    marginTop: "10px",
     padding: "30px 15px",
     minHeight: "calc(100vh - 123px)"
   },

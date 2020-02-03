@@ -13,7 +13,10 @@ import Container from '@material-ui/core/Container';
 import firebase from '../Config/fire';
 import {withRouter} from 'react-router-dom';
 import Copyright from "../Common/Copyright";
-import {setNewStudent} from "../Actions/firestore_functions";
+import {setNewStudent} from "../Actions/firestore_functions_student.js";
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
 
 
 
@@ -42,7 +45,7 @@ const SignUp = ({ history }) => {
 
     const handleSignUp = useCallback(async event => {
         event.preventDefault();
-        const { email, password ,phone, firstName, lastName} = event.target.elements;
+        const { email, password ,phone, firstName, lastName, englishType} = event.target.elements;
         try {
             await firebase
                 .auth()
@@ -54,6 +57,12 @@ const SignUp = ({ history }) => {
             alert(error);
         }
     }, [history]);
+
+
+    const [englishType, setEnglishType] = React.useState("English Level");
+    const handleDropDownChange = event => {
+        setEnglishType(event.target.value);
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -138,6 +147,21 @@ const SignUp = ({ history }) => {
                                 autoComplete="current-password"
                                 placeholder="Password"
                             />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                onChange={handleDropDownChange}
+                                id="demo-simple-select"
+                                value= {englishType}
+                                //placeholder='Select Friend'
+                                //label="Password"
+                            >
+                                <MenuItem value={0}>Kids</MenuItem>
+                                <MenuItem value={1}>Adults</MenuItem>
+                                <MenuItem value={2}>Business</MenuItem>
+                                <MenuItem value={3}>Spoken</MenuItem>
+                            </Select>
                         </Grid>
                     </Grid>
                     <Button

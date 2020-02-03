@@ -10,7 +10,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 
-import styles from "../../Layouts/tableStyle";
+import styles from "assets/jss/material-dashboard-pro-react/components/tableStyle";
 
 const useStyles = makeStyles(styles);
 
