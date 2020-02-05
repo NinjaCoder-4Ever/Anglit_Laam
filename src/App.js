@@ -7,11 +7,13 @@ import { AuthProvider } from "./Actions/auth";
 import PrivateRoute from "./Actions/privateRoute";
 import PrivateRouteStudent from "./Actions/privateRouteStudent";
 import PrivateRouteTeacher from "./Actions/privateRouteTeacher";
+import PrivateRouteAdmin from "./Actions/privateRouteAdmin";
 import firebase from 'Config/fire';
 
 /* Student imports */
 import StudentHomePage from "./Views/Student/student";
 import TeacherHomePage from "./Views/Teacher/teacher";
+import AdminHomePage from "./Views/Admin/admin";
 
 import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 
@@ -55,6 +57,11 @@ const App = () => {
                 <PrivateRouteTeacher exact path='/Teacher/myStudents' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/feedbackToFill' component = {TeacherHomePage}/>
                 <PrivateRouteTeacher exact path='/Teacher/contactUs' component = {TeacherHomePage}/>
+
+                {/* Admin Routes */}
+                <PrivateRouteAdmin exact path='/Admin' component = {AdminHomePage}/>
+                <PrivateRouteAdmin exact path='/Admin/homePage' component = {AdminHomePage}/>
+                <PrivateRouteAdmin exact path='/Admin/contactUs' component = {AdminHomePage}/>
 
                 {/* General Routing */}
                 <Route exact path='/' component = {logIn}/>
