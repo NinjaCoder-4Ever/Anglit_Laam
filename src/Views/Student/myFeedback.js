@@ -21,15 +21,27 @@ import CardBody from "Components/Card/CardBody.js";
 import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
+import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
 import Loader from "Components/Loader/Loader.js";
+import Transition from "react-transition-group/Transition";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import Close from "@material-ui/core/SvgIcon/SvgIcon";
+import DialogContent from "@material-ui/core/DialogContent";
+import Grid from "@material-ui/core/Grid";
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
 
 const useStyles = makeStyles(styles);
 function printFeedback(feedback) {
     return "this is feedback for the class"
 }
+const useStylesPopup = makeStyles(stylesPopup);
 export default  function ExtendedTables() {
+    const classesPopup = useStylesPopup();
+    const classes = useStyles();
     const [checked, setChecked] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
@@ -42,22 +54,41 @@ export default  function ExtendedTables() {
         subscription: '',
         teacher: {},
         uid: ''});
-    const [pastLessons,setPastLessons] = React.useState({});
+    const [pastLessonsTable,setPastLessonsTable] = React.useState([[]]);
+    const [modal, setModal] = React.useState(false);
+    const [feedbackData, setFeedbackData] = React.useState({
+        grammar_corrections: "",
+        pronunciation_corrections: "",
+        vocabulary: "",
+        home_work: "",
+        teacher_name: "",
+        lesson_date: "",
+    });
+
 
     React.useEffect(() => {
+        let lessonsTable = [];
+        getStudentByUID(firebase.auth().currentUser.uid).then((studentInfo)=>{
+            if(studentInfo != null){
+                setStudentData(studentInfo);
+            }
+            getAllPastLessonsForStudent(studentInfo.email).then((lessons)=>{
+                if(lessons != null){
+                    lessons.forEach(lesson => {
+                        let teacher_name = lesson.teacher_name;
+                        let lesson_date = new Date(lesson.date_utc.full_date_string).toString();
+                        let feedback = lesson.feedback;
+                        lessonsTable.push([
+                            teacher_name,
+                            lesson_date,
+                            getSimpleButtons(lesson.feedback_given, feedback, teacher_name, lesson_date)
+                        ]);
 
-        getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
-            if(res != null){
-                setStudentData(res);
-            }
-            console.log('getStudentByUID '+res);
-        });
-        getAllPastLessonsForStudent('some@mail.com').then((res)=>{
-            if(res != null){
-                setPastLessons(res);
-            }
-            console.log('past lessons: '+res);
-            setLoading(false);
+                    })
+                }
+                setPastLessonsTable(lessonsTable);
+                setLoading(false);
+            });
         });
     },[]);
 
@@ -65,56 +96,39 @@ export default  function ExtendedTables() {
         setAlert(null);
     };
 
-    const popFeedback = (line) => {
-        console.log("feedback: "+ line.feedback)
-
-        setAlert(
-            <SweetAlert
-
-                style={{ display: "block"}}
-                title="Feedback"
-                onConfirm={() => hideAlert()}
-                onCancel={() => hideAlert()}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-                confirmBtnText="close"
-            >
-                {printFeedback(line.lesson_data.feedback)}
-            </SweetAlert>
-        );
+    const popFeedback = (feedback, teacher_name, lesson_date) => {
+        let temp = {
+            grammar_corrections: feedback.grammar_corrections,
+            pronunciation_corrections: feedback.pronunciation_corrections,
+            vocabulary: feedback.vocabulary,
+            home_work: feedback.home_work,
+            teacher_name: teacher_name,
+            lesson_date: lesson_date,
+        };
+        setFeedbackData(temp);
+        setModal(true);
     };
 
-
-    const classes = useStyles();
-
-    function getSimpleButtons(line)
+    function getSimpleButtons(feedback_given, feedback, teacher_name, lesson_date)
     {
-        return  [
-            {color: "success", icon: Check, data: line}
-        ].map((prop, key) => {
-            return (
-                <Button
-                    color={prop.color}
-
-                    className={classes.actionButton}
-                    key={key}
-                    onClick={() => {
-                        popFeedback(prop.data);
-                    }}
-                >
-                    Feedback
-                </Button>
-            );
-        });
-    }
-    let lessons = Object.keys(pastLessons).map((lesson_id,index) => {
-        let teacher_name = pastLessons[lesson_id].teacher_name;
-        let lesson_date = new Date(pastLessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
-        let duration = pastLessons[lesson_id].duration;
         return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_date, index: lesson_id, lesson_data: pastLessons[lesson_id]})]
-        );
+            <Button
+                color={"info"}
+                disabled={!feedback_given}
+                className={classes.actionButton}
+                onClick={() => {
+                    popFeedback(feedback, teacher_name, lesson_date);
+                }}
+            >
+                Feedback
+            </Button>
+        )
+    };
 
-    });
+    const closeModal = () => {
+        document.getElementById("feedbackForm").reset();
+        setModal(false)
+    };
 
     return (
         <div>
@@ -123,14 +137,14 @@ export default  function ExtendedTables() {
             <GridContainer>
                 <GridItem xs={12}>
                     <Card>
-                        <CardHeader color="info" icon>
-                            <CardIcon color="info">
+                        <CardHeader color="info">
+                            <CardIcon color="rose">
                                 <Assignment />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Past Lessons</h4>
+                            <h4 className={classes.cardCategory}>Past Lessons and Feedback</h4>
                         </CardHeader>
                         {
-                            loading == true ?
+                            loading === true ?
                                 <Loader width={'20%'}/>:
                                 <CardBody>
                                     <Table
@@ -140,7 +154,7 @@ export default  function ExtendedTables() {
                                             "Duration"
                                         ]}
                                         tableData={
-                                            lessons
+                                            pastLessonsTable
                                         }
                                     />
                                 </CardBody>
@@ -148,6 +162,139 @@ export default  function ExtendedTables() {
                     </Card>
                 </GridItem>
             </GridContainer>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center
+                }}
+                open={modal}
+                transition={Transition}
+                keepMounted
+                onClose={() => closeModal()}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+                maxWidth={"90%"}
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Feedback</h3>
+                </DialogTitle>
+                <DialogContent>
+                    <form id="feedbackForm" className={classes.form} noValidate>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    autoComplete="teacher_name"
+                                    name="teacher_name"
+                                    variant="outlined"
+                                    fullWidth
+                                    id="teacher_name"
+                                    label="Teacher"
+                                    value={feedbackData.teacher_name}
+                                    autoFocus
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="lesson_date"
+                                    label="Date"
+                                    name="lesson_date"
+                                    value={new Date(feedbackData.lesson_date).toString()}
+                                    autoComplete="lesson_date"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Grammar Corrections</h5>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="grammar_corrections"
+                                    label="Grammar corrections that happened during the lesson."
+                                    name="Grammar Corrections"
+                                    value={feedbackData.grammar_corrections}
+                                    multiline={5}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Pronunciation Corrections</h5>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="pronunciation_corrections"
+                                    label="Pronunciation corrections from the lesson."
+                                    name="Pronunciation Corrections"
+                                    value={feedbackData.pronunciation_corrections}
+                                    multiline={5}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Vocabulary</h5>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="vocabulary"
+                                    label="New vocabulary that I learned in the lesson."
+                                    name="Vocabulary"
+                                    value={feedbackData.vocabulary}
+                                    multiline={5}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Home Work</h5>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="home_work"
+                                    label="Home work I got from the lesson."
+                                    name="Home Work"
+                                    value={feedbackData.home_work}
+                                    multiline={5}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid>
+                            <br/>
+                        </Grid>
+                    </form>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <GridContainer>
+                        <GridItem>
+                            <Button onClick={() => closeModal()} color="default">
+                                Close
+                            </Button>
+                        </GridItem>
+                    </GridContainer>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

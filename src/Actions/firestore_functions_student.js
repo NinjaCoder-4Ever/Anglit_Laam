@@ -319,7 +319,7 @@ export async function getAllPastLessonsForStudent(email){
     let today = new Date();
     let lastYear = new Date().setFullYear(today.getFullYear() - 1);
     const snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
-        .where("date_utc.full_date", ">=", lastYear).orderBy("date_utc.full_date").get();
+        .where("date_utc.full_date", ">=", new Date(lastYear)).orderBy("date_utc.full_date", 'desc').get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
         lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
@@ -329,7 +329,7 @@ export async function getAllPastLessonsForStudent(email){
     return pastLessons
 }
 
-export async function getLessonByDateForStudent(student_mail, local_date, teacher_mail=null){
+export async function getLessonByIDForStudent(student_mail, lesson_id){
     /**
      * Function returns the lesson data of a lesson in a given date.
      * Returns: {
@@ -354,10 +354,6 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
         lesson_id: lesson_id
     }
      */
-    if (teacher_mail == null){
-        teacher_mail = getStudentTeacher(student_mail).email;
-    }
-    let lesson_id = constructLessonId(student_mail, teacher_mail, convertLocalTimeToUtc(local_date));
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const doc = await studentLessons.doc(lesson_id).get();
 
