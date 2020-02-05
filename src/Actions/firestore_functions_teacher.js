@@ -372,11 +372,11 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
 
     let lessonInfo = await studentLessons.doc(lesson_id).get();
     let studentInfo = await db.collection('students').doc(student_mail).get();
-    if ( studentInfo.data().last_feedback_given === undefined ||
-        studentInfo.data().last_feedback_given.lesson_date < lessonInfo.data().date_utc.full_date){
+    if ( studentInfo.data().last_feedback_given === undefined || studentInfo.data().last_feedback_given.lesson_date === undefined ||
+        new Date(studentInfo.data().last_feedback_given.lesson_date) < new Date(lessonInfo.data().date_utc.full_date)){
         let last_feedback_updated = {
             lesson_id: lesson_id,
-            lesson_date: lessonInfo.data().date_utc.full_date,
+            lesson_date: lessonInfo.data().date_utc.full_date_string,
             teacher_mail: lessonInfo.data().teacher_mail,
             teacher_name: lessonInfo.data().teacher_name,
             grammar_corrections: lessonInfo.data().feedback.grammar_corrections,
@@ -437,18 +437,18 @@ export async function setLessonStarted(lesson_id, teacher_mail, student_mail, st
         });
     }
 
-    if (checkSameWeek(currentLocalDate, start_time)){
-        const teacherCollectionRef = db.collection('teachers');
-        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
-        let currentWeekLessons = teacherData.data().lessons_this_week;
-        let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
-        currentLessonInfo.started = true;
-        currentLessonInfo.no_show = false;
-        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
-        teacherCollectionRef.doc(teacher_mail).update({
-            lessons_this_week: currentWeekLessons
-        });
-    }
+    // if (checkSameWeek(currentLocalDate, start_time)){
+    //     const teacherCollectionRef = db.collection('teachers');
+    //     let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
+    //     let currentWeekLessons = teacherData.data().lessons_this_week;
+    //     let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
+    //     currentLessonInfo.started = true;
+    //     currentLessonInfo.no_show = false;
+    //     currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
+    //     teacherCollectionRef.doc(teacher_mail).update({
+    //         lessons_this_week: currentWeekLessons
+    //     });
+    // }
 }
 
 export async function unmarkLessonStatus(lesson_id, teacher_mail, student_mail, start_time){
@@ -487,18 +487,18 @@ export async function unmarkLessonStatus(lesson_id, teacher_mail, student_mail, 
         });
     }
 
-    if (checkSameWeek(currentLocalDate, start_time)){
-        const teacherCollectionRef = db.collection('teachers');
-        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
-        let currentWeekLessons = teacherData.data().lessons_this_week;
-        let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
-        currentLessonInfo.started = false;
-        currentLessonInfo.no_show = false;
-        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
-        teacherCollectionRef.doc(teacher_mail).update({
-            lessons_this_week: currentWeekLessons
-        });
-    }
+    // if (checkSameWeek(currentLocalDate, start_time)){
+    //     const teacherCollectionRef = db.collection('teachers');
+    //     let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
+    //     let currentWeekLessons = teacherData.data().lessons_this_week;
+    //     let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
+    //     currentLessonInfo.started = false;
+    //     currentLessonInfo.no_show = false;
+    //     currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
+    //     teacherCollectionRef.doc(teacher_mail).update({
+    //         lessons_this_week: currentWeekLessons
+    //     });
+    // }
 }
 
 export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, start_time){
@@ -536,18 +536,18 @@ export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, sta
         });
     }
 
-    if (checkSameWeek(currentLocalDate, start_time)){
-        const teacherCollectionRef = db.collection('teachers');
-        let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
-        let currentWeekLessons = teacherData.data().lessons_this_week;
-        let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
-        currentLessonInfo.no_show = true;
-        currentLessonInfo.started = false;
-        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
-        teacherCollectionRef.doc(teacher_mail).update({
-            lessons_this_week: currentWeekLessons
-        });
-    }
+    // if (checkSameWeek(currentLocalDate, start_time)){
+    //     const teacherCollectionRef = db.collection('teachers');
+    //     let teacherData = await teacherCollectionRef.doc(teacher_mail).get();
+    //     let currentWeekLessons = teacherData.data().lessons_this_week;
+    //     let currentLessonInfo = currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id];
+    //     currentLessonInfo.no_show = true;
+    //     currentLessonInfo.started = false;
+    //     currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = currentLessonInfo;
+    //     teacherCollectionRef.doc(teacher_mail).update({
+    //         lessons_this_week: currentWeekLessons
+    //     });
+    // }
 }
 
 export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday){
@@ -882,4 +882,17 @@ function getWorkingHoursForDay(working_hours, day) {
     }
 
     return working_hours_array
+}
+
+export async function getStudentLastFeedbackByMail(student_mail) {
+    const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
+    let studentLastLessonWithFeedback = []
+    let querySnapshot = await collectionRef.where('feedback_given', '==', true).
+    orderBy('date_utc.full_date', 'desc').limit(1).get();
+    querySnapshot.forEach(doc => {
+        studentLastLessonWithFeedback.push(doc.data());
+    });
+
+    return studentLastLessonWithFeedback[0]
+
 }

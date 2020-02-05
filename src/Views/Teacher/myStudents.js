@@ -26,7 +26,7 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Loader from "Components/Loader/Loader.js";
 import {getTeacherByUID} from 'Actions/firestore_functions_teacher.js'
-import {getStudentByMail} from "../../Actions/firestore_functions_student";
+import {getStudentLastFeedbackByMail} from "../../Actions/firestore_functions_teacher";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -48,25 +48,22 @@ export default  function ExtendedTables() {
     const [checked, setChecked] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
-    const [studentData,setStudentData] = React.useState({first_name: '',
-        last_name: '',
-        email: '',
-        credits: 0,
-        lessons_this_month: {},
-        phone_number: '',
-        subscription: '',
-        teacher: {},
-        uid: '',
-        last_feedback_given: {
-            lesson_id: "",
-            lesson_date: "",
-            teacher_mail: "",
-            teacher_name: "",
+    const [lessonData,setLessonData] = React.useState({
+        teacher_mail: "",
+        teacher_name: "",
+        student_mail: "",
+        student_name: "",
+        duration: "",
+        date_utc: {
+            full_date: "",
+            full_date_string: ""
+        },
+        feedback: {
             grammar_corrections: "",
             pronunciation_corrections: "",
             vocabulary: "",
             home_work: "",
-        }
+        },
     });
     const [studentTable, setStudentTable] = React.useState([]);
     const [teacherData,setTeacherData] = React.useState({
@@ -99,11 +96,18 @@ export default  function ExtendedTables() {
     };
 
     const popFeedback = (studentMail) => {
-        getStudentByMail(studentMail).then((studentInfo) => {
-            setStudentData(studentInfo);
+        setLoading(true);
+        getStudentLastFeedbackByMail(studentMail).then((lessonInfo) => {
+            setLessonData(lessonInfo);
             setModal(true);
+            setLoading(false);
     });
 
+    };
+
+    const closeModal = () => {
+        document.getElementById("feedbackForm").reset();
+        setModal(false)
     };
 
     function getSimpleButtons(data)
@@ -161,15 +165,15 @@ export default  function ExtendedTables() {
 
             <Dialog
                 classes={{
-                    root: classesPopup.center,
-                    paper: classesPopup.modal
+                    root: classesPopup.center
                 }}
                 open={modal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setModal(false)}
+                onClose={() => closeModal()}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
+                maxWidth={"90%"}
             >
                 <DialogTitle
                     id="classic-modal-slide-title"
@@ -181,99 +185,111 @@ export default  function ExtendedTables() {
                         className={classesPopup.modalCloseButton}
                         key="close"
                         aria-label="Close"
-                        color="info"
+                        color="transparent"
                         onClick={() => setModal(false)}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Last Feedback for {studentData.first_name} {studentData.last_name}</h3>
+                    <h3 className={classesPopup.modalTitle}>Feedback</h3>
                 </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={classesPopup.modalBody}
-                >
-                    <form className={classes.form} noValidate>
+                <DialogContent>
+                    <form id="feedbackForm" className={classes.form} noValidate>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     autoComplete="student_name"
                                     name="student_name"
                                     variant="outlined"
                                     fullWidth
                                     id="student_name"
-                                    label="Student "
+                                    label="Student"
+                                    value={lessonData.student_name}
                                     autoFocus
                                 />
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     variant="outlined"
                                     required
                                     fullWidth
                                     id="lesson_date"
-                                    label="Date: "
+                                    label="Date"
                                     name="lesson_date"
+                                    value={new Date(lessonData.date_utc.full_date_string)}
                                     autoComplete="lesson_date"
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <h5>Grammar Corrections</h5>
                                 <TextField
+                                    readOnly
                                     variant="outlined"
-                                    disabled
+                                    required
                                     fullWidth
                                     id="grammar_corrections"
                                     label="Grammar corrections that happened during the lesson."
                                     name="Grammar Corrections"
+                                    value={lessonData.feedback.grammar_corrections}
                                     multiline={5}
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <h5>Pronunciation Corrections</h5>
                                 <TextField
+                                    readOnly
                                     variant="outlined"
-                                    disabled
+                                    required
                                     fullWidth
                                     id="pronunciation_corrections"
                                     label="Pronunciation corrections from the lesson."
                                     name="Pronunciation Corrections"
+                                    value={lessonData.feedback.pronunciation_corrections}
                                     multiline={5}
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <h5>Vocabulary</h5>
                                 <TextField
+                                    readOnly
                                     variant="outlined"
-                                    disabled
+                                    required
                                     fullWidth
                                     id="vocabulary"
                                     label="New vocabulary that the student learned in the lesson."
                                     name="Vocabulary"
+                                    value={lessonData.feedback.vocabulary}
                                     multiline={5}
                                 />
                             </Grid>
                             <Grid item xs={12}>
                                 <h5>Home Work</h5>
                                 <TextField
+                                    readOnly
                                     variant="outlined"
-                                    disabled
+                                    required
                                     fullWidth
                                     id="home_work"
                                     label="Home work for the student."
                                     name="Home Work"
+                                    value={lessonData.feedback.home_work}
                                     multiline={5}
                                 />
                             </Grid>
                         </Grid>
+                        <Grid>
+                            <br/>
+                        </Grid>
                     </form>
+                    <GridContainer>
+                        <GridItem>
+                            <Button onClick={() => closeModal()} color="default">
+                                Close
+                            </Button>
+                        </GridItem>
+                    </GridContainer>
                 </DialogContent>
-                <DialogActions
-                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
-                >
-                    <Button onClick={() => setModal(false)}>Close</Button>
-                </DialogActions>
             </Dialog>
         </div>
     );
