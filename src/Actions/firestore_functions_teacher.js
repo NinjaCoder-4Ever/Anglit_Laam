@@ -29,7 +29,7 @@ const MONTH_DAYS = {
 
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
-export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours, skype_username){
+export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours, skype_username, category){
     /**
      * Function enters a new teacher to the "teachers" collection.
      * Also enters the teacher to the "users" collection.
@@ -55,7 +55,8 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         working_hours: parsed_working_hours,
         working_days: working_days,
         last_log_on: new Date(),
-        skype_username: skype_username
+        skype_username: skype_username,
+        category: category
     };
 
     let usersData = {
@@ -337,7 +338,7 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
     const futureFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     const snapshot = await collectionRef.where('feedback_given', '==', false)
-        .where('started', '==', true).get();
+        .where('started', '==', true).orderBy("date_utc.full_date").get();
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -371,7 +372,8 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
 
     let lessonInfo = await studentLessons.doc(lesson_id).get();
     let studentInfo = await db.collection('students').doc(student_mail).get();
-    if (studentInfo.data().last_feedback_given.lesson_date < lessonInfo.data().date_utc.full_date){
+    if ( studentInfo.data().last_feedback_given === undefined ||
+        studentInfo.data().last_feedback_given.lesson_date < lessonInfo.data().date_utc.full_date){
         let last_feedback_updated = {
             lesson_id: lesson_id,
             lesson_date: lessonInfo.data().date_utc.full_date,
@@ -382,10 +384,22 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
             vocabulary: lessonInfo.data().feedback.vocabulary,
             home_work: lessonInfo.data().feedback.home_work,
         };
-        db.collection('student').doc(student_mail).update({
+        if (lessonInfo.data().teacher_name === undefined){
+            last_feedback_updated["teacher_name"] = "";
+        }
+        db.collection('students').doc(student_mail).update({
             last_feedback_given: last_feedback_updated
         });
     }
+}
+
+export async function saveFeedback(feedback, lesson_id, teacher_mail) {
+    const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
+    teacherLessons.doc(lesson_id).update({
+        "feedback": feedback,
+    }).then(function () {
+        console.log("Feedback updated for teacher")
+    });
 }
 
 export async function setLessonStarted(lesson_id, teacher_mail, student_mail, start_time){

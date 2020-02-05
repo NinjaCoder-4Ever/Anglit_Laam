@@ -29,7 +29,7 @@ const MONTH_DAYS = {
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
 
-export async function setNewStudent(uid, email, firstName, lastName, phoneNumber){
+export async function setNewStudent(uid, email, firstName, lastName, phoneNumber, category){
     /**
      *Function enters a new student to the "students" collection.
      * Chooses a teacher for the student (the one with least students)
@@ -56,11 +56,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             pronunciation_corrections: "",
             vocabulary: "",
             home_work: "",
-        }
+        },
+        category: category
     };
     let student_name = firstName + " " + lastName;
 
-    let teacherInfo = await chooseTeacherForStudent(email, student_name);
+    let teacherInfo = await chooseTeacherForStudent(email, student_name, category);
     newStudentData.teacher = {
         first_name: teacherInfo.first_name,
         last_name: teacherInfo.last_name,
@@ -211,7 +212,7 @@ export async function addStudentToTeacher(teacherMail, studentMail, studentName)
     });
 }
 
-export async function chooseTeacherForStudent(studentMail, studentName) {
+export async function chooseTeacherForStudent(studentMail, studentName, category) {
     /**
      * Function goes through all the teachers in the "teachers" collection and and brings back the info about
      * the teacher with the least amount of students.
@@ -220,14 +221,14 @@ export async function chooseTeacherForStudent(studentMail, studentName) {
      */
     const chosenTeacher = [];
     const teacherCollection = db.collection('teachers');
-    const snapshot = await teacherCollection.get();
+    const snapshot = await teacherCollection.where('category', 'array-contains', category).get();
     let minimalStudents = 10000000000000000000;
     snapshot.forEach(doc => {
         let studentArray = doc.data().students;
         let numberOfStudents = studentArray.length;
         if (numberOfStudents <= minimalStudents) {
 
-            if (chosenTeacher.length > 0){
+            if (chosenTeacher.length > 0) {
                 chosenTeacher.pop();
             }
 

@@ -17,14 +17,14 @@
 */
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
+import Person from "@material-ui/icons/Person";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import People from "@material-ui/icons/PeopleAlt";
+import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
+import Calendar from "@material-ui/icons/Today";
 import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
-import HomePage from './Views/Teacher/homePage'
-import FeedbackToFill from './Views/Teacher/feedbackToFill'
-import MyStudents from './Views/Teacher/myStudents'
-import ContactUs from './Views/Teacher/contactUs';
+import HomePage from './Views/Admin/homePage'
+import ContactUs from './Views/Admin/contactUs'
 
 const dashboardRoutes = [
     {
@@ -32,28 +32,14 @@ const dashboardRoutes = [
         name: "Home Page",
         icon: Dashboard,
         component: HomePage,
-        layout: "/Teacher"
-    },
-    {
-        path: "/feedbackToFill",
-        name: "Feedback To Fill",
-        icon: LibraryBooks,
-        component: FeedbackToFill,
-        layout: "/Teacher"
-    },
-    {
-        path: "/myStudents",
-        name: "My Students",
-        icon: People,
-        component: MyStudents,
-        layout: "/Teacher"
+        layout: "/Admin"
     },
     {
         path: "/contactUs",
         name: "Contact Us",
         icon: Help,
         component: ContactUs,
-        layout: "/Teacher"
+        layout: "/Admin"
     }
 ];
 
