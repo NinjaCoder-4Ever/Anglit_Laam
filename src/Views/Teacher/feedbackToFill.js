@@ -201,7 +201,7 @@ export default  function ExtendedTables(callback, deps) {
                             <CardIcon color="rose">
                                 <Assignment />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Feedback To Fill</h4>
+                            <h4 className={classes.cardCategory}>Feedback To Fill</h4>
                         </CardHeader>
                         {
                             loading === true ?
