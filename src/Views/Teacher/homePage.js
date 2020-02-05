@@ -456,7 +456,7 @@ export default function Calendar({history}) {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     autoComplete="student_name"
                                     name="student_name"
                                     variant="outlined"
@@ -469,7 +469,7 @@ export default function Calendar({history}) {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     variant="outlined"
                                     required
                                     fullWidth
@@ -533,6 +533,10 @@ export default function Calendar({history}) {
                             <br/>
                         </Grid>
                     </form>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
                     <GridContainer>
                         <GridItem>
                             <Button onClick={() => warningWithConfirmMessage()} color="info">
@@ -550,7 +554,7 @@ export default function Calendar({history}) {
                             </Button>
                         </GridItem>
                     </GridContainer>
-                </DialogContent>
+                </DialogActions>
             </Dialog>
         </div>
     );

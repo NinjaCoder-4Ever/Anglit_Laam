@@ -31,6 +31,7 @@ import TextField from "@material-ui/core/TextField";
 import Transition from "react-transition-group/Transition";
 import SweetAlert from "react-bootstrap-sweetalert";
 import Loader from "../../Components/Loader/Loader";
+import DialogActions from "@material-ui/core/DialogActions";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -257,7 +258,7 @@ export default  function ExtendedTables(callback, deps) {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     autoComplete="student_name"
                                     name="student_name"
                                     variant="outlined"
@@ -270,7 +271,7 @@ export default  function ExtendedTables(callback, deps) {
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
-                                    disabled
+                                    readOnly
                                     variant="outlined"
                                     required
                                     fullWidth
@@ -338,24 +339,28 @@ export default  function ExtendedTables(callback, deps) {
                             <br/>
                         </Grid>
                     </form>
-                <GridContainer>
-                    <GridItem>
-                    <Button onClick={() => warningWithConfirmMessage()} color="info">
-                        Submit Feedback
-                    </Button>
-                </GridItem>
-                    <GridItem>
-                        <Button onClick={() => saveTempFeedback()} color="rose">
-                            Save Feedback
-                        </Button>
-                    </GridItem>
-                    <GridItem>
-                        <Button onClick={() => closeModal()} color="default">
-                            Close
-                        </Button>
-                    </GridItem>
-                </GridContainer>
                 </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <GridContainer>
+                        <GridItem>
+                            <Button onClick={() => warningWithConfirmMessage()} color="info">
+                                Submit Feedback
+                            </Button>
+                        </GridItem>
+                        <GridItem>
+                            <Button onClick={() => saveTempFeedback()} color="rose">
+                                Save Feedback
+                            </Button>
+                        </GridItem>
+                        <GridItem>
+                            <Button onClick={() => closeModal()} color="default">
+                                Close
+                            </Button>
+                        </GridItem>
+                    </GridContainer>
+                </DialogActions>
             </Dialog>
         </div>
     );

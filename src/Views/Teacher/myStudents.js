@@ -282,6 +282,11 @@ export default  function ExtendedTables() {
                             <br/>
                         </Grid>
                     </form>
+
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
                     <GridContainer>
                         <GridItem>
                             <Button onClick={() => closeModal()} color="default">
@@ -289,7 +294,7 @@ export default  function ExtendedTables() {
                             </Button>
                         </GridItem>
                     </GridContainer>
-                </DialogContent>
+                </DialogActions>
             </Dialog>
         </div>
     );
