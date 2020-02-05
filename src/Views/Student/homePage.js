@@ -85,14 +85,17 @@ export default  function ExtendedTables({history}) {
                                 setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
                                 setLessonsButton();
                             }
-
+                            let index = -1;
                             let lessonsTable = Object.keys(lessons).map((lesson_id,index) => {
                                 let teacher_name = lessons[lesson_id].teacher_name;
+                                let teacher_mail = lessons[lesson_id].teacher_mail;
                                 let lesson_full_date = new Date(lessons[lesson_id].date_utc.full_date_string);
                                 let lesson_date = new Date(lessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
                                 let duration = lessons[lesson_id].duration;
+                                index++;
                                 return (
-                                    [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
+                                    [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date,
+                                        lesson_id: lesson_id, teacher_mail: teacher_mail, index: index})]
                                 );
                             });
                             setNextLessonsTable(lessonsTable)
@@ -113,18 +116,19 @@ export default  function ExtendedTables({history}) {
 
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
-        let teacher_mail = studentData.teacher.email;
+        let teacher_mail = line.teacher_mail;
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
-        if (new Date(lesson_date) === new Date(nextLessonDate)){
+        if (new Date(lesson_date).toString() === new Date(nextLessonDate).toString()){
             delete nextLesson[Object.keys(nextLesson)[0]];
             let nextLessonData = nextLesson[Object.keys(nextLesson)[0]];
             console.log(nextLessonData);
             setNextLessonDate(new Date(nextLessonData.date_utc.full_date_string).toString().slice(0, 21));
         }
         else {
-            delete nextLesson[line.index];
+            delete nextLesson[line.lesson_id];
+            delete nextLessonsTable[line.index];
         }
 
         setChecked(checked+1);

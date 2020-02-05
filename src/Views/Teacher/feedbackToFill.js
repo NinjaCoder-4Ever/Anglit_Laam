@@ -29,6 +29,8 @@ import Dialog from "@material-ui/core/Dialog";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Transition from "react-transition-group/Transition";
+import SweetAlert from "react-bootstrap-sweetalert";
+import Loader from "../../Components/Loader/Loader";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -39,17 +41,22 @@ export default  function ExtendedTables(callback, deps) {
         last_name: '',
         students:[]
     });
+    const [loading, setLoading] = React.useState(true);
     const [modal, setModal] = React.useState(false);
     const [feedbacks,setFeedbacks] = React.useState([]);
+    const [reloadToken, setReloadToken] = React.useState(true);
     const [selectedLesson, setSelectedLesson] = React.useState({
         student_name:"",
-        date_utc: {
-            full_date: ""
-        },
+        lesson_date: "",
         duration: "",
         student_mail: "",
         teacher_mail: "",
-        lesson_id: ""
+        lesson_id: "",
+        grammar_corrections: null,
+        pronunciation_corrections: null,
+        vocabulary: null,
+        home_work: null,
+        index: ""
     });
 
     const classesPopup = useStylesPopup();
@@ -60,107 +67,158 @@ export default  function ExtendedTables(callback, deps) {
             setTeacherData(teacherInfo);
             getFeedbackNecessaryLessonsForTeacher(teacherInfo.email).then(lessons => {
                 let feedbacksInfo = [];
+                let index = 0;
                 lessons.forEach(lesson => {
                     let lessonArray = [];
                     lessonArray.push(lesson.student_name);
                     lessonArray.push(new Date(lesson.date_utc.full_date_string).toString());
                     lessonArray.push(lesson.duration);
-                    lessonArray.push(getSimpleButtons(lesson));
+                    lessonArray.push(getSimpleButtons(lesson.student_mail, lesson.teacher_mail, lesson.lesson_id,
+                        lesson.date_utc.full_date_string, lesson.duration, lesson.student_name, lesson.feedback, index));
+                    index++;
                     feedbacksInfo.push(lessonArray);
                 });
                 setFeedbacks(feedbacksInfo);
+                setLoading(false);
             });
         })
-    },[]);
+    },[reloadToken]);
 
 
-    function getSimpleButtons(lessonData)
-    {
-        return  [
-            {color: "info", icon: Check, data: lessonData}
-        ].map((prop, key) => {
-            return (
-                <Button
-                    color={prop.color}
-
-                    className={classes.actionButton}
-                    key={key}
-                    onClick={() => {modalPopUp(lessonData)}}
-                >
-                    Submit Feedback
-                </Button>
-            );
-        });
+    function getSimpleButtons(student_mail, teacher_mail, lesson_id, lesson_date, duration, student_name, feedback, index) {
+        return (
+            <Button
+                color="info"
+                className={classes.actionButton}
+                onClick={() => {modalPopUp(student_mail, teacher_mail, lesson_id, lesson_date, duration, student_name, feedback, index)}}
+            >
+                Submit Feedback
+            </Button>
+        );
     }
 
-    const modalPopUp = (lessonData) => {
-        setSelectedLesson(lessonData);
+    const modalPopUp = (student_mail, teacher_mail, lesson_id, lesson_date, duration, student_name, feedback, index) => {
+        console.log(student_mail);
+        let lessonInfo = {
+            student_mail: student_mail,
+            teacher_mail: teacher_mail,
+            lesson_id: lesson_id,
+            lesson_date: lesson_date,
+            duration: duration,
+            student_name: student_name,
+            grammar_corrections: feedback.grammar_corrections,
+            pronunciation_corrections: feedback.pronunciation_corrections,
+            vocabulary: feedback.vocabulary,
+            home_work: feedback.home_work,
+            index: index
+        };
+        setSelectedLesson(lessonInfo);
         setModal(true);
     };
 
-    const submitFeedback =(grammar, pronunciation, vocabulary, home_work, save=false) => {
+    const submitFeedback =() => {
+        var formInfo = document.getElementById("feedbackForm");
         let student_mail = selectedLesson.student_mail;
         let teacher_mail = selectedLesson.teacher_mail;
         let lesson_id = selectedLesson.lesson_id;
         let feedback = {
-            grammar_corrections: grammar.value,
-            pronunciation_corrections: pronunciation.value,
-            vocabulary: vocabulary.value,
-            home_work: home_work.value,
+            grammar_corrections: formInfo.elements["grammar_corrections"].value,
+            pronunciation_corrections: formInfo.elements["pronunciation_corrections"].value,
+            vocabulary: formInfo.elements["vocabulary"].value,
+            home_work: formInfo.elements["home_work"].value,
         };
-
-        if (save){
-            saveFeedback(feedback, lesson_id, teacher_mail);
-        }
-        else {
-            setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
-        }
+        setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
+        let tempFeedbacks = feedbacks;
+        delete tempFeedbacks[selectedLesson.index];
+        console.log(tempFeedbacks);
+        setFeedbacks(tempFeedbacks);
+        formInfo.reset();
+        setModal(false);
+        confirmMessage()
     };
 
-    const handleSubmit = useCallback(event => {
-        console.log("submit");
-        event.preventDefault();
-        const {
-            student_name, lesson_date, grammar_corrections, pronunciation_corrections,
-            vocabulary, home_work
-        } = event.target.elements;
-        submitFeedback(grammar_corrections, pronunciation_corrections, vocabulary, home_work);
-    }, deps);
+    const closeModal = () => {
+        document.getElementById("feedbackForm").reset();
+        setModal(false)
+    };
 
-    const handleSave = useCallback(event => {
-        console.log("save");
-        event.preventDefault();
-        const {
-            student_name, lesson_date, grammar_corrections, pronunciation_corrections,
-            vocabulary, home_work
-        } = event.target.elements;
-        submitFeedback(grammar_corrections, pronunciation_corrections, vocabulary, home_work);
-    }, deps);
+    const saveTempFeedback = () => {
+        setLoading(true);
+        var formInfo = document.getElementById("feedbackForm");
+        let teacher_mail = selectedLesson.teacher_mail;
+        let lesson_id = selectedLesson.lesson_id;
+        let feedback = {
+            grammar_corrections: formInfo.elements["grammar_corrections"].value,
+            pronunciation_corrections: formInfo.elements["pronunciation_corrections"].value,
+            vocabulary: formInfo.elements["vocabulary"].value,
+            home_work: formInfo.elements["home_work"].value,
+        };
+        saveFeedback(feedback, lesson_id, teacher_mail);
+        formInfo.reset();
+        setReloadToken(!reloadToken);
+        setModal(false);
+    };
 
+    const confirmMessage = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Lesson Feedback Submitted!"
+                onConfirm={() => setAlert(null)}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+                confirmBtnText="OK!"
+            >
+            </SweetAlert>
+        );
+    };
+    const warningWithConfirmMessage = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="Are you sure you want to submit the feedback?"
+                onConfirm={() => submitFeedback()}
+                onCancel={() => setAlert(null)}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+                cancelBtnCssClass={classes.button + " " + classes.danger}
+                confirmBtnText="Yes, Submit"
+                cancelBtnText="No wait..."
+                showCancel
+            >
+                Once submitted no additional changes in the feedback are possible!
+            </SweetAlert>
+        );
+    };
 
     return (
         <div>
+            {alert}
             <GridContainer>
                 <GridItem xs={12}>
                     <Card>
-                        <CardHeader color="info" icon>
+                        <CardHeader color="info">
                             <CardIcon color="rose">
                                 <Assignment />
                             </CardIcon>
-                            <h4 className={classes.cardIconTitle}>Past Lessons</h4>
+                            <h4 className={classes.cardIconTitle}>Feedback To Fill</h4>
                         </CardHeader>
-                        <CardBody>
-                            <Table
-                                tableHead={[
-                                    "Student",
-                                    "Date",
-                                    "Duration",
-                                ]}
-                                tableData={
-                                    feedbacks
-                                }
-                            />
-                        </CardBody>
+                        {
+                            loading === true ?
+                                <Loader width={'20%'}/> :
+                                <CardBody>
+                                    <Table
+                                        tableHead={[
+                                            "Student",
+                                            "Date",
+                                            "Duration",
+                                        ]}
+                                        tableData={
+                                            feedbacks
+                                        }
+                                    />
+                                </CardBody>
+                        }
                     </Card>
                 </GridItem>
             </GridContainer>
@@ -172,10 +230,10 @@ export default  function ExtendedTables(callback, deps) {
                 open={modal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setModal(false)}
+                onClose={() => closeModal()}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
-                fullScreen = {true}
+                maxWidth={"90%"}
             >
                 <DialogTitle
                     id="classic-modal-slide-title"
@@ -195,7 +253,7 @@ export default  function ExtendedTables(callback, deps) {
                     <h3 className={classesPopup.modalTitle}>Submit Feedback</h3>
                 </DialogTitle>
                 <DialogContent>
-                    <form onSubmit={handleSubmit} className={classes.form} noValidate>
+                    <form id="feedbackForm" className={classes.form} noValidate>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -205,7 +263,8 @@ export default  function ExtendedTables(callback, deps) {
                                     variant="outlined"
                                     fullWidth
                                     id="student_name"
-                                    label="Student "{...selectedLesson.student_name}
+                                    label="Student"
+                                    value={selectedLesson.student_name}
                                     autoFocus
                                 />
                             </Grid>
@@ -216,7 +275,8 @@ export default  function ExtendedTables(callback, deps) {
                                     required
                                     fullWidth
                                     id="lesson_date"
-                                    label="Date: "{...selectedLesson.date_utc.full_date}
+                                    label="Date"
+                                    value={new Date(selectedLesson.lesson_date).toString()}
                                     name="lesson_date"
                                     autoComplete="lesson_date"
                                 />
@@ -230,6 +290,7 @@ export default  function ExtendedTables(callback, deps) {
                                     id="grammar_corrections"
                                     label="Grammar corrections that happened during the lesson."
                                     name="Grammar Corrections"
+                                    defaultValue={selectedLesson.grammar_corrections}
                                     multiline={5}
                                 />
                             </Grid>
@@ -242,6 +303,7 @@ export default  function ExtendedTables(callback, deps) {
                                     id="pronunciation_corrections"
                                     label="Pronunciation corrections from the lesson."
                                     name="Pronunciation Corrections"
+                                    defaultValue={selectedLesson.pronunciation_corrections}
                                     multiline={5}
                                 />
                             </Grid>
@@ -254,6 +316,7 @@ export default  function ExtendedTables(callback, deps) {
                                     id="vocabulary"
                                     label="New vocabulary that the student learned in the lesson."
                                     name="Vocabulary"
+                                    defaultValue={selectedLesson.vocabulary}
                                     multiline={5}
                                 />
                             </Grid>
@@ -266,29 +329,32 @@ export default  function ExtendedTables(callback, deps) {
                                     id="home_work"
                                     label="Home work for the student."
                                     name="Home Work"
+                                    defaultValue={selectedLesson.home_work}
                                     multiline={5}
                                 />
                             </Grid>
                         </Grid>
                         <Grid>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                color="info"
-                                className={classes.submit}
-                            >
-                                Submit Feedback
-                            </Button>
-                            <Button
-                                onClick={handleSave.bind(this)}
-                                variant="contained"
-                                color="default"
-                                className={classes.submit}
-                            >
-                                Save Feedback
-                            </Button>
+                            <br/>
                         </Grid>
                     </form>
+                <GridContainer>
+                    <GridItem>
+                    <Button onClick={() => warningWithConfirmMessage()} color="info">
+                        Submit Feedback
+                    </Button>
+                </GridItem>
+                    <GridItem>
+                        <Button onClick={() => saveTempFeedback()} color="rose">
+                            Save Feedback
+                        </Button>
+                    </GridItem>
+                    <GridItem>
+                        <Button onClick={() => closeModal()} color="default">
+                            Close
+                        </Button>
+                    </GridItem>
+                </GridContainer>
                 </DialogContent>
             </Dialog>
         </div>
