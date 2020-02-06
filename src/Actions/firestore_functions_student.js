@@ -1,5 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
+import {getAllAdminMails} from "./firestore_functions_admin";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -75,14 +76,54 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         uid: uid
     } ;
 
+    let adminStudentInfo = {
+        student_name: firstName + " " + lastName,
+        student_mail: email,
+        teacher_name: teacherInfo.first_name + " " + teacherInfo.last_name,
+        teacher_mail: teacherInfo.email,
+        category: category,
+        phone_number: phoneNumber,
+        uid: uid,
+        subscription: "PAL",
+        credits: 1,
+        last_log_on: new Date()
+    };
+
     Promise.all([
         db.collection('students').doc(email).set(newStudentData).then(function() {
             console.log('Added student with ID: ', email)
         }),
         db.collection('users').doc(email).set(usersData).then(function () {
             console.log('Added user to users collection')
-        })
+        }),
     ]);
+    updateAdminStudentData(adminStudentInfo);
+}
+
+async function updateAdminStudentData(studentData) {
+    let studentMail = studentData.student_mail;
+    let adminMails = getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminData.data().all_students;
+    students[studentMail] = studentData;
+
+    // update the teacher's list to have the student
+    let teachers = adminData.data().all_teachers;
+    for (const teacherMail of Object.keys(teachers)){
+        if (teacherMail === studentData.teacher_mail){
+            teachers[teacherMail].students.push({
+                student_mail: studentMail,
+                student_name: studentData.student_name
+            })
+        }
+    }
+
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students,
+            all_teachers: teachers
+        });
+    }
 }
 
 export function updateFirstTimeEntry(student_mail) {

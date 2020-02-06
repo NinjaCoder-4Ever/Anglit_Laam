@@ -1,6 +1,7 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
 import {updateStudentMonthLessons} from "./firestore_functions_student";
+import {getAllAdminMails} from "./firestore_functions_admin";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -65,6 +66,16 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         uid: uid
     };
 
+    let adminTeacherData = {
+        category: category,
+        last_log_on: new Date(),
+        students: [],
+        teacher_name: firstName + " " + lastName,
+        teacher_mail: email,
+        uid: uid,
+        working_days: working_days
+    };
+
     Promise.all([
         db.collection('teachers').doc(email).set(newTeacherData).then(function() {
             console.log('Added teacher with ID: ', email)
@@ -73,6 +84,20 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
             console.log('Added user to users collection')
         })
     ]);
+    updateAdminDataForTeacher(adminTeacherData);
+}
+
+async function updateAdminDataForTeacher(teacherData) {
+    let teacherMail = teacherData.teacher_mail;
+    let adminMails = await getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminData.data().all_teachers;
+    teachers[teacherMail] = teacherData;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        })
+    }
 }
 
 function setWorkingHours(working_hours){
