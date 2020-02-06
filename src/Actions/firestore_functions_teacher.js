@@ -88,17 +88,16 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
 }
 
 async function updateAdminDataForTeacher(teacherData) {
-    getAllAdminMails().then(adminMails => {
-        for (const mail of adminMails) {
-            db.collection('admins').doc(mail).get().then(function (doc) {
-                let teachers = doc.data().all_teachers;
-                teachers.push(teacherData);
-                db.collection('admin').doc(mail).update({
-                    all_teachers: teachers
-                })
-            });
-        }
-    });
+    let teacherMail = teacherData.teacher_mail;
+    let adminMails = await getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminData.data().all_teachers;
+    teachers[teacherMail] = teacherData;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        })
+    }
 }
 
 function setWorkingHours(working_hours){

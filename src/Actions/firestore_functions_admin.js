@@ -1,6 +1,11 @@
 import {db} from '../Config/fire'
 import {getTeacherByMail} from "./firestore_functions_teacher";
-import {chooseTeacherForStudent, getStudentByMail} from "./firestore_functions_student";
+import {
+    addStudentToTeacher,
+    chooseTeacherForStudent,
+    getStudentByMail,
+    updateCredits
+} from "./firestore_functions_student";
 
 export async function getAdminByUid(uid){
     let adminInfo = [];
@@ -29,23 +34,35 @@ export async function deleteTeacher(teacher_mail) {
 
     // change students teacher
     let students = teacherData.students;
+    for (const student in students){
+        await changeTeacherForStudent(student.student_mail, null, true);
+    }
 
-    students.forEach(student => {
-        changeTeacherForStudent(student.student_mail, null, true)
-    })
+    let adminMails = getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    delete teachers[teacher_mail];
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
 }
 
 async function changeTeacherForStudent(student_mail, teacher_mail = null, teacher_deleted = false) {
     let studentData = await getStudentByMail(student_mail);
+    let old_teacher_mail = studentData.teacher.email;
     let student_name = studentData.first_name + " " + studentData.last_name;
     let student_category = studentData.category;
     let teacherInfo = {};
-    // choose a teacher for the student if one is not picked yet.
+    // choose a teacher for the student if one is not picked yet - this function also adds the student to the teacher's list of students.
     if (teacher_mail === null) {
         teacherInfo = await chooseTeacherForStudent(student_mail, student_name, student_category);
     }
+    // if a teacher was already picked - get his info and add the student to his list.
     else{
         teacherInfo = await getTeacherByMail(teacher_mail);
+        await addStudentToTeacher(teacherInfo.email, student_mail, student_name);
     }
 
     // update the new teacher data in the student's doc.
@@ -58,47 +75,60 @@ async function changeTeacherForStudent(student_mail, teacher_mail = null, teache
     db.collection('students').doc(student_mail).update({
         teacher: studentTeacherData
     });
+    // clear all future lessons of the student and the old teacher.
+    await clearAllLessons(student_mail, old_teacher_mail, teacher_deleted);
 
     // go through all the admins
-    let allAdmins = await getAllAdminMails();
-    allAdmins.forEach(adminMail => {
-        let adminData = db.collection('admins').doc(adminMail).get();
-        let teachers = adminData.data().all_teachers;
-        let newTeachers = [];
-        teachers.forEach(teacher => {
-            // update the students array for the new teacher (in admin's doc)
-            if (teacher.teacher_mail === teacherInfo.email){
-                teacher.students.push({
-                    student_mail: student_mail,
-                    student_name: student_name
-                });
-            }
-            // if the old teacher was not deleted
-            if (!teacher_deleted){
-                // take the student out of the old teacher's students array list (in admin doc)
-                if (teacher.teacher_mail === studentData.teacher.email){
-                    let students = teacher.students;
-                    let newStudentsList = [];
-                    students.forEach(student => {
-                        if (student.student_mail !== student_mail){
-                            newStudentsList.push(student);
-                        }
-                    });
-                    teacher.students = newStudentsList;
-                }
-                newTeachers.push(teacher)
-            }
-            // if the old teacher was deleted take him out of the teachers array (in the admin doc)
-            else {
-                if (teacher.teacher_mail !== studentData.teacher.email){
-                    newTeachers.push(teacher)
-                }
-            }
+    let allAdminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(allAdminMails[0]).get();
+    let students = adminInfo.data().all_students;
+    let teachers = adminInfo.data().all_teachers;
 
-        });
-        // update teachers list in admins doc
-        db.collection('admins').doc(adminMail).update({
-            all_teachers: newTeachers
-        });
+    // update student's new teacher info
+    students[student_mail]['teacher_mail'] = teacherInfo.email;
+    students[student_mail]['teacher_name'] = teacherInfo.first_name + " " + teacherInfo.last_name;
+
+    // update the new teacher's student list
+    teachers[teacherInfo.email]['students'].push({
+        'student_mail': student_mail,
+        'student_name': student_name
     });
+
+    // if the old teacher is not deleted take the student out of his list.
+    if (!teacher_deleted){
+        let old_teacher_new_student_list = [];
+        teachers[old_teacher_mail].students.forEach(student => {
+            if (student.student_mail !== student_mail){
+                old_teacher_new_student_list.push(student);
+            }
+        });
+        teachers[old_teacher_mail].students = old_teacher_new_student_list;
+    }
+
+    for (const mail in allAdminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students,
+            all_teachers: teachers
+        })
+    }
+}
+
+async function clearAllLessons(student_mail, teacher_mail, deleted = false){
+    let creditsToReturn = 0;
+    let lessons = [];
+    let snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
+        .where('student_mail', '==', student_mail)
+        .where('teacher_mail', '==', teacher_mail)
+        .where('date_utc.full_date', '>=', new Date()).get();
+    snapshot.forEach(doc => {
+        lessons.push(doc.data());
+    });
+    creditsToReturn = lessons.length;
+    for (const lesson of lessons){
+        db.collection('students').doc(student_mail).collection('student_lessons').doc(lesson.lesson_id).delete();
+        if (!deleted){
+            db.collection('teachers').doc(teacher_mail).collection('teacher_lessons').doc(lesson.lesson_id).delete();
+        }
+    }
+    await updateCredits(student_mail, creditsToReturn);
 }

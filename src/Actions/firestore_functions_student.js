@@ -97,21 +97,33 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             console.log('Added user to users collection')
         }),
     ]);
-    updateAdminData(adminStudentInfo);
+    updateAdminStudentData(adminStudentInfo);
 }
 
-async function updateAdminData(studentData) {
-    getAllAdminMails().then(adminMails => {
-        for (const mail of adminMails) {
-            db.collection('admins').doc(mail).get().then(function (doc) {
-                let students = doc.data().all_students;
-                students.push(studentData);
-                db.collection('admin').doc(mail).update({
-                    all_students: students
-                })
-            });
+async function updateAdminStudentData(studentData) {
+    let studentMail = studentData.student_mail;
+    let adminMails = getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminData.data().all_students;
+    students[studentMail] = studentData;
+
+    // update the teacher's list to have the student
+    let teachers = adminData.data().all_teachers;
+    for (const teacherMail of Object.keys(teachers)){
+        if (teacherMail === studentData.teacher_mail){
+            teachers[teacherMail].students.push({
+                student_mail: studentMail,
+                student_name: studentData.student_name
+            })
         }
-    });
+    }
+
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students,
+            all_teachers: teachers
+        });
+    }
 }
 
 export function updateFirstTimeEntry(student_mail) {
