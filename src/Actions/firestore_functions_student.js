@@ -507,6 +507,7 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
             lessons_this_week: currentWeekLessons
         });
     }
+    await updateCredits(student_mail, -1);
     return true
 }
 

@@ -167,11 +167,6 @@ export default function Calendar({history}) {
            }
             setGetEvents(!getEvents);
         });
-        updateCredits(studentData.email, studentData.credits - 1).then(res => {
-            const data = studentData;
-            data.credits = studentData.credits - 1;
-            setstudentData(data);
-        });
     };
 
     const closeAlert = () => {
