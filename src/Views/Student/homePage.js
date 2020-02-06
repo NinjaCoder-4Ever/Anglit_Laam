@@ -55,7 +55,6 @@ export default  function ExtendedTables({history}) {
         teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''});
     const [modal, setModal] = React.useState(false);
-    const [nextLessonsTable, setNextLessonsTable] = React.useState([[]]);
     const [buttonLesson, setButtonLesson] = React.useState(null);
     const classesPopup = useStylesPopup();
 
@@ -67,7 +66,7 @@ export default  function ExtendedTables({history}) {
                 // Check First Entry.
                 if (res.first_time || res.first_time === undefined){
                     updateFirstTimeEntry(res.email);
-                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson");
+                    setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
                     setLessonsButton();
                     setModal(true);
                 }
@@ -82,23 +81,9 @@ export default  function ExtendedTables({history}) {
                             }
                             else {
                                 noNextLessonAlert();
-                                setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson")
+                                setNextLessonDate("No Next Lesson... Go Ahead and Set your Next Lesson");
                                 setLessonsButton();
                             }
-                            let index = -1;
-                            let lessonsTable = Object.keys(lessons).map((lesson_id,index) => {
-                                let teacher_name = lessons[lesson_id].teacher_name;
-                                let teacher_mail = lessons[lesson_id].teacher_mail;
-                                let lesson_full_date = new Date(lessons[lesson_id].date_utc.full_date_string);
-                                let lesson_date = new Date(lessons[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
-                                let duration = lessons[lesson_id].duration;
-                                index++;
-                                return (
-                                    [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date,
-                                        lesson_id: lesson_id, teacher_mail: teacher_mail, index: index})]
-                                );
-                            });
-                            setNextLessonsTable(lessonsTable)
                         }
                     })
                 }
@@ -116,19 +101,18 @@ export default  function ExtendedTables({history}) {
 
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
-        let teacher_mail = line.teacher_mail;
+        let teacher_mail = studentData.teacher.email;
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
-        if (new Date(lesson_date).toString() === new Date(nextLessonDate).toString()){
+        if (new Date(lesson_date) === new Date(nextLessonDate)){
             delete nextLesson[Object.keys(nextLesson)[0]];
             let nextLessonData = nextLesson[Object.keys(nextLesson)[0]];
             console.log(nextLessonData);
             setNextLessonDate(new Date(nextLessonData.date_utc.full_date_string).toString().slice(0, 21));
         }
         else {
-            delete nextLesson[line.lesson_id];
-            delete nextLessonsTable[line.index];
+            delete nextLesson[line.index];
         }
 
         setChecked(checked+1);
@@ -229,13 +213,23 @@ export default  function ExtendedTables({history}) {
     };
 
     const setLessonsButton = () => {
-        setButtonLesson (<Button round color="rose" onClick={() => {
+        setButtonLesson(<Button round color="rose" onClick={() => {
             goToSetLesson();
         }}>
             Lets Set a New Lesson!
         </Button>)
     };
 
+    let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
+        let teacher_name = nextLesson[lesson_id].teacher_name;
+        let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
+        let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
+        let duration = nextLesson[lesson_id].duration;
+        return (
+            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
+        );
+
+    });
     return (
         <div>
             {alert}
@@ -287,7 +281,7 @@ export default  function ExtendedTables({history}) {
                                             "Cancel Lesson"
                                         ]}
                                         tableData={
-                                            nextLessonsTable
+                                            lessons
                                         }
                                     />
                                 </CardBody>
@@ -330,7 +324,6 @@ export default  function ExtendedTables({history}) {
                     className={classesPopup.modalBody}
                 >
                     <h4>Say hello to your Teacher: {studentData.teacher.first_name} {studentData.teacher.last_name}</h4>
-                    <h5>Feel Free to send him a mail: {studentData.teacher.email}</h5>
                     <h5>Or Send him a message by Skype.
 
                     </h5>
