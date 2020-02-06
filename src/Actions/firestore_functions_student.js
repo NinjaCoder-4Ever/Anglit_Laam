@@ -1,5 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
+import {getAllAdminMails} from "./firestore_functions_admin";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -75,14 +76,42 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         uid: uid
     } ;
 
+    let adminStudentInfo = {
+        student_name: firstName + " " + lastName,
+        student_mail: email,
+        teacher_name: teacherInfo.first_name + " " + teacherInfo.last_name,
+        teacher_mail: teacherInfo.email,
+        category: category,
+        phone_number: phoneNumber,
+        uid: uid,
+        subscription: "PAL",
+        credits: 1,
+        last_log_on: new Date()
+    };
+
     Promise.all([
         db.collection('students').doc(email).set(newStudentData).then(function() {
             console.log('Added student with ID: ', email)
         }),
         db.collection('users').doc(email).set(usersData).then(function () {
             console.log('Added user to users collection')
-        })
+        }),
     ]);
+    updateAdminData(adminStudentInfo);
+}
+
+async function updateAdminData(studentData) {
+    getAllAdminMails().then(adminMails => {
+        for (const mail of adminMails) {
+            db.collection('admins').doc(mail).get().then(function (doc) {
+                let students = doc.data().all_students;
+                students.push(studentData);
+                db.collection('admin').doc(mail).update({
+                    all_students: students
+                })
+            });
+        }
+    });
 }
 
 export function updateFirstTimeEntry(student_mail) {
