@@ -49,7 +49,7 @@ export async function deleteTeacher(teacher_mail) {
     }
 }
 
-async function changeTeacherForStudent(student_mail, teacher_mail = null, teacher_deleted = false) {
+export async function changeTeacherForStudent(student_mail, teacher_mail = null, teacher_deleted = false) {
     let studentData = await getStudentByMail(student_mail);
     let old_teacher_mail = studentData.teacher.email;
     let student_name = studentData.first_name + " " + studentData.last_name;
