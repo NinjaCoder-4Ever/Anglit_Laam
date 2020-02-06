@@ -1,5 +1,6 @@
 import {db} from '../Config/fire'
 import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
+import {getAllAdminMails} from "./firestore_functions_admin";
 
 const WEEKDAYS = {
     0: 'Sunday',
@@ -29,7 +30,7 @@ const MONTH_DAYS = {
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
 
-export async function setNewStudent(uid, email, firstName, lastName, phoneNumber){
+export async function setNewStudent(uid, email, firstName, lastName, phoneNumber, category){
     /**
      *Function enters a new student to the "students" collection.
      * Chooses a teacher for the student (the one with least students)
@@ -56,11 +57,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             pronunciation_corrections: "",
             vocabulary: "",
             home_work: "",
-        }
+        },
+        category: category
     };
     let student_name = firstName + " " + lastName;
 
-    let teacherInfo = await chooseTeacherForStudent(email, student_name);
+    let teacherInfo = await chooseTeacherForStudent(email, student_name, category);
     newStudentData.teacher = {
         first_name: teacherInfo.first_name,
         last_name: teacherInfo.last_name,
@@ -74,14 +76,54 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         uid: uid
     } ;
 
+    let adminStudentInfo = {
+        student_name: firstName + " " + lastName,
+        student_mail: email,
+        teacher_name: teacherInfo.first_name + " " + teacherInfo.last_name,
+        teacher_mail: teacherInfo.email,
+        category: category,
+        phone_number: phoneNumber,
+        uid: uid,
+        subscription: "PAL",
+        credits: 1,
+        last_log_on: new Date()
+    };
+
     Promise.all([
         db.collection('students').doc(email).set(newStudentData).then(function() {
             console.log('Added student with ID: ', email)
         }),
         db.collection('users').doc(email).set(usersData).then(function () {
             console.log('Added user to users collection')
-        })
+        }),
     ]);
+    updateAdminStudentData(adminStudentInfo);
+}
+
+async function updateAdminStudentData(studentData) {
+    let studentMail = studentData.student_mail;
+    let adminMails = getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminData.data().all_students;
+    students[studentMail] = studentData;
+
+    // update the teacher's list to have the student
+    let teachers = adminData.data().all_teachers;
+    for (const teacherMail of Object.keys(teachers)){
+        if (teacherMail === studentData.teacher_mail){
+            teachers[teacherMail].students.push({
+                student_mail: studentMail,
+                student_name: studentData.student_name
+            })
+        }
+    }
+
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students,
+            all_teachers: teachers
+        });
+    }
 }
 
 export function updateFirstTimeEntry(student_mail) {
@@ -211,7 +253,7 @@ export async function addStudentToTeacher(teacherMail, studentMail, studentName)
     });
 }
 
-export async function chooseTeacherForStudent(studentMail, studentName) {
+export async function chooseTeacherForStudent(studentMail, studentName, category) {
     /**
      * Function goes through all the teachers in the "teachers" collection and and brings back the info about
      * the teacher with the least amount of students.
@@ -220,14 +262,14 @@ export async function chooseTeacherForStudent(studentMail, studentName) {
      */
     const chosenTeacher = [];
     const teacherCollection = db.collection('teachers');
-    const snapshot = await teacherCollection.get();
+    const snapshot = await teacherCollection.where('category', 'array-contains', category).get();
     let minimalStudents = 10000000000000000000;
     snapshot.forEach(doc => {
         let studentArray = doc.data().students;
         let numberOfStudents = studentArray.length;
         if (numberOfStudents <= minimalStudents) {
 
-            if (chosenTeacher.length > 0){
+            if (chosenTeacher.length > 0) {
                 chosenTeacher.pop();
             }
 
@@ -318,7 +360,7 @@ export async function getAllPastLessonsForStudent(email){
     let today = new Date();
     let lastYear = new Date().setFullYear(today.getFullYear() - 1);
     const snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
-        .where("date_utc.full_date", ">=", lastYear).orderBy("date_utc.full_date").get();
+        .where("date_utc.full_date", ">=", new Date(lastYear)).orderBy("date_utc.full_date", 'desc').get();
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
         lessonData.local_date = convertUtcToLocalTime(lessonData.date_utc.full_date_string);
@@ -328,7 +370,7 @@ export async function getAllPastLessonsForStudent(email){
     return pastLessons
 }
 
-export async function getLessonByDateForStudent(student_mail, local_date, teacher_mail=null){
+export async function getLessonByIDForStudent(student_mail, lesson_id){
     /**
      * Function returns the lesson data of a lesson in a given date.
      * Returns: {
@@ -353,10 +395,6 @@ export async function getLessonByDateForStudent(student_mail, local_date, teache
         lesson_id: lesson_id
     }
      */
-    if (teacher_mail == null){
-        teacher_mail = getStudentTeacher(student_mail).email;
-    }
-    let lesson_id = constructLessonId(student_mail, teacher_mail, convertLocalTimeToUtc(local_date));
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const doc = await studentLessons.doc(lesson_id).get();
 
