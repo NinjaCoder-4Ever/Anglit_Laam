@@ -38,7 +38,7 @@ export async function deleteTeacher(teacher_mail) {
         await changeTeacherForStudent(student.student_mail, null, true);
     }
 
-    let adminMails = getAllAdminMails();
+    let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
     let teachers = adminInfo.data().all_teachers;
     delete teachers[teacher_mail];
@@ -106,7 +106,7 @@ async function changeTeacherForStudent(student_mail, teacher_mail = null, teache
     }
 
     for (const mail in allAdminMails){
-        db.collection('admins').doc(mail).update({
+        db.collection('admins').doc(mail.toString()).update({
             all_students: students,
             all_teachers: teachers
         })
@@ -114,7 +114,6 @@ async function changeTeacherForStudent(student_mail, teacher_mail = null, teache
 }
 
 async function clearAllLessons(student_mail, teacher_mail, deleted = false){
-    let creditsToReturn = 0;
     let lessons = [];
     let snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
         .where('student_mail', '==', student_mail)
@@ -123,12 +122,57 @@ async function clearAllLessons(student_mail, teacher_mail, deleted = false){
     snapshot.forEach(doc => {
         lessons.push(doc.data());
     });
-    creditsToReturn = lessons.length;
+    let creditsToReturn = lessons.length;
     for (const lesson of lessons){
         db.collection('students').doc(student_mail).collection('student_lessons').doc(lesson.lesson_id).delete();
         if (!deleted){
             db.collection('teachers').doc(teacher_mail).collection('teacher_lessons').doc(lesson.lesson_id).delete();
         }
     }
+    // finally return credits for deleted lessons
     await updateCredits(student_mail, creditsToReturn);
+}
+
+export async function deleteStudent(student_mail){
+    let studentData = await getStudentByMail(student_mail);
+    let teacherMail = studentData.teacher.email;
+    let teacherData = await getTeacherByMail(teacherMail);
+    let studentList = teacherData.students;
+    let newStudentList = [];
+    for (const student of studentList){
+        if (student.student_mail !== student_mail){
+            newStudentList.push(student);
+        }
+    }
+    db.collection('teachers').doc(teacherMail).update({
+        students: newStudentList
+    });
+    let lessons = [];
+    let snapshot = db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+        .where('student_mail', '==', student_mail)
+        .where('date_utc.full_date', '>=', new Date()).get();
+
+    snapshot.forEach(doc => {
+        lessons.push(doc.data());
+    });
+
+    for (const lesson of lessons){
+        db.collection('teachers').doc(teacherMail).collection('teacher_lessons').doc(lesson.lesson_id).delete();
+    }
+
+    db.collection('students').doc(student_mail).delete();
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    let students = adminInfo.data().all_students;
+    delete students[student_mail];
+    teachers[teacherMail].students = newStudentList;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers,
+            all_students: students
+        });
+    }
+
 }
