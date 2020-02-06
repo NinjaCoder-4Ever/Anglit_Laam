@@ -53,7 +53,7 @@ const Home = ({ history }) => {
                                 active={0}
                                 collapses={[
                                     {
-                                        title: "Who are you?",
+                                        title: "Who are you guys?",
                                         content: "We are Anglit Laam - the first low cost English school in Israel.\n" +
                                             "We are here To find you the best teachers so you can learn English any time," +
                                             "at any place and at the lowest cost possible"
