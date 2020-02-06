@@ -140,7 +140,6 @@ export default function Calendar({history}) {
                         newEvents.push(slotInfo)
                     }
                 }
-                console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~here!");
                 setEvents(newEvents)
             });
         }
@@ -250,7 +249,9 @@ export default function Calendar({history}) {
                                             style={{fontSize: "16px",}}>
                                             Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s
                                             schedule, please choose a free time.
-                                            Currently you have {studentData.credits} credits.
+                                            <br/>
+                                            <br/>
+                                            Currently you have <b>{studentData.credits} credits</b>.
                                         </h3>
                                         :
                                         <h3 className={`${classes.cardTitle}`}
