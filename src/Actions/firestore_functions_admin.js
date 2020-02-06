@@ -174,5 +174,4 @@ export async function deleteStudent(student_mail){
             all_students: students
         });
     }
-
 }
