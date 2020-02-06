@@ -449,18 +449,18 @@ export async function setLessonStarted(lesson_id, teacher_mail, student_mail, st
         console.log("Lesson started status updated for teacher")
     });
 
-    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
-        const studentCollectionRef = db.collection('students');
-        let studentData = await studentCollectionRef.doc(student_mail).get();
-        let currentMonthLessons = studentData.data().lessons_this_month;
-        let currentLessonInfo = currentMonthLessons[lesson_id];
-        currentLessonInfo.started = true;
-        currentMonthLessons.no_show = false;
-        currentMonthLessons[lesson_id] = currentLessonInfo;
-        studentCollectionRef.doc(student_mail).update({
-            lessons_this_month: currentMonthLessons
-        });
-    }
+    // if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    //     const studentCollectionRef = db.collection('students');
+    //     let studentData = await studentCollectionRef.doc(student_mail).get();
+    //     let currentMonthLessons = studentData.data().lessons_this_month;
+    //     let currentLessonInfo = currentMonthLessons[lesson_id];
+    //     currentLessonInfo.started = true;
+    //     currentMonthLessons.no_show = false;
+    //     currentMonthLessons[lesson_id] = currentLessonInfo;
+    //     studentCollectionRef.doc(student_mail).update({
+    //         lessons_this_month: currentMonthLessons
+    //     });
+    // }
 
     // if (checkSameWeek(currentLocalDate, start_time)){
     //     const teacherCollectionRef = db.collection('teachers');
@@ -499,18 +499,18 @@ export async function unmarkLessonStatus(lesson_id, teacher_mail, student_mail, 
         console.log("Lesson started status updated for teacher")
     });
 
-    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
-        const studentCollectionRef = db.collection('students');
-        let studentData = await studentCollectionRef.doc(student_mail).get();
-        let currentMonthLessons = studentData.data().lessons_this_month;
-        let currentLessonInfo = currentMonthLessons[lesson_id];
-        currentLessonInfo.started = false;
-        currentMonthLessons.no_show = false;
-        currentMonthLessons[lesson_id] = currentLessonInfo;
-        studentCollectionRef.doc(student_mail).update({
-            lessons_this_month: currentMonthLessons
-        });
-    }
+    // if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    //     const studentCollectionRef = db.collection('students');
+    //     let studentData = await studentCollectionRef.doc(student_mail).get();
+    //     let currentMonthLessons = studentData.data().lessons_this_month;
+    //     let currentLessonInfo = currentMonthLessons[lesson_id];
+    //     currentLessonInfo.started = false;
+    //     currentMonthLessons.no_show = false;
+    //     currentMonthLessons[lesson_id] = currentLessonInfo;
+    //     studentCollectionRef.doc(student_mail).update({
+    //         lessons_this_month: currentMonthLessons
+    //     });
+    // }
 
     // if (checkSameWeek(currentLocalDate, start_time)){
     //     const teacherCollectionRef = db.collection('teachers');
@@ -548,18 +548,18 @@ export async function setLessonNoShow(lesson_id, teacher_mail, student_mail, sta
         console.log("Lesson no show status updated for teacher")
     });
 
-    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
-        const studentCollectionRef = db.collection('students');
-        let studentData = await studentCollectionRef.doc(student_mail).get();
-        let currentMonthLessons = studentData.data().lessons_this_month;
-        let currentLessonInfo = currentMonthLessons[lesson_id];
-        currentLessonInfo.no_show = true;
-        currentLessonInfo.started = false;
-        currentMonthLessons[lesson_id] = currentLessonInfo;
-        studentCollectionRef.doc(student_mail).update({
-            lessons_this_month: currentMonthLessons
-        });
-    }
+    // if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    //     const studentCollectionRef = db.collection('students');
+    //     let studentData = await studentCollectionRef.doc(student_mail).get();
+    //     let currentMonthLessons = studentData.data().lessons_this_month;
+    //     let currentLessonInfo = currentMonthLessons[lesson_id];
+    //     currentLessonInfo.no_show = true;
+    //     currentLessonInfo.started = false;
+    //     currentMonthLessons[lesson_id] = currentLessonInfo;
+    //     studentCollectionRef.doc(student_mail).update({
+    //         lessons_this_month: currentMonthLessons
+    //     });
+    // }
 
     // if (checkSameWeek(currentLocalDate, start_time)){
     //     const teacherCollectionRef = db.collection('teachers');
