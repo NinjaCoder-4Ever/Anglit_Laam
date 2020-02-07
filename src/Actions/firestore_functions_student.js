@@ -97,7 +97,7 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
             console.log('Added user to users collection')
         }),
     ]);
-    updateAdminStudentData(adminStudentInfo);
+    await updateAdminStudentData(adminStudentInfo);
 }
 
 async function updateAdminStudentData(studentData) {
@@ -151,10 +151,17 @@ async function setLogOnStudent(student_data){
             lastLogOn = new Date(student_data.last_log_on.toString());
         }
     }
-    if (lastLogOn === undefined || currentDate.getMonth() !== lastLogOn.getMonth()){
-        let newCurrentMonthLessons = await updateStudentMonthLessons(student_data.email,
-            currentDate.getMonth() + 1, currentDate.getFullYear());
-        student_data.lessons_this_month = newCurrentMonthLessons;
+    // if (lastLogOn === undefined || currentDate.getMonth() !== lastLogOn.getMonth()){
+    //     let newCurrentMonthLessons = await updateStudentMonthLessons(student_data.email,
+    //         currentDate.getMonth() + 1, currentDate.getFullYear());
+    //     student_data.lessons_this_month = newCurrentMonthLessons;
+    // }
+
+    if (student_data.subscription !== "PAL"){
+        if (!checkSameWeek(lastLogOn, student_data.last_log_on)){
+            let numberOfCreditsToAdd = parseInt(student_data.subscription.slice(0,1));
+            await updateCredits(student_data.email, numberOfCreditsToAdd);
+        }
     }
     db.collection('students').doc(student_data.email).update({
         last_log_on: currentDate
@@ -444,7 +451,7 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     if (!(await checkLessonAvailability(student_mail, teacher_mail, start_time, duration))){
         return false
     }
-    let currentLocalDate = new Date();
+    // let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let utcLessonDate = start_time.toISOString();
@@ -489,24 +496,24 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
         console.log("Lesson set in student lessons")
     });
 
-    if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
-        const studentCollectionRef = db.collection('students');
-        let studentData = await studentCollectionRef.doc(student_mail).get();
-        let currentMonthLessons = studentData.data().lessons_this_month;
-        currentMonthLessons[lesson_id] = lessonInfo;
-        studentCollectionRef.doc(student_mail).update({
-            lessons_this_month: currentMonthLessons
-        });
-    }
-    if (checkSameWeek(currentLocalDate, start_time)){
-        const teacherCollectionRef = db.collection('teachers');
-        let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
-        let currentWeekLessons = teacherData.data().lessons_this_week;
-        currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = lessonInfo;
-        teacherCollectionRef.doc(teacher_mail).update({
-            lessons_this_week: currentWeekLessons
-        });
-    }
+    // if (start_time.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    //     const studentCollectionRef = db.collection('students');
+    //     let studentData = await studentCollectionRef.doc(student_mail).get();
+    //     let currentMonthLessons = studentData.data().lessons_this_month;
+    //     currentMonthLessons[lesson_id] = lessonInfo;
+    //     studentCollectionRef.doc(student_mail).update({
+    //         lessons_this_month: currentMonthLessons
+    //     });
+    // }
+    // if (checkSameWeek(currentLocalDate, start_time)){
+    //     const teacherCollectionRef = db.collection('teachers');
+    //     let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
+    //     let currentWeekLessons = teacherData.data().lessons_this_week;
+    //     currentWeekLessons[WEEKDAYS[start_time.getUTCDay()]][lesson_id] = lessonInfo;
+    //     teacherCollectionRef.doc(teacher_mail).update({
+    //         lessons_this_week: currentWeekLessons
+    //     });
+    // }
     await updateCredits(student_mail, -1);
     return true
 }
@@ -521,7 +528,6 @@ export async function cancelLesson(student_mail, teacher_mail, lesson_date){
      * If the lesson is this week it will also be deleted from the teacher's lessons_this_week field under
      * the "teachers" collection.
      */
-    let currentLocalDate = new Date();
     const studentLessons = db.collection('students').doc(student_mail).collection('student_lessons');
     const teacherLessons = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let utcLessonDate = lesson_date.toISOString();
@@ -533,25 +539,33 @@ export async function cancelLesson(student_mail, teacher_mail, lesson_date){
        console.log("Deleted lesson in teacher lessons")
     });
 
-    if (lesson_date.getUTCMonth() === currentLocalDate.getUTCMonth()){
-        const studentCollectionRef = db.collection('students');
-        let studentData = await studentCollectionRef.doc(student_mail).get();
-        let currentMonthLessons = studentData.data().lessons_this_month;
-        delete currentMonthLessons[lesson_id];
-        studentCollectionRef.doc(student_mail).update({
-            lessons_this_month: currentMonthLessons
-        });
+    // check if credits should be refunded
+    let currentLocalDate = new Date();
+    let nextDay = new Date(currentLocalDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    if (!new Date(lesson_date) < nextDay){
+        await updateCredits(student_mail, 1)
     }
 
-    if (checkSameWeek(currentLocalDate, lesson_date)){
-        const teacherCollectionRef = db.collection('teachers');
-        let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
-        let currentWeekLessons = teacherData.data().lessons_this_week;
-        delete currentWeekLessons[WEEKDAYS[lesson_date.getUTCDay()]][lesson_id];
-        teacherCollectionRef.doc(teacher_mail).update({
-            lessons_this_week: currentWeekLessons
-        });
-    }
+    // if (lesson_date.getUTCMonth() === currentLocalDate.getUTCMonth()){
+    //     const studentCollectionRef = db.collection('students');
+    //     let studentData = await studentCollectionRef.doc(student_mail).get();
+    //     let currentMonthLessons = studentData.data().lessons_this_month;
+    //     delete currentMonthLessons[lesson_id];
+    //     studentCollectionRef.doc(student_mail).update({
+    //         lessons_this_month: currentMonthLessons
+    //     });
+    // }
+    //
+    // if (checkSameWeek(currentLocalDate, lesson_date)){
+    //     const teacherCollectionRef = db.collection('teachers');
+    //     let teacherData = await  teacherCollectionRef.doc(teacher_mail).get();
+    //     let currentWeekLessons = teacherData.data().lessons_this_week;
+    //     delete currentWeekLessons[WEEKDAYS[lesson_date.getUTCDay()]][lesson_id];
+    //     teacherCollectionRef.doc(teacher_mail).update({
+    //         lessons_this_week: currentWeekLessons
+    //     });
+    // }
 
 }
 
