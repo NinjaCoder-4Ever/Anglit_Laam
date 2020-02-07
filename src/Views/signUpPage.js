@@ -43,26 +43,25 @@ const useStyles = makeStyles(theme => ({
 const SignUp = ({ history }) => {
     const classes = useStyles();
 
-    const handleSignUp = useCallback(async event => {
-        event.preventDefault();
-        const { email, password ,phone, firstName, lastName, englishType} = event.target.elements;
+    const handleSignUp = useCallback(async () => {
+        let email = document.getElementById('email').value;
+        let password = document.getElementById('password').value;
+        let firstName = document.getElementById('firstName').value;
+        let lastName = document.getElementById('lastName').value;
+        let phone = document.getElementById('phone').value;
+        let englishType = document.getElementById('englishType').innerText.toLowerCase();
         try {
             await firebase
                 .auth()
-                .createUserWithEmailAndPassword(email.value, password.value);
+                .createUserWithEmailAndPassword(email, password);
             await setNewStudent(firebase.auth().currentUser.uid,
-                email.value, firstName.value, lastName.value, phone.value);
+                email, firstName, lastName, phone, englishType);
             history.push("/Student/homePage");
         } catch (error) {
-            alert(error);
+            history.push("/Student/homePage");
         }
     }, [history]);
 
-
-    const [englishType, setEnglishType] = React.useState("English Level");
-    const handleDropDownChange = event => {
-        setEnglishType(event.target.value);
-    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -74,7 +73,7 @@ const SignUp = ({ history }) => {
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
-                <form onSubmit={handleSignUp} className={classes.form} noValidate>
+                <form id="signupForm" className={classes.form}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -149,38 +148,39 @@ const SignUp = ({ history }) => {
                             />
                         </Grid>
                         <Grid item xs={12}>
+                            <p>English Type</p>
                             <Select
-                                labelId="demo-simple-select-label"
-                                onChange={handleDropDownChange}
-                                id="demo-simple-select"
-                                value= {englishType}
+                                label="English Type"
+                                required
+                                fullWidth
+                                id="englishType"
                                 //placeholder='Select Friend'
                                 //label="Password"
                             >
-                                <MenuItem value={0}>Kids</MenuItem>
-                                <MenuItem value={1}>Adults</MenuItem>
-                                <MenuItem value={2}>Business</MenuItem>
-                                <MenuItem value={3}>Spoken</MenuItem>
+                                <option value={"kids"}>Kids</option>
+                                <option value={"adults"}>Adults</option>
+                                <option value={"business"}>Business</option>
+                                <option value={"spoken"}>Spoken</option>
                             </Select>
                         </Grid>
                     </Grid>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                    >
-                        Sign Up
-                    </Button>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Link href="./login" variant="body2">
-                                Already have an account? Sign in
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </form>
+                <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                    onClick={handleSignUp}
+                >
+                    Sign Up
+                </Button>
+                <Grid container justify="flex-end">
+                    <Grid item>
+                        <Link href="./login" variant="body2">
+                            Already have an account? Sign in
+                        </Link>
+                    </Grid>
+                </Grid>
             </div>
             <Box mt={5}>
                 <Copyright />

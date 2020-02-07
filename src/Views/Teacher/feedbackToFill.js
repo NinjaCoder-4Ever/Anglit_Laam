@@ -254,7 +254,7 @@ export default  function ExtendedTables(callback, deps) {
                     <h3 className={classesPopup.modalTitle}>Submit Feedback</h3>
                 </DialogTitle>
                 <DialogContent>
-                    <form id="feedbackForm" className={classes.form} noValidate>
+                    <form id="feedbackForm" className={classes.form}>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
