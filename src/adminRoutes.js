@@ -24,7 +24,7 @@ import Calendar from "@material-ui/icons/Today";
 import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Admin/homePage'
-import ContactUs from './Views/Admin/contactUs'
+import Students from './Views/Admin/students'
 
 const dashboardRoutes = [
     {
@@ -35,10 +35,10 @@ const dashboardRoutes = [
         layout: "/Admin"
     },
     {
-        path: "/contactUs",
-        name: "Contact Us",
+        path: "/students",
+        name: "Students",
         icon: Help,
-        component: ContactUs,
+        component: Students,
         layout: "/Admin"
     }
 ];
