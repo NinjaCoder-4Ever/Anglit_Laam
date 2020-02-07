@@ -710,3 +710,20 @@ export async function updateStudentMonthLessons(student_mail, month, year){
     return formattedMonthLessons
 }
 
+export async function updateStudentContactInfo(student_mail, phone_number, skype_username) {
+    await db.collection('students').doc(student_mail).update({
+        phone_number: phone_number,
+        skype_username: skype_username
+    });
+    let adminMails = getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminData.data().all_students;
+    students[student_mail]['phone_number'] = phone_number;
+    students[student_mail]['skype_username'] = skype_username;
+
+    for (const mail of adminMails){
+        await db.collection('admins').doc(mail).update({
+            all_students: students
+        });
+    }
+}
