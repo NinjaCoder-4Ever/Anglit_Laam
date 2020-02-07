@@ -84,7 +84,10 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         category: category,
         phone_number: phoneNumber,
         uid: uid,
-        subscription: "PAL",
+        subscription: {
+            recurring: false,
+            lessons_num: 1
+        },
         credits: 1,
         last_log_on: new Date()
     };
@@ -157,11 +160,8 @@ async function setLogOnStudent(student_data){
     //     student_data.lessons_this_month = newCurrentMonthLessons;
     // }
 
-    if (student_data.subscription !== "PAL"){
-        if (!checkSameWeek(lastLogOn, student_data.last_log_on)){
-            let numberOfCreditsToAdd = parseInt(student_data.subscription.slice(0,1));
-            await updateCredits(student_data.email, numberOfCreditsToAdd);
-        }
+    if (student_data.subscription.recurring && !checkSameWeek(lastLogOn, currentDate)){
+        await updateCredits(student_data.email, student_data.subscription.lessons_num)
     }
     db.collection('students').doc(student_data.email).update({
         last_log_on: currentDate
@@ -230,12 +230,24 @@ export async function updateCredits(email, addedCredits) {
     await collectionRef.doc(email).get().then(function (doc) {
         currentCreditValue.push(doc.data().credits)
     });
-
+    let newCreditStatus = currentCreditValue[0] + addedCredits;
     await collectionRef.doc(email).update({
-        "credits": currentCreditValue[0] + addedCredits
+        "credits": newCreditStatus
     }).then(function () {
        console.log('Updated credit status!')
     });
+
+    let adminMails = await getAllAdminMails();
+    let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminData.data().all_students;
+    students[email]['credits'] = newCreditStatus;
+
+    for (const mail of adminMails){
+        await db.collection('admins').doc(mail).update({
+            all_students: students
+        });
+    }
+
 }
 
 export async function addStudentToTeacher(teacherMail, studentMail, studentName){
@@ -730,7 +742,7 @@ export async function updateStudentContactInfo(student_mail, phone_number, skype
         phone_number: phone_number,
         skype_username: skype_username
     });
-    let adminMails = getAllAdminMails();
+    let adminMails = await getAllAdminMails();
     let adminData = await db.collection('admins').doc(adminMails[0]).get();
     let students = adminData.data().all_students;
     students[student_mail]['phone_number'] = phone_number;
