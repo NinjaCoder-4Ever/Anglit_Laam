@@ -2,7 +2,6 @@ import React from "react";
 import firebase from '../../Config/fire';
 import {withRouter} from 'react-router-dom';
 
-
 // @material-ui/core components
 import {makeStyles} from "@material-ui/core/styles";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -24,14 +23,16 @@ import CardAvatar from "Components/Card/CardAvatar.js";
 import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/userProfileStyles.js";
-import {getStudentByUID} from "Actions/firestore_functions_student";
+import {getStudentByUID, updateStudentContactInfo} from "Actions/firestore_functions_student";
 import TextField from "@material-ui/core/TextField";
-
+import SweetAlert from "react-bootstrap-sweetalert";
 
 const useStyles = makeStyles(styles);
 
 export default function MyProfile() {
     const classes = useStyles();
+    const [alert, setAlert] = React.useState(null);
+    const [subscriptionText, setSubscriptionText] = React.useState(null);
     const [studentData, setStudentData] = React.useState({
         first_name: '',
         last_name: '',
@@ -39,7 +40,8 @@ export default function MyProfile() {
         credits: 0,
         lessons_this_month: {},
         phone_number: '',
-        subscription: '',
+        subscription: {lessons_num: 0, recurring: true},
+        skype_username: '',
         teacher: {first_name: "", last_name: "", email: "", skype_username: ""},
         uid: ''
     });
@@ -49,14 +51,48 @@ export default function MyProfile() {
         getStudentByUID(firebase.auth().currentUser.uid).then((res) => {
             if (res != null) {
                 setStudentData(res);
+                setSubscriptionText(
+                    res.subscription.lessons_num +
+                    (res.subscription.recurring ?
+                        " weekly lessons subscription" :
+                        " lessons package")
+                )
             }
             setLoading(false);
             console.log(res);
         });
     }, []);
 
+    const submitChange =() => {
+        updateStudentContactInfo(
+            document.getElementById("username").value,
+            document.getElementById("tel").value,
+            document.getElementById("skypeId").value);
+        success();
+    };
+
+    const hideAlert = () => {
+        setAlert(null)
+    };
+
+    const success = (line) => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Updated!"
+                onConfirm={() => hideAlert()}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Your details have been updated.
+            </SweetAlert>
+        );
+    };
+
     return (
         <div>
+            {alert}
             <GridContainer>
                 <GridItem xs={12} sm={12} md={8}>
                     <Card>
@@ -74,7 +110,7 @@ export default function MyProfile() {
                                     <Loader width={'20%'}/> :
                                     <CardBody>
                                         <GridContainer>
-                                            <GridItem xs={12} sm={12} md={5}>
+                                            <GridItem xs={12} sm={12} md={4}>
                                                 <CustomInput
                                                     labelText="Teacher name"
                                                     id="teacherName"
@@ -87,16 +123,16 @@ export default function MyProfile() {
                                                     }}
                                                 />
                                             </GridItem>
-                                            <GridItem xs={12} sm={12} md={3}>
+                                            <GridItem xs={12} sm={12} md={4}>
                                                 <CustomInput
-                                                    labelText="Username"
-                                                    id="username"
+                                                    labelText="Subscription"
+                                                    id="subscription"
                                                     formControlProps={{
                                                         fullWidth: true
                                                     }}
                                                     inputProps={{
                                                         disabled: true,
-                                                        defaultValue: studentData.email
+                                                        defaultValue: subscriptionText
                                                     }}
                                                 />
                                             </GridItem>
@@ -122,7 +158,10 @@ export default function MyProfile() {
                                                     formControlProps={{
                                                         fullWidth: true
                                                     }}
-                                                    inputProps={{defaultValue: studentData.first_name}}
+                                                    inputProps={{
+                                                        disabled: true,
+                                                        defaultValue: studentData.first_name
+                                                    }}
                                                 />
                                             </GridItem>
                                             <GridItem xs={12} sm={12} md={6}>
@@ -132,11 +171,27 @@ export default function MyProfile() {
                                                     formControlProps={{
                                                         fullWidth: true
                                                     }}
-                                                    inputProps={{defaultValue: studentData.last_name}}
+                                                    inputProps={{
+                                                        disabled: true,
+                                                        defaultValue: studentData.last_name
+                                                    }}
                                                 />
                                             </GridItem>
                                         </GridContainer>
                                         <GridContainer>
+                                            <GridItem xs={12} sm={12} md={4}>
+                                                <CustomInput
+                                                    labelText="Username"
+                                                    id="username"
+                                                    formControlProps={{
+                                                        fullWidth: true
+                                                    }}
+                                                    inputProps={{
+                                                        disabled: true,
+                                                        defaultValue: studentData.email
+                                                    }}
+                                                />
+                                            </GridItem>
                                             <GridItem xs={12} sm={12} md={4}>
                                                 <CustomInput
                                                     labelText="Telephone"
@@ -149,7 +204,7 @@ export default function MyProfile() {
                                                     }}
                                                 />
                                             </GridItem>
-                                            {/*<GridItem xs={12} sm={12} md={4}>
+                                            <GridItem xs={12} sm={12} md={4}>
                                                 <CustomInput
                                                     labelText="Skype ID"
                                                     id="skypeId"
@@ -157,24 +212,13 @@ export default function MyProfile() {
                                                         fullWidth: true
                                                     }}
                                                     inputProps={{
-                                                        defaultValue: studentData.phone_number
-                                                    }}
-                                                />
-                                            </GridItem>*/}
-                                            <GridItem xs={12} sm={12} md={4}>
-                                                <CustomInput
-                                                    labelText="Subscription"
-                                                    id="subscription"
-                                                    formControlProps={{
-                                                        fullWidth: true
-                                                    }}
-                                                    inputProps={{
-                                                        defaultValue: studentData.subscription
+                                                        defaultValue: studentData.skype_username
                                                     }}
                                                 />
                                             </GridItem>
                                         </GridContainer>
-                                        <Button color="info" className={classes.updateProfileButton}>
+                                        <Button color="info" className={classes.updateProfileButton}
+                                                onClick={() => submitChange()}>
                                             Update Profile
                                         </Button>
                                         <Clearfix/>
