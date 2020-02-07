@@ -132,7 +132,7 @@ export default  function ExtendedTables({history}) {
                 cancelBtnText="Cancel"
                 showCancel
             >
-                You will not be able to recover this imaginary file!
+                <b>Canceling a lesson less than 24 hours ahead will not restore Credits for that lesson!</b>
             </SweetAlert>
         );
     };
