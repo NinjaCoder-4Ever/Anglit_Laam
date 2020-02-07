@@ -279,3 +279,12 @@ export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_t
     await setNewLesson(student_mail, new_teacher_mail,
         lesson_data.date_utc.full_date, lesson_data.duration, lesson_data.student_name, new_teacher_name)
 }
+
+export async function getAllStudents(){
+    let studentsInfo = [];
+    let snapshot = await db.collection('students').get();
+    snapshot.forEach(student => {
+        studentsInfo.push(student.data());
+    });
+    return studentsInfo;
+}
