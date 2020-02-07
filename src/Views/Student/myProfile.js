@@ -52,10 +52,10 @@ export default function MyProfile() {
             if (res != null) {
                 setStudentData(res);
                 setSubscriptionText(
-                    res.subscription.lessons_num +
-                    (res.subscription.recurring ?
-                        " weekly lessons subscription" :
-                        " lessons package")
+                    res.subscription.lessons_num.toString() +
+                (res.subscription.recurring ?
+                    " weekly lessons subscription" :
+                    " lessons package")
                 )
             }
             setLoading(false);
