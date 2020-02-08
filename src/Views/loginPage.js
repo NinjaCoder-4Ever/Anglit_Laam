@@ -77,7 +77,7 @@ const LoginSide = ({ history }) => {
                 history.push("/Teacher/homePage");
             } else if (userType === "admins"){
                 window.$userType = 'admins';
-                history.push("/Admin/homePage");
+                history.push("/Admin/teachers");
             } else {
                 throw new Error("An error has occurred, unknown user");
             }

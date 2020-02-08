@@ -19,7 +19,7 @@ const PrivateRouteTeacher = ({ component: RouteComponent, ...rest }) => {
             {...rest}
             render={routeProps =>
                 !!currentUser ?
-                    (userType() ? (<RouteComponent {...routeProps} />) : (<Redirect to={"/Admins/homePage"} />))
+                    (userType() ? (<RouteComponent {...routeProps} />) : (<Redirect to={"/Admin/teachers"} />))
                     :
                     (<Redirect to={"/login"} />)
             }
