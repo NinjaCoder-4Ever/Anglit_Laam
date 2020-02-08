@@ -7,6 +7,7 @@ import {
     updateCredits
 } from "./firestore_functions_student";
 import {WEEKDAYS} from "./firestore_functions_general"
+import teacher from "../Views/Teacher/teacher";
 
 export async function getAdminByUid(uid){
     let adminInfo = [];
@@ -298,4 +299,43 @@ export async function getAllStudents(){
         studentsInfo.push(student.data());
     });
     return studentsInfo;
+}
+
+export async function editTeacherContactInfo(teacher_mail, phone_number, skype_username, student_list) {
+    await db.collection('teachers').doc(teacher_mail).update({
+        phone_number: phone_number,
+        skype_username: skype_username
+    });
+    for (const studentInfo of student_list){
+        await db.collection('students').doc(studentInfo.student_mail).update({
+            "teacher.skype_username": skype_username
+        });
+    }
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    teachers[teacher_mail]['phone_number'] = phone_number;
+    teachers[teacher_mail]['skype_username'] = skype_username;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
+}
+
+export async function editTeacherCategory(teacher_mail, category_list) {
+    await db.collection('teachers').doc(teacher_mail).update({
+        category: category_list
+    });
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    teachers[teacher_mail]['category'] = category_list;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
 }

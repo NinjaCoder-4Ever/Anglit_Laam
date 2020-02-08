@@ -188,7 +188,7 @@ export default  function ExtendedTables() {
 
     const updateSubscriptionFunction = (recurring, lessons_num) => {
         if (!recurring){
-            lessons_num = document.getElementById('subscriptionLessons');
+            lessons_num = parseInt(document.getElementById('subscriptionLessons').value);
         }
         setAlert(
             <SweetAlert
@@ -407,23 +407,20 @@ export default  function ExtendedTables() {
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>What edits would you like to make?</h5>
                 </DialogContent>
                 <DialogActions
                     className={classesPopup.modalFooterCenter + " " +
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => updateCreditsModalSetup()} color="info">Update Credits</Button>
-                            <Button onClick={() => subscriptionModalSetup()} color="primary">Update Subscription</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => teacherChangeSetup()} color="rose">Change Teacher</Button>
-                            <Button onClick={() => warningWithConfirmMessage()} color="danger">Delete Student</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => setModal(false)} color="default">Never Mind..</Button>
+                        <GridItem  xs={5} sm={5} md={5}>
+                            <div>
+                            <Button onClick={() => updateCreditsModalSetup()} color="info" style={{width:"100%"}}>Update Credits</Button>
+                            <Button onClick={() => subscriptionModalSetup()} color="info" style={{width:"100%"}}>Update Subscription</Button>
+                            <Button onClick={() => teacherChangeSetup()} color="info" style={{width:"100%"}}>Change Teacher</Button>
+                            <Button onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Student</Button>
+                            <Button onClick={() => setModal(false)} color="default" style={{width:"100%"}}>Never Mind..</Button>
+                            </div>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
@@ -582,7 +579,7 @@ export default  function ExtendedTables() {
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Subscription for {selectedStudent.student_name}</h3>
+                    <h3 className={classesPopup.modalTitle}>Change Teacher for {selectedStudent.student_name}</h3>
                 </DialogTitle>
                 <DialogContent
                     id="modal-slide-description"
@@ -591,7 +588,6 @@ export default  function ExtendedTables() {
                     <h5>Current Teacher: {selectedStudent.teacher_name}</h5>
                     <h5>Would you like to change a teacher?</h5>
                     <br/>
-                    <h5>If you change to Pay As You Learn - please enter number of lessons purchased</h5>
                     <form id={"teacherForm"}>
                         <select id="teacherSelect"/>
                     </form>
