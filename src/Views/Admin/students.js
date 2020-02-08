@@ -25,7 +25,7 @@ import {School} from "@material-ui/icons";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Loader from "Components/Loader/Loader.js";
-import {getAllStudents} from 'Actions/firestore_functions_admin.js'
+import {getAdminByUid} from 'Actions/firestore_functions_admin.js'
 import {getStudentLastFeedbackByMail} from "../../Actions/firestore_functions_teacher";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
@@ -49,32 +49,37 @@ export default  function ExtendedTables() {
 
     React.useEffect(() => {
 
-        getAllStudents().then((student)=>{
-            console.log(student);
+        getAdminByUid(firebase.auth().currentUser.uid).then((admin)=>{
+            if (admin != null) {
+                // all students listed to the system
+                let studentList = admin.all_students;
+                console.log(studentList);
+                //table for all rows/students
+                let studentsInfoTable = [];
 
-            //table for all rows/students
-            let studentsInfoTable = [];
+                // loop over Students
+                for (let student of Object.values(studentList)) {
+                    console.log(student);
+                    let row = [];
+                    console.log(row);
+                    row.push(student.student_name);
+                    row.push(student.student_mail);
+                    row.push(student.phone_number);
+                    row.push(student.teacher_name);
+                    if (student.subscription.recurring === true)
+                        row.push("recurring");
+                    else
+                        row.push(student.subscription.lessons_num);
 
-            //for each student in the collection
-            student.forEach(student =>{
-                let row = [];
+                    row.push(student.credits);
+                    row.push(getSimpleButtons(student.student_mail));
+                    console.log(row);
 
-                row.push(student.first_name + " " + student.last_name);
-                row.push(student.email);
-                row.push(student.phone_number);
-                row.push(student.teacher.first_name + " " + student.teacher.last_name);
-                //if (student.subscription.recurring === true)
-                //    row.push("recurring");
-               //else
-                //    row.push(student.subscription.lessons_num);
+                    studentsInfoTable.push(row);
+                }
 
-                row.push(student.credits);
-                row.push(getSimpleButtons(student.email));
-                console.log(row);
-
-                studentsInfoTable.push(row);
-            })
-            setStudentsTable(studentsInfoTable);
+                setStudentsTable(studentsInfoTable);
+            }
             setLoading(false);
         });
     },[]);
@@ -123,7 +128,7 @@ export default  function ExtendedTables() {
                                             "Mail",
                                             "Phone",
                                             "Teacher",
-                                            //"Subscription",
+                                            "Subscription",
                                             "Credit",
                                         ]}
                                         tableData={
