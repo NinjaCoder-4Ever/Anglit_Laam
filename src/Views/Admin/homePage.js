@@ -37,7 +37,7 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {
     changeTeacherForStudent,
-    deleteStudent,
+    deleteStudent, deleteTeacher, editTeacherCategory, editTeacherContactInfo,
     getAdminByUid,
     updateSubscriptionForStudent
 } from "../../Actions/firestore_functions_admin";
@@ -55,25 +55,10 @@ export default  function ExtendedTables() {
 
     const [teachersTable, setTeachersTable] = React.useState([]);
     const [modal, setModal] = React.useState(false);
-    const [creditsModal, setCreditsModal] = React.useState(false);
-    const [subscriptionModal, setSubscriptionModal] = React.useState(false);
-    const [teacherChangeModal, setTeacherChangeModal] = React.useState(false);
-    const [selectedStudent, setSelectedStudent] = React.useState({
-        category: "",
-        credits: 0,
-        phone_number: "",
-        skype_username: "",
-        student_mail: "",
-        student_name: "",
-        subscription: {
-            recurring: "",
-            lessons_num: ""
-        },
-        teacher_name: "",
-        teacher_mail: "",
-        uid: "",
-    });
-    const [SelectedTeacher, setSelectedTeacher] = React.useState({
+    const [contactInfoModal, setContactInfoModal] = React.useState(false);
+    const [categoryModal, setCategoryModal] = React.useState(false);
+
+    const [selectedTeacher, setSelectedTeacher] = React.useState({
         category: "",
         credits: 0,
         phone_number: "",
@@ -81,6 +66,7 @@ export default  function ExtendedTables() {
         teacher_name: "",
         teacher_mail: "",
         uid: "",
+        students: ""
     });
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const [allTeacherMailsList, setAllTeacherMailsList] =React.useState([]);
@@ -93,7 +79,7 @@ export default  function ExtendedTables() {
             setAllTeacherMailsList(Object.keys(adminData.all_teachers));
             let all_teachers = adminData.all_teachers;
             //table for all rows/students
-            let studentsInfoTable = [];
+            let teacherInfoTable = [];
 
             //for each student in the collection
             let index = 0;
@@ -101,22 +87,19 @@ export default  function ExtendedTables() {
                 let row = [];
                 row.push(all_teachers[teacher].teacher_name);
                 row.push(all_teachers[teacher].teacher_mail);
+                row.push(all_teachers[teacher].phone_number);
+                row.push(all_teachers[teacher].skype_username);
+                row.push(all_teachers[teacher].category.toString());
                 row.push(getSimpleButtons(all_teachers[teacher], index));
                 console.log(row);
 
-                studentsInfoTable.push(row);
+                teacherInfoTable.push(row);
                 index = index + 1;
             });
-            setTeachersTable(studentsInfoTable);
+            setTeachersTable(teacherInfoTable);
             setLoading(false);
-            let selectTeacher = document.getElementById('teacherSelect');
-            for (const teacherMail of Object.keys(adminData.all_teachers)){
-                let opt = document.createElement('option');
-                opt.textContent = teacherMail;
-                opt.value = teacherMail;
-                selectTeacher.appendChild(opt);
-            }
         });
+
     },[triggerMount]);
 
 
@@ -129,14 +112,15 @@ export default  function ExtendedTables() {
                     className={classes.actionButton}
                     onClick={() => actionModal(teacherData, index)}
                 >
-                    Schedule
+                    See Schedule
                 </Button>
+
                 <Button
                     color={"info"}
                     className={classes.actionButton}
                     onClick={() => actionModal(teacherData, index)}
                 >
-                    Options
+                    Edit Teacher Info
                 </Button>
             </>
         )
@@ -152,13 +136,12 @@ export default  function ExtendedTables() {
         setModal(true);
     };
 
-    const updateCreditsModalSetup = () => {
+    const contactInfoSetup = () => {
         setModal(false);
-        setCreditsModal(true);
+        setContactInfoModal(true);
     };
 
-    const updateCreditstFunction = () => {
-        let amountToUpdate = parseInt(document.getElementById('creditsToAdd').value);
+    const updateContactInfoFunction = () => {
         setAlert(
             <SweetAlert
                 customButtons={
@@ -168,68 +151,42 @@ export default  function ExtendedTables() {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
-        updateCredits(selectedStudent.student_mail, amountToUpdate).then(() => {
-            teachersTable[selectedIndex][5] = teachersTable[selectedIndex][5] + amountToUpdate;
-            confirmCreditsAlert();
-            document.getElementById('creditsForm').reset();
-            setCreditsModal(false);
-        })
-    };
-
-    const confirmCreditsAlert = () => {
-        setAlert(
-            <SweetAlert
-                success
-                style={{ display: "block"}}
-                title="Credits Updated"
-                onConfirm={() => closeAlert()}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-            >
-                Credits were updated for {selectedStudent.student_name}
-            </SweetAlert>
-        );
-    };
-
-    const subscriptionModalSetup = () => {
-        setModal(false);
-        setSubscriptionModal(true);
-    };
-
-    const updateSubscriptionFunction = (recurring, lessons_num) => {
-        if (!recurring){
-            lessons_num = document.getElementById('subscriptionLessons');
+      let newPhoneNumber = document.getElementById('phoneForm').value;
+      let newSkypeUser = document.getElementById('skypeForm').value;
+      if (newSkypeUser === "" || newSkypeUser === undefined || newSkypeUser === null){
+          newSkypeUser = selectedTeacher.skype_username;
+      }
+        if (newPhoneNumber === "" || newPhoneNumber === undefined || newPhoneNumber === null){
+            newPhoneNumber = selectedTeacher.phone_number;
         }
-        setAlert(
-            <SweetAlert
-                customButtons={
-                    <React.Fragment>
-                    </React.Fragment>
-                }>
-                <Loader width={'30%'}/>
-            </SweetAlert>
-        );
-        updateSubscriptionForStudent(selectedStudent.student_mail, recurring, lessons_num).then(() => {
-            ConfirmSubscriptionAlert();
-            setSubscriptionModal(false);
-            document.getElementById('subscriptionForm').reset();
-        });
+      editTeacherContactInfo(selectedTeacher.teacher_mail, newPhoneNumber, newSkypeUser, selectedTeacher.students).then(() =>{
+          setContactInfoModal(false);
+          confirmContactUpdateAlert();
+          setTriggerMount(!triggerMount);
+          document.getElementById('conactForm').reset();
+      })
     };
 
-    const ConfirmSubscriptionAlert = () => {
+    const confirmContactUpdateAlert = () => {
         setAlert(
             <SweetAlert
                 success
                 style={{ display: "block"}}
-                title="Subscription Updated"
+                title="Contact Info Updated"
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
-                Subscription was updated for {selectedStudent.student_name}
+                Updated contact info for {selectedTeacher.teacher_name}
             </SweetAlert>
         );
     };
 
-    const deleteStudentFunction = () => {
+    const categoryModalSetup = () => {
+      setModal(false);
+      setCategoryModal(true);
+    };
+
+    const updateCategoryFunction = () => {
         setAlert(
             <SweetAlert
                 customButtons={
@@ -239,11 +196,33 @@ export default  function ExtendedTables() {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
-        deleteStudent(selectedStudent.student_mail).then( () => {
-            confirmDeletedStudent();
-            delete teachersTable[selectedIndex];
-            setModal(false);
+        let selectedCategories = document.getElementById('catogorySelect').options;
+        let categoryList = [];
+        for (const opt of selectedCategories){
+            if (opt.selected){
+                categoryList.push(opt.value);
+            }
+        }
+        editTeacherCategory(selectedTeacher.teacher_mail, categoryList).then(() =>{
+            setCategoryModal(false);
+            confirmCategoryUpdateAlert();
+            setTriggerMount(!triggerMount);
+            document.getElementById('categoryForm').reset();
         })
+    };
+
+    const confirmCategoryUpdateAlert = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Categories Updated"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Updated categories info for {selectedTeacher.teacher_name}
+            </SweetAlert>
+        );
     };
 
     const warningWithConfirmMessage = () => {
@@ -252,11 +231,11 @@ export default  function ExtendedTables() {
                 warning
                 style={{ display: "block"}}
                 title="Are you sure?"
-                onConfirm={() => deleteStudentFunction()}
+                onConfirm={() => deleteTeacherFunction()}
                 onCancel={() => setAlert(null)}
                 confirmBtnCssClass={classes.button + " " + classes.success}
                 cancelBtnCssClass={classes.button + " " + classes.danger}
-                confirmBtnText={"Yes, delete " + selectedStudent.student_name + "!"}
+                confirmBtnText={"Yes, delete " + selectedTeacher.teacher_name + "!"}
                 cancelBtnText="Cancel"
                 showCancel
             >
@@ -265,84 +244,30 @@ export default  function ExtendedTables() {
         );
     };
 
-    const confirmDeletedStudent = () => {
-        setAlert(
-            <SweetAlert
-                success
-                style={{ display: "block"}}
-                title="Subscription Updated"
-                onConfirm={() => closeAlert()}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-            >
-                {selectedStudent.student_name} was deleted!
-            </SweetAlert>
-        );
-    };
-
-    const teacherChangeSetup = () => {
-        setModal(false);
-        setTeacherChangeModal(true);
-    };
-
-    const warningWithConfirmMessageTeacher = (use_preset_teacher) => {
-        setAlert(
-            <SweetAlert
-                warning
-                style={{ display: "block"}}
-                title="Are you sure?"
-                onConfirm={() => changeTeacherFunction(use_preset_teacher)}
-                onCancel={() => setAlert(null)}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-                cancelBtnCssClass={classes.button + " " + classes.danger}
-                confirmBtnText={"Yes, Change the teacher for " + selectedStudent.student_name + "!"}
-                cancelBtnText="Cancel"
-                showCancel
-            >
-                <b>Once changed all future lessons for the student with the current teacher will be deleted!</b>
-            </SweetAlert>
-        );
-    };
-
-    const changeTeacherFunction = (use_preset_teacher) => {
-        let newTeacherMail = null;
-        if (use_preset_teacher) {
-            newTeacherMail = document.getElementById('teacherSelect').value;
-            console.log(newTeacherMail);
-        }
-        setAlert(
-            <SweetAlert
-                customButtons={
-                    <React.Fragment>
-                    </React.Fragment>
-                }>
-                <Loader width={'30%'}/>
-            </SweetAlert>
-        );
-        changeTeacherForStudent(selectedStudent.student_mail, newTeacherMail, false).then(() => {
+    const deleteTeacherFunction = () => {
+        deleteTeacher(selectedTeacher.teacher_mail).then(() => {
+            confirmDeletion();
             setTriggerMount(!triggerMount);
-            confirmStudentsTeacherChange();
-            setTeacherChangeModal(false);
         });
     };
 
-    const confirmStudentsTeacherChange = () => {
+    const confirmDeletion = () => {
         setAlert(
             <SweetAlert
                 success
                 style={{ display: "block"}}
-                title="Teacher Updated"
+                title="Teacher Deleted"
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
-                {selectedStudent.student_name} teacher was changed!
+                {selectedTeacher.teacher_name} was deleted!
             </SweetAlert>
         );
     };
 
     const backToControlPanel = () => {
-        setCreditsModal(false);
-        setTeacherChangeModal(false);
-        setSubscriptionModal(false);
+        setContactInfoModal(false);
+        setCategoryModal(false);
         setModal(true);
     };
 
@@ -367,6 +292,9 @@ export default  function ExtendedTables() {
                                         tableHead={[
                                             "Name",
                                             "Mail",
+                                            "Phone",
+                                            "Skype Username",
+                                            "Categories"
                                         ]}
                                         tableData={
                                             teachersTable
@@ -405,7 +333,7 @@ export default  function ExtendedTables() {
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Control Panel: {selectedStudent.student_name}</h3>
+                    <h3 className={classesPopup.modalTitle}>Control Panel: {selectedTeacher.teacher_name}</h3>
                 </DialogTitle>
                 <DialogContent
                     id="modal-slide-description"
@@ -419,10 +347,10 @@ export default  function ExtendedTables() {
                     <GridContainer justify="center">
                         <GridItem  xs={5} sm={5} md={5}>
                             <div>
-                                <Button onClick={() => {}} color="info" style={{width:"100%"}}>Edit working time</Button>
-                                <Button onClick={() => {}} color="info" style={{width:"100%"}}>Edit contact info</Button>
-                                <Button onClick={() => {}} color="info" style={{width:"100%"}}>Edit categories</Button>
-                                <Button onClick={() => {}} color="danger" style={{width:"100%"}}>Delete Teacher</Button>
+                                <Button onClick={() => setModal(false)} color="info" style={{width:"100%"}}>Edit working time</Button>
+                                <Button onClick={() => contactInfoSetup()} color="info" style={{width:"100%"}}>Edit contact info</Button>
+                                <Button onClick={() => categoryModalSetup()} color="info" style={{width:"100%"}}>Edit categories</Button>
+                                <Button onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Teacher</Button>
                                 <Button onClick={() => setModal(false)} color="default" style={{width:"100%"}}>Never Mind..</Button>
                             </div>
                         </GridItem>
@@ -435,10 +363,10 @@ export default  function ExtendedTables() {
                     root: classesPopup.center,
                     paper: classesPopup.modal
                 }}
-                open={creditsModal}
+                open={contactInfoModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setCreditsModal(false)}
+                onClose={() => setContactInfoModal(false)}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -453,22 +381,31 @@ export default  function ExtendedTables() {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setCreditsModal(false)}
+                        onClick={() => setContactInfoModal(false)}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Credits for {selectedStudent.student_name}</h3>
+                    <h3 className={classesPopup.modalTitle}>Contact Info for {selectedTeacher.teacher_name}</h3>
                 </DialogTitle>
                 <DialogContent
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>Current Credit Status: {selectedStudent.credits}</h5>
-                    <h5>How many would you like to add?</h5>
-                    <form id={"creditsForm"}>
+                    <form id={"conactForm"}>
+                        <h5>Teacher's phone number: {selectedTeacher.phone_number}</h5>
                         <TextField
-                            id={"creditsToAdd"}
+                            id={"phoneForm"}
                             fullWidth
+                            label={"Enter new phone number"}
+                            defaultValue={selectedTeacher.phone_number}
+                        />
+                        <br/>
+                        <h5>Teacher's Skype username: {selectedTeacher.skype_username} </h5>
+                        <TextField
+                            id={"skypeForm"}
+                            fullWidth
+                            label={"Enter new Skype username:"}
+                            defaultValue={selectedTeacher.skype_username}
                         />
                     </form>
                 </DialogContent>
@@ -478,25 +415,26 @@ export default  function ExtendedTables() {
                 >
                     <GridContainer justify="center">
                         <GridItem>
-                            <Button onClick={() => updateCreditstFunction()} color="info">Add Credits</Button>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
+                            <Button onClick={() => updateContactInfoFunction()} color="info">Update Changes</Button>
                         </GridItem>
                         <GridItem>
-                            <Button onClick={() => setCreditsModal(false)} color="default">Never Mind...</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
+                            <Button onClick={() => setContactInfoModal(false)} color="default">Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
             </Dialog>
+
 
             <Dialog
                 classes={{
                     root: classesPopup.center,
                     paper: classesPopup.modal
                 }}
-                open={subscriptionModal}
+                open={categoryModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setSubscriptionModal(false)}
+                onClose={() => setCategoryModal(false)}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -511,28 +449,26 @@ export default  function ExtendedTables() {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setSubscriptionModal(false)}
+                        onClick={() => setCategoryModal(false)}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Subscription for {selectedStudent.student_name}</h3>
+                    <h3 className={classesPopup.modalTitle}>Set Category for {selectedTeacher.teacher_name}</h3>
                 </DialogTitle>
                 <DialogContent
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>Current Subscription: {selectedStudent.subscription.lessons_num.toString() +
-                    (selectedStudent.subscription.recurring ?
-                        " weekly lessons subscription" :
-                        " lessons package")}</h5>
-                    <h5>Would you like to change it?</h5>
+                    <h5>Current Categories: {selectedTeacher.category.toString()}</h5>
+                    <h5>Would you like to change the categories?</h5>
                     <br/>
-                    <h5>If you change to Pay As You Learn - please enter number of lessons purchased</h5>
-                    <form id={"subscriptionForm"}>
-                        <TextField
-                            id={"subscriptionLessons"}
-                            fullWidth
-                        />
+                    <form id={"categoryForm"}>
+                        <select id="catogorySelect" multiple={true}>
+                            <option value={"kids"}>Kids</option>
+                            <option value={"adults"}>Adults</option>
+                            <option value={"business"}>Business</option>
+                            <option value={"spoken"}>Spoken</option>
+                        </select>
                     </form>
                 </DialogContent>
                 <DialogActions
@@ -541,74 +477,11 @@ export default  function ExtendedTables() {
                 >
                     <GridContainer justify="center">
                         <GridItem>
-                            <Button onClick={() => updateSubscriptionFunction(false, 1)} color="info">Pay as you Learn</Button>
-                            <Button onClick={() => updateSubscriptionFunction(true, 1)} color="info">1 lesson per week</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => updateSubscriptionFunction(true, 2)} color="info">2 lessons per week</Button>
-                            <Button onClick={() => updateSubscriptionFunction(true, 3)} color="info">3 lessons per week</Button>
+                            <Button onClick={() => updateCategoryFunction()} color="info">Update Categories</Button>
                         </GridItem>
                         <GridItem>
                             <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setSubscriptionModal(false)} color="default">Never Mind...</Button>
-                        </GridItem>
-                    </GridContainer>
-                </DialogActions>
-            </Dialog>
-
-            <Dialog
-                classes={{
-                    root: classesPopup.center,
-                    paper: classesPopup.modal
-                }}
-                open={teacherChangeModal}
-                transition={Transition}
-                keepMounted
-                onClose={() => setTeacherChangeModal(false)}
-                aria-labelledby="modal-slide-title"
-                aria-describedby="modal-slide-description"
-            >
-                <DialogTitle
-                    id="classic-modal-slide-title"
-                    disableTypography
-                    className={classesPopup.modalHeader}
-                >
-                    <Button
-                        justIcon
-                        className={classesPopup.modalCloseButton}
-                        key="close"
-                        aria-label="Close"
-                        color="transparent"
-                        onClick={() => setTeacherChangeModal(false)}
-                    >
-                        <Close className={classesPopup.modalClose} />
-                    </Button>
-                    <h3 className={classesPopup.modalTitle}>Subscription for {selectedStudent.student_name}</h3>
-                </DialogTitle>
-                <DialogContent
-                    id="modal-slide-description"
-                    className={classesPopup.modalBody}
-                >
-                    <h5>Current Teacher: {selectedStudent.teacher_name}</h5>
-                    <h5>Would you like to change a teacher?</h5>
-                    <br/>
-                    <h5>If you change to Pay As You Learn - please enter number of lessons purchased</h5>
-                    <form id={"teacherForm"}>
-                        <select id="teacherSelect"/>
-                    </form>
-                </DialogContent>
-                <DialogActions
-                    className={classesPopup.modalFooterCenter + " " +
-                    classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
-                >
-                    <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => warningWithConfirmMessageTeacher(false)} color="info">Choose Teacher For Me</Button>
-                            <Button onClick={() => warningWithConfirmMessageTeacher(true)} color="info">Use Selected Teacher</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setTeacherChangeModal(false)} color="default">Never Mind...</Button>
+                            <Button onClick={() => setCategoryModal(false)} color="default">Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
