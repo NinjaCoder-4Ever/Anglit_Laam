@@ -14,12 +14,14 @@
     "node-sass": "^4.13.1",
     "perfect-scrollbar": "1.4.0",
     "prop-types": "15.7.2",
+    "query-string": "^6.10.1",
     "react": "^16.12.0",
     "react-big-calendar": "^0.23.0",
     "react-bootstrap-sweetalert": "^5.1.9",
     "react-dom": "^16.12.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.3.0"
+    "react-scripts": "3.3.0",
+    "react-table": "^7.0.0-rc.15"
   },
   "scripts": {
     "start": "react-scripts start",

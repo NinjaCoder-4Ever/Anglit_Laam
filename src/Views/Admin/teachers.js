@@ -42,6 +42,7 @@ import {
     updateSubscriptionForStudent
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
+import {Redirect} from "react-router-dom";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -52,7 +53,7 @@ export default  function ExtendedTables() {
     const classesPopup = useStylesPopup();
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
-
+    const [redirect, setRedirect] = React.useState(false);
     const [teachersTable, setTeachersTable] = React.useState([]);
     const [modal, setModal] = React.useState(false);
     const [contactInfoModal, setContactInfoModal] = React.useState(false);
@@ -103,6 +104,18 @@ export default  function ExtendedTables() {
     },[triggerMount]);
 
 
+    function goToTeacherSchedule(teacherData, index) {
+
+        setRedirect(
+            <Redirect
+                to={{
+                    pathname: "/Admin/teacherCalendar",
+                    search: "?email=" + teacherData.teacher_mail,
+                    state: { teacher: teacherData }
+                }}
+            /> );
+    }
+
     function getSimpleButtons(teacherData, index)
     {
         return (
@@ -110,7 +123,7 @@ export default  function ExtendedTables() {
                 <Button
                     color={"info"}
                     className={classes.actionButton}
-                    onClick={() => actionModal(teacherData, index)}
+                    onClick={() => goToTeacherSchedule(teacherData, index)}
                 >
                     See Schedule
                 </Button>
@@ -273,6 +286,7 @@ export default  function ExtendedTables() {
 
     return (
         <div>
+            {redirect}
             {alert}
 
             <GridContainer>
@@ -305,6 +319,7 @@ export default  function ExtendedTables() {
                     </Card>
                 </GridItem>
             </GridContainer>
+
 
             <Dialog
                 classes={{
