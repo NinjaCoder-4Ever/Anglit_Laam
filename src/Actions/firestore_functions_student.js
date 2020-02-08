@@ -272,7 +272,7 @@ export async function addStudentToTeacher(teacherMail, studentMail, studentName)
     });
 }
 
-export async function chooseTeacherForStudent(studentMail, studentName, category) {
+export async function chooseTeacherForStudent(studentMail, studentName, category, exclude_mail = null) {
     /**
      * Function goes through all the teachers in the "teachers" collection and and brings back the info about
      * the teacher with the least amount of students.
@@ -284,16 +284,18 @@ export async function chooseTeacherForStudent(studentMail, studentName, category
     const snapshot = await teacherCollection.where('category', 'array-contains', category).get();
     let minimalStudents = 10000000000000000000;
     snapshot.forEach(doc => {
-        let studentArray = doc.data().students;
-        let numberOfStudents = studentArray.length;
-        if (numberOfStudents <= minimalStudents) {
+        if (exclude_mail === null || exclude_mail !== doc.data().email){
+            let studentArray = doc.data().students;
+            let numberOfStudents = studentArray.length;
+            if (numberOfStudents <= minimalStudents) {
 
-            if (chosenTeacher.length > 0) {
-                chosenTeacher.pop();
+                if (chosenTeacher.length > 0) {
+                    chosenTeacher.pop();
+                }
+
+                chosenTeacher.push(doc.data());
+                minimalStudents = numberOfStudents;
             }
-
-            chosenTeacher.push(doc.data());
-            minimalStudents = numberOfStudents;
         }
     });
 

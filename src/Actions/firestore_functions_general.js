@@ -1,6 +1,6 @@
 import {db} from "../Config/fire";
 
-const WEEKDAYS = {
+export const WEEKDAYS = {
     0: 'Sunday',
     1: 'Monday',
     2: 'Tuesday',

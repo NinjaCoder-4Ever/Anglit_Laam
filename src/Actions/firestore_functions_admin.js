@@ -3,9 +3,10 @@ import {getTeacherByMail} from "./firestore_functions_teacher";
 import {
     addStudentToTeacher,
     chooseTeacherForStudent,
-    getStudentByMail,
+    getStudentByMail, setNewLesson,
     updateCredits
 } from "./firestore_functions_student";
+import {WEEKDAYS} from "./firestore_functions_general"
 
 export async function getAdminByUid(uid){
     let adminInfo = [];
@@ -57,12 +58,14 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     let teacherInfo = {};
     // choose a teacher for the student if one is not picked yet - this function also adds the student to the teacher's list of students.
     if (teacher_mail === null) {
-        teacherInfo = await chooseTeacherForStudent(student_mail, student_name, student_category);
+        teacherInfo = await chooseTeacherForStudent(student_mail, student_name, student_category, studentData.teacher.email);
+        console.log('choose new teacher for student and connected him to the teacher')
     }
     // if a teacher was already picked - get his info and add the student to his list.
     else{
         teacherInfo = await getTeacherByMail(teacher_mail);
         await addStudentToTeacher(teacherInfo.email, student_mail, student_name);
+        console.log('selected teacher now connected to student')
     }
 
     // update the new teacher data in the student's doc.
@@ -75,9 +78,10 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     db.collection('students').doc(student_mail).update({
         teacher: studentTeacherData
     });
+    console.log('new teacher updated for student');
     // clear all future lessons of the student and the old teacher.
     await clearAllLessons(student_mail, old_teacher_mail, teacher_deleted);
-
+    console.log('cleared all future lessons with old teacher');
     // go through all the admins
     let allAdminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(allAdminMails[0]).get();
@@ -103,14 +107,22 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
             }
         });
         teachers[old_teacher_mail].students = old_teacher_new_student_list;
+        db.collection('teachers').doc(old_teacher_mail).update({
+            students: old_teacher_new_student_list
+        });
+        console.log('updated old teacher student list');
     }
 
-    for (const mail in allAdminMails){
-        db.collection('admins').doc(mail.toString()).update({
+    for (const mail of allAdminMails){
+        console.log(mail);
+        await db.collection('admins').doc(mail).update({
             all_students: students,
             all_teachers: teachers
+        }).catch(function (error) {
+            console.error("problem updating" + mail);
         })
     }
+    console.log('updated admins records')
 }
 
 async function clearAllLessons(student_mail, teacher_mail, deleted = false){
@@ -174,4 +186,116 @@ export async function deleteStudent(student_mail){
             all_students: students
         });
     }
+}
+
+export async function updateSubscriptionForStudent(student_mail, recurring, lessons_num) {
+    await db.collection('students').doc(student_mail).update({
+        subscription: {
+            recurring: recurring,
+            lessons_num: lessons_num
+        }
+    });
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminInfo.data().all_students;
+    students[student_mail]['subscription'] ={
+        recurring: recurring,
+        lessons_num: lessons_num
+    };
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students
+        });
+    }
+}
+
+export async function getAvailableTeachersInDate(admin_data, current_teacher_mail, student_mail, lesson_date) {
+    let teacherMailList = Object.keys(admin_data.all_teachers);
+    delete teacherMailList[current_teacher_mail];
+    let lessonDay = WEEKDAYS[lesson_date.getDay()];
+    let filteredTeacherList = [];
+    let fullTeachersList = admin_data.all_teachers;
+
+    // filter teachers who are not working on that day.
+    for (const teacherMail of teacherMailList){
+        if (teacherMail !== undefined) {
+            if (fullTeachersList[teacherMail].working_days.includes(lessonDay)) {
+                filteredTeacherList.push(teacherMail);
+            }
+        }
+    }
+
+    // no available teachers
+    if (filteredTeacherList.length === 0){
+        return [];
+    }
+
+    let studentData = await getStudentByMail(student_mail);
+    let categoryFilteredList = [];
+    for (const teacherMail of filteredTeacherList){
+        if (teacherMail !== undefined){
+            if (fullTeachersList[teacherMail].category.includes(studentData.category)){
+                categoryFilteredList.push(teacherMail);
+            }
+        }
+    }
+    let finalList = [];
+   let backupList = [];
+   // prefer category applicable teachers to non applicable.
+    //teachers who are working on that day and not in the same category will go in the backup list
+    for (const teacherMail of filteredTeacherList){
+        if (!categoryFilteredList.includes(teacherMail)){
+            backupList.push(teacherMail);
+        }
+    }
+
+    // get all category applicable teachers who are free on the lesson date.
+    for (const teacherMail of categoryFilteredList){
+        let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+            .where('date_utc.full_date', '==', lesson_date).get();
+        if (snapshot.length === 0){
+            finalList.push({
+                teacher_mail: teacherMail,
+                teacher_name: fullTeachersList[teacherMail].teacher_name
+            });
+        }
+    }
+
+    // if no category applicable teachers are free - search the backup list.
+    if (finalList.length === 0){
+        for (const teacherMail of backupList){
+            let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+                .where('date_utc.full_date', '==', lesson_date).get();
+            if (snapshot.length === 0){
+                finalList.push({
+                    teacher_mail: teacherMail,
+                    teacher_name: fullTeachersList[teacherMail].teacher_name
+                });
+            }
+        }
+    }
+
+    return finalList;
+}
+
+export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_teacher_name) {
+    let old_lesson_id = lesson_data.lesson_id;
+    let old_teacher_mail = lesson_data.teacher_mail;
+    let student_mail = lesson_data.student_mail;
+    // delete existing lesson.
+    db.collection('students').doc(student_mail).collection('student_lessons').doc(old_lesson_id).delete();
+    db.collection('teachers').doc(old_teacher_mail).collection('teacher_lessons').doc(old_lesson_id).delete();
+
+    await setNewLesson(student_mail, new_teacher_mail,
+        lesson_data.date_utc.full_date, lesson_data.duration, lesson_data.student_name, new_teacher_name)
+}
+
+export async function getAllStudents(){
+    let studentsInfo = [];
+    let snapshot = await db.collection('students').get();
+    snapshot.forEach(student => {
+        studentsInfo.push(student.data());
+    });
+    return studentsInfo;
 }
