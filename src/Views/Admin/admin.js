@@ -29,7 +29,7 @@ const switchRoutes = (
             }
             return null;
         })}
-        <Redirect from="/Admin" to="/Admin/homePage" />
+        <Redirect from="/Admin" to="/Admin/teachers" />
     </Switch>
 );
 
