@@ -7,6 +7,7 @@ import {
     updateCredits
 } from "./firestore_functions_student";
 import {WEEKDAYS} from "./firestore_functions_general"
+import teacher from "../Views/Teacher/teacher";
 
 export async function getAdminByUid(uid){
     let adminInfo = [];
@@ -59,11 +60,13 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     // choose a teacher for the student if one is not picked yet - this function also adds the student to the teacher's list of students.
     if (teacher_mail === null) {
         teacherInfo = await chooseTeacherForStudent(student_mail, student_name, student_category, studentData.teacher.email);
+        console.log('choose new teacher for student and connected him to the teacher')
     }
     // if a teacher was already picked - get his info and add the student to his list.
     else{
         teacherInfo = await getTeacherByMail(teacher_mail);
         await addStudentToTeacher(teacherInfo.email, student_mail, student_name);
+        console.log('selected teacher now connected to student')
     }
 
     // update the new teacher data in the student's doc.
@@ -76,9 +79,10 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     db.collection('students').doc(student_mail).update({
         teacher: studentTeacherData
     });
+    console.log('new teacher updated for student');
     // clear all future lessons of the student and the old teacher.
     await clearAllLessons(student_mail, old_teacher_mail, teacher_deleted);
-
+    console.log('cleared all future lessons with old teacher');
     // go through all the admins
     let allAdminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(allAdminMails[0]).get();
@@ -104,14 +108,22 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
             }
         });
         teachers[old_teacher_mail].students = old_teacher_new_student_list;
+        db.collection('teachers').doc(old_teacher_mail).update({
+            students: old_teacher_new_student_list
+        });
+        console.log('updated old teacher student list');
     }
 
-    for (const mail in allAdminMails){
-        db.collection('admins').doc(mail.toString()).update({
+    for (const mail of allAdminMails){
+        console.log(mail);
+        await db.collection('admins').doc(mail).update({
             all_students: students,
             all_teachers: teachers
+        }).catch(function (error) {
+            console.error("problem updating" + mail);
         })
     }
+    console.log('updated admins records')
 }
 
 async function clearAllLessons(student_mail, teacher_mail, deleted = false){
@@ -287,4 +299,43 @@ export async function getAllStudents(){
         studentsInfo.push(student.data());
     });
     return studentsInfo;
+}
+
+export async function editTeacherContactInfo(teacher_mail, phone_number, skype_username, student_list) {
+    await db.collection('teachers').doc(teacher_mail).update({
+        phone_number: phone_number,
+        skype_username: skype_username
+    });
+    for (const studentInfo of student_list){
+        await db.collection('students').doc(studentInfo.student_mail).update({
+            "teacher.skype_username": skype_username
+        });
+    }
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    teachers[teacher_mail]['phone_number'] = phone_number;
+    teachers[teacher_mail]['skype_username'] = skype_username;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
+}
+
+export async function editTeacherCategory(teacher_mail, category_list) {
+    await db.collection('teachers').doc(teacher_mail).update({
+        category: category_list
+    });
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let teachers = adminInfo.data().all_teachers;
+    teachers[teacher_mail]['category'] = category_list;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
 }

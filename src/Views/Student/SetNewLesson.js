@@ -154,14 +154,22 @@ export default function Calendar({history}) {
         setEvents([]);
         let teacher_name = studentData.teacher.first_name + " " + studentData.teacher.last_name;
         let student_name = studentData.first_name + " " + studentData.last_name;
+        setAlert(
+            <SweetAlert
+                customButtons={
+                    <React.Fragment>
+                    </React.Fragment>
+                }>
+                <Loader width={'30%'}/>
+            </SweetAlert>
+        );
+        setModal(false);
         setNewLesson(studentData.email, studentData.teacher.email,
             selectedEvent.start, duration, student_name, teacher_name).then(res => {
            if (res === true){
-               setModal(false);
                confirmAlert();
            }
            else {
-               setModal(false);
                denaiedAlert();
            }
             setGetEvents(!getEvents);
