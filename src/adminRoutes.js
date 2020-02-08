@@ -23,8 +23,9 @@ import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
 import Calendar from "@material-ui/icons/Today";
 import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
-import HomePage from './Views/Admin/homePage'
-import Students from './Views/Admin/students'
+import HomePage from './Views/Admin/homePage';
+import Students from './Views/Admin/students';
+import TeacherCalendar from './Views/Admin/teacherCalendar';
 
 const dashboardRoutes = [
     {
@@ -32,6 +33,13 @@ const dashboardRoutes = [
         name: "Home Page",
         icon: Dashboard,
         component: HomePage,
+        layout: "/Admin"
+    },
+    {
+        path: "/teacherCalendar",
+        name: "Teacher Calendar",
+        icon: Dashboard,
+        component: TeacherCalendar,
         layout: "/Admin"
     },
     {

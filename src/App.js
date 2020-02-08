@@ -62,6 +62,7 @@ const App = () => {
                 <PrivateRouteAdmin exact path='/Admin' component = {AdminHomePage}/>
                 <PrivateRouteAdmin exact path='/Admin/homePage' component = {AdminHomePage}/>
                 <PrivateRouteAdmin exact path='/Admin/students' component = {AdminHomePage}/>
+                <PrivateRouteAdmin exact path='/Admin/teacherCalendar' component = {AdminHomePage}/>
 
                 {/* General Routing */}
                 <Route exact path='/' component = {logIn}/>
