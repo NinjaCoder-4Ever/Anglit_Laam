@@ -31,7 +31,7 @@ const App = () => {
             if (window.$userType === 'teachers')
                 return '/Teacher/homePage';
             if (window.$userType === 'admins')
-                return '/Admin/homePage';
+                return '/Admin/teachers';
         }
         else
             return '/login';
@@ -60,7 +60,7 @@ const App = () => {
 
                 {/* Admin Routes */}
                 <PrivateRouteAdmin exact path='/Admin' component = {AdminHomePage}/>
-                <PrivateRouteAdmin exact path='/Admin/homePage' component = {AdminHomePage}/>
+                <PrivateRouteAdmin exact path='/Admin/teachers' component = {AdminHomePage}/>
                 <PrivateRouteAdmin exact path='/Admin/students' component = {AdminHomePage}/>
                 <PrivateRouteAdmin exact path='/Admin/teacherCalendar' component = {AdminHomePage}/>
 
