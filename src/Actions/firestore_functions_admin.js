@@ -171,7 +171,7 @@ export async function deleteStudent(student_mail){
         students: newStudentList
     });
     let lessons = [];
-    let snapshot = db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+    let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
         .where('student_mail', '==', student_mail)
         .where('date_utc.full_date', '>=', new Date()).get();
 
