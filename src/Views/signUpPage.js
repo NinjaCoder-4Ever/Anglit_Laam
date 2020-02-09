@@ -17,6 +17,8 @@ import {setNewStudent} from "../Actions/firestore_functions_student.js";
 import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
+import SweetAlert from "react-bootstrap-sweetalert";
+import Loader from "../Components/Loader/Loader";
 
 
 
@@ -44,6 +46,7 @@ const SignUp = ({ history }) => {
     const inputLabel = React.useRef(null);
     const classes = useStyles();
     const [category, setCategory] = React.useState('');
+    const [alert, setAlert] = React.useState(null);
     //const [labelWidth, setLabelWidth] = React.useState(0);
     //React.useEffect(() => {
      //   setLabelWidth(inputLabel.current.offsetWidth);
@@ -54,6 +57,15 @@ const SignUp = ({ history }) => {
     };
 
     const handleSignUp = useCallback(async () => {
+        setAlert(
+            <SweetAlert
+                customButtons={
+                    <React.Fragment>
+                    </React.Fragment>
+                }>
+                <Loader width={'30%'}/>
+            </SweetAlert>
+        );
         let email = document.getElementById('email').value;
         let password = document.getElementById('password').value;
         let firstName = document.getElementById('firstName').value;
@@ -78,6 +90,7 @@ const SignUp = ({ history }) => {
         <Container component="main" maxWidth="xs">
             <CssBaseline />
             <div className={classes.paper}>
+                {alert}
                 <Avatar className={classes.avatar}>
                     <LockOutlinedIcon />
                 </Avatar>
