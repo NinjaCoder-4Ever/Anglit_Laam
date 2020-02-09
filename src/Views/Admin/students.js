@@ -261,7 +261,7 @@ export default  function ExtendedTables() {
             <SweetAlert
                 success
                 style={{ display: "block"}}
-                title="Subscription Updated"
+                title="Student Deleted!"
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
