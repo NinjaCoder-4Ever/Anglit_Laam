@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React from "react";
 import firebase from 'Config/fire';
 
 // react components used to create a calendar with events on it
@@ -14,7 +14,6 @@ import { makeStyles } from "@material-ui/core/styles";
 
 
 // core components
-import Heading from "../../Components/Heading/Heading";
 import GridContainer from "../../Components/Grid/GridContainer";
 import GridItem from "../../Components/Grid/GridItem";
 import Card from "../../Components/Card/Card.js";
@@ -23,9 +22,8 @@ import CardBody from "../../Components/Card/CardBody.js";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
-import { events as calendarEvents } from "../../Variables/general.js";
 import {getTeachersWeekFreeTime} from "Actions/firestore_functions_teacher"
-import {getStudentByUID, setNewLesson, updateCredits} from "Actions/firestore_functions_student"
+import {getStudentByUID, setNewLesson} from "Actions/firestore_functions_student"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -35,7 +33,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Slide from "@material-ui/core/Slide";
 import CardHeader from "../../Components/Card/CardHeader";
 import CardIcon from "../../Components/Card/CardIcon";
-import {CalendarToday, InsertInvitation} from "@material-ui/icons";
+import { InsertInvitation } from "@material-ui/icons";
 import Loader from "Components/Loader/Loader.js";
 
 const localizer = momentLocalizer(moment);
@@ -52,7 +50,7 @@ export default function Calendar({history}) {
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [teacherFreeTime, setTeacherFreeTime] = React.useState({});
-    const [studentData, setstudentData] = React.useState({teacher:{email:"",
+    const [studentData, setStudentData] = React.useState({teacher:{email:"",
         first_name: "", last_name:""}, email:"", first_name: "", last_name: "", credits: null});
     const [selectedEvent, setSelectedEvent] = React.useState({start:"", duration:[]});
     const [getEvents, setGetEvents] = React.useState(true);
@@ -63,11 +61,11 @@ export default function Calendar({history}) {
     const Transition = React.forwardRef(function Transition(props, ref) {
         return <Slide direction="down" ref={ref} {...props} />;
     });
-    const [currentDay, setDsetCurrentDay] = React.useState(new Date());
+    const [currentDay] = React.useState(new Date());
 
     React.useEffect(() => {
         getStudentByUID(firebase.auth().currentUser.uid).then(studentInfo =>{
-            setstudentData(studentInfo);
+            setStudentData(studentInfo);
             let teacherMail = studentInfo.teacher.email;
             let i;
             let newEvents = [];
