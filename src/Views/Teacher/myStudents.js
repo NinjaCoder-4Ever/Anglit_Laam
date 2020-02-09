@@ -2,13 +2,11 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "assets/img/LogoText.png";
 import firebase from 'Config/fire';
-import SweetAlert from "react-bootstrap-sweetalert";
+
 
 
 // material-ui icons
-import Assignment from "@material-ui/icons/Assignment";
 import Check from "@material-ui/icons/Check";
 
 // core components
@@ -32,9 +30,10 @@ import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-import Transition from "react-transition-group/Transition";
+//import Transition from "react-transition-group/Transition";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
+import Slide from "@material-ui/core/Slide";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -70,6 +69,10 @@ export default  function ExtendedTables() {
         students: []
     });
     const [modal, setModal] = React.useState(false);
+
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
 
     React.useEffect(() => {
 

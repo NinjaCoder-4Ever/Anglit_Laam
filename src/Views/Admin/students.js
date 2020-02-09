@@ -32,7 +32,7 @@ import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-import Transition from "react-transition-group/Transition";
+//import Transition from "react-transition-group/Transition";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {
@@ -42,6 +42,7 @@ import {
     updateSubscriptionForStudent
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
+import Slide from "@material-ui/core/Slide";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -52,6 +53,10 @@ export default  function ExtendedTables() {
     const classesPopup = useStylesPopup();
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
+
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
 
     const [studentsTable, setStudentsTable] = React.useState([]);
     const [modal, setModal] = React.useState(false);
