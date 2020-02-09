@@ -171,7 +171,7 @@ export async function deleteStudent(student_mail){
         students: newStudentList
     });
     let lessons = [];
-    let snapshot = db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+    let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
         .where('student_mail', '==', student_mail)
         .where('date_utc.full_date', '>=', new Date()).get();
 
@@ -221,7 +221,8 @@ export async function updateSubscriptionForStudent(student_mail, recurring, less
     }
 }
 
-export async function getAvailableTeachersInDate(admin_data, current_teacher_mail, student_mail, lesson_date) {
+export async function getAvailableTeachersInDate(uid, current_teacher_mail, student_mail, lesson_date) {
+    let admin_data = await getAdminByUid(uid);
     let teacherMailList = Object.keys(admin_data.all_teachers);
     delete teacherMailList[current_teacher_mail];
     let lessonDay = WEEKDAYS[lesson_date.getDay()];
@@ -265,7 +266,7 @@ export async function getAvailableTeachersInDate(admin_data, current_teacher_mai
     for (const teacherMail of categoryFilteredList){
         let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
             .where('date_utc.full_date', '==', lesson_date).get();
-        if (snapshot.length === 0){
+        if (snapshot.length !== 0){
             finalList.push({
                 teacher_mail: teacherMail,
                 teacher_name: fullTeachersList[teacherMail].teacher_name
@@ -278,7 +279,7 @@ export async function getAvailableTeachersInDate(admin_data, current_teacher_mai
         for (const teacherMail of backupList){
             let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
                 .where('date_utc.full_date', '==', lesson_date).get();
-            if (snapshot.length === 0){
+            if (snapshot.length !== 0){
                 finalList.push({
                     teacher_mail: teacherMail,
                     teacher_name: fullTeachersList[teacherMail].teacher_name
@@ -295,11 +296,11 @@ export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_t
     let old_teacher_mail = lesson_data.teacher_mail;
     let student_mail = lesson_data.student_mail;
     // delete existing lesson.
-    db.collection('students').doc(student_mail).collection('student_lessons').doc(old_lesson_id).delete();
-    db.collection('teachers').doc(old_teacher_mail).collection('teacher_lessons').doc(old_lesson_id).delete();
+    await db.collection('students').doc(student_mail).collection('student_lessons').doc(old_lesson_id).delete();
+    await db.collection('teachers').doc(old_teacher_mail).collection('teacher_lessons').doc(old_lesson_id).delete();
 
     await setNewLesson(student_mail, new_teacher_mail,
-        lesson_data.date_utc.full_date, lesson_data.duration, lesson_data.student_name, new_teacher_name)
+        lesson_data.start, lesson_data.duration, lesson_data.student_name, new_teacher_name)
 }
 
 export async function getAllStudents(){
