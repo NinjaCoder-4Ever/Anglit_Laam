@@ -43,6 +43,7 @@ import {
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
 import {Redirect} from "react-router-dom";
+import {Checkbox} from "@material-ui/core";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -91,7 +92,8 @@ export default  function ExtendedTables() {
                 row.push(all_teachers[teacher].phone_number);
                 row.push(all_teachers[teacher].skype_username);
                 row.push(all_teachers[teacher].category.toString());
-                row.push(getSimpleButtons(all_teachers[teacher], index));
+                row.push(getScheduleButtons(all_teachers[teacher], index));
+                row.push(getInfoButtons(all_teachers[teacher], index));
                 console.log(row);
 
                 teacherInfoTable.push(row);
@@ -116,7 +118,7 @@ export default  function ExtendedTables() {
             /> );
     }
 
-    function getSimpleButtons(teacherData, index)
+    function getScheduleButtons(teacherData, index)
     {
         return (
             <>
@@ -127,7 +129,14 @@ export default  function ExtendedTables() {
                 >
                     See Schedule
                 </Button>
+            </>
+        )
+    }
 
+    function getInfoButtons(teacherData, index)
+    {
+        return (
+            <>
                 <Button
                     color={"info"}
                     className={classes.actionButton}
@@ -209,19 +218,48 @@ export default  function ExtendedTables() {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
-        let selectedCategories = document.getElementById('catogorySelect').options;
         let categoryList = [];
-        for (const opt of selectedCategories){
-            if (opt.selected){
-                categoryList.push(opt.value);
-            }
+        let kids = document.getElementById('kidsBox');
+        let adults = document.getElementById('adultsBox');
+        let business = document.getElementById('businessBox');
+        let spoken = document.getElementById('spokenBox');
+        if (kids.checked){
+            categoryList.push('kids');
         }
+        if (adults.checked){
+            categoryList.push('adults')
+        }
+        if (business.checked){
+            categoryList.push('business')
+        }
+        if (spoken.checked){
+            categoryList.push('spoken')
+        }
+        if(categoryList.length === 0){
+            noCategorySelectedAlert();
+            return 0
+        }
+
         editTeacherCategory(selectedTeacher.teacher_mail, categoryList).then(() =>{
             setCategoryModal(false);
             confirmCategoryUpdateAlert();
             setTriggerMount(!triggerMount);
             document.getElementById('categoryForm').reset();
         })
+    };
+
+    const noCategorySelectedAlert = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="No Categories Selected"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Please select a category for the teacher.
+            </SweetAlert>
+        );
     };
 
     const confirmCategoryUpdateAlert = () => {
@@ -478,12 +516,10 @@ export default  function ExtendedTables() {
                     <h5>Would you like to change the categories?</h5>
                     <br/>
                     <form id={"categoryForm"}>
-                        <select id="catogorySelect" multiple={true}>
-                            <option value={"kids"}>Kids</option>
-                            <option value={"adults"}>Adults</option>
-                            <option value={"business"}>Business</option>
-                            <option value={"spoken"}>Spoken</option>
-                        </select>
+                        <Checkbox id={'kidsBox'} value={"kids"} color={'primary'} label={'Kids'}/>Kids
+                        <Checkbox id={'adultsBox'} value={"adults"} color={'primary'} label={'Adults'}/>Adults
+                        <Checkbox id={'businessBox'} value={"business"} color={'primary'} label={'Business'}/>Business
+                        <Checkbox id={'spokenBox'} value={"spoken"} color={'primary'} label={"Spoken"}/>Spoken
                     </form>
                 </DialogContent>
                 <DialogActions
