@@ -2,14 +2,10 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "assets/img/LogoText.png";
 import firebase from 'Config/fire';
-import SweetAlert from "react-bootstrap-sweetalert";
-
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Check from "@material-ui/icons/Check";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
@@ -23,9 +19,8 @@ import CardHeader from "Components/Card/CardHeader.js";
 
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
+import {getStudentByUID, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
 import Loader from "Components/Loader/Loader.js";
-import Transition from "react-transition-group/Transition";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -33,12 +28,14 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
+import Slide from "@material-ui/core/Slide";
 
 const useStyles = makeStyles(styles);
 function printFeedback(feedback) {
     return "this is feedback for the class"
 }
 const useStylesPopup = makeStyles(stylesPopup);
+
 export default  function ExtendedTables() {
     const classesPopup = useStylesPopup();
     const classes = useStyles();
@@ -65,6 +62,9 @@ export default  function ExtendedTables() {
         lesson_date: "",
     });
 
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
 
     React.useEffect(() => {
         let lessonsTable = [];

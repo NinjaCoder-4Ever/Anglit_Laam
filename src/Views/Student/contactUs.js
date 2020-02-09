@@ -1,6 +1,5 @@
 
 import React from "react";
-import firebase from '../../Config/fire';
 import {withRouter} from 'react-router-dom';
 import GridContainer from "../../Components/Grid/GridContainer";
 import GridItem from "../../Components/Grid/GridItem";

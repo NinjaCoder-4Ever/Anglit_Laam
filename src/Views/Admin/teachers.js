@@ -45,6 +45,8 @@ import {updateCredits} from "../../Actions/firestore_functions_student";
 import {Redirect} from "react-router-dom";
 import {Checkbox} from "@material-ui/core";
 
+import Slide from "@material-ui/core/Slide";
+
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
 
@@ -59,6 +61,10 @@ export default  function ExtendedTables() {
     const [modal, setModal] = React.useState(false);
     const [contactInfoModal, setContactInfoModal] = React.useState(false);
     const [categoryModal, setCategoryModal] = React.useState(false);
+
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
 
     const [selectedTeacher, setSelectedTeacher] = React.useState({
         category: "",
@@ -218,6 +224,7 @@ export default  function ExtendedTables() {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
+        let selectedCategories = document.getElementById('catogorySelect').options;
         let categoryList = [];
         let kids = document.getElementById('kidsBox');
         let adults = document.getElementById('adultsBox');

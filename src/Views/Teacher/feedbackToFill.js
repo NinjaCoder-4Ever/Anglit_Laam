@@ -28,10 +28,11 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Dialog from "@material-ui/core/Dialog";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import Transition from "react-transition-group/Transition";
+//import Transition from "react-transition-group/Transition";
 import SweetAlert from "react-bootstrap-sweetalert";
 import Loader from "../../Components/Loader/Loader";
 import DialogActions from "@material-ui/core/DialogActions";
+import Slide from "@material-ui/core/Slide";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -62,6 +63,10 @@ export default  function ExtendedTables(callback, deps) {
 
     const classesPopup = useStylesPopup();
     const classes = useStyles();
+
+    const Transition = React.forwardRef(function Transition(props, ref) {
+        return <Slide direction="down" ref={ref} {...props} />;
+    });
 
     React.useEffect(() => {
         getTeacherByUID(firebase.auth().currentUser.uid).then(teacherInfo => {

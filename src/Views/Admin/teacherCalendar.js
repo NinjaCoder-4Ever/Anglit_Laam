@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
+import queryString from 'query-string';
 import firebase from 'Config/fire';
-import queryString from 'query-string'
 
 // react components used to create a calendar with events on it
 import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
@@ -14,8 +14,8 @@ import { makeStyles } from "@material-ui/core/styles";
 
 
 
+
 // core components
-import Heading from "../../Components/Heading/Heading";
 import GridContainer from "../../Components/Grid/GridContainer";
 import GridItem from "../../Components/Grid/GridItem";
 import Card from "../../Components/Card/Card.js";
@@ -24,8 +24,7 @@ import CardBody from "../../Components/Card/CardBody.js";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/components/buttonStyle.js";
 
-import { events as calendarEvents } from "../../Variables/general.js";
-import {getTeacherByUID,getTeacherByMail , setLessonStarted, setLessonNoShow, unmarkLessonStatus, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
+import {getTeacherByMail , setLessonStarted, setLessonNoShow, unmarkLessonStatus, getWeekLessonByDateTeacher} from "Actions/firestore_functions_teacher"
 import Button from "../../Components/CustomButtons/Button";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -37,10 +36,6 @@ import CardHeader from "../../Components/Card/CardHeader";
 import CardIcon from "../../Components/Card/CardIcon";
 import {CalendarToday} from "@material-ui/icons";
 import Loader from "Components/Loader/Loader.js";
-import Transition from "react-transition-group/Transition";
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
-import {saveFeedback, setFeedbackForLesson} from "../../Actions/firestore_functions_teacher";
 import {getAvailableTeachersInDate, swapTeachersForLesson} from "../../Actions/firestore_functions_admin";
 
 const localizer = momentLocalizer(moment);

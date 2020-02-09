@@ -1,10 +1,8 @@
 import React from "react";
 import firebase from '../../Config/fire';
-import {withRouter} from 'react-router-dom';
 
 // @material-ui/core components
 import {makeStyles} from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
 
 // @material-ui/icons
 import PermIdentity from "@material-ui/icons/PermIdentity";
@@ -19,12 +17,10 @@ import Card from "Components/Card/Card.js";
 import CardBody from "Components/Card/CardBody.js";
 import CardHeader from "Components/Card/CardHeader.js";
 import CardIcon from "Components/Card/CardIcon.js";
-import CardAvatar from "Components/Card/CardAvatar.js";
 import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/userProfileStyles.js";
 import {getStudentByUID, updateStudentContactInfo} from "Actions/firestore_functions_student";
-import TextField from "@material-ui/core/TextField";
 import SweetAlert from "react-bootstrap-sweetalert";
 
 const useStyles = makeStyles(styles);
