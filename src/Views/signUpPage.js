@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import firebase from '../Config/fire';
-import {withRouter} from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import Copyright from "../Common/Copyright";
 import {setNewStudent} from "../Actions/firestore_functions_student.js";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -41,28 +41,38 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignUp = ({ history }) => {
+    const inputLabel = React.useRef(null);
     const classes = useStyles();
+    const [category, setCategory] = React.useState('');
+    //const [labelWidth, setLabelWidth] = React.useState(0);
+    //React.useEffect(() => {
+     //   setLabelWidth(inputLabel.current.offsetWidth);
+    //}, []);
 
-    const handleSignUp = useCallback(async event => {
-        event.preventDefault();
-        const { email, password ,phone, firstName, lastName, englishType} = event.target.elements;
-        try {
+    const handleChange = event => {
+        setCategory(event.target.value);
+    };
+
+    const handleSignUp = useCallback(async () => {
+        let email = document.getElementById('email').value;
+        let password = document.getElementById('password').value;
+        let firstName = document.getElementById('firstName').value;
+        let lastName = document.getElementById('lastName').value;
+        let phone = document.getElementById('phone').value;
+        let englishType = document.getElementById('englishType').innerText.toLowerCase();
+        //try {
             await firebase
                 .auth()
-                .createUserWithEmailAndPassword(email.value, password.value);
+                .createUserWithEmailAndPassword(email, password);
             await setNewStudent(firebase.auth().currentUser.uid,
-                email.value, firstName.value, lastName.value, phone.value);
+                email, firstName, lastName, phone, englishType);
             history.push("/Student/homePage");
-        } catch (error) {
-            alert(error);
-        }
+        //} catch (error) {
+        //    console.log("the error: " + error);
+            //   history.push("/Student/homePage");
+        //}
     }, [history]);
 
-
-    const [englishType, setEnglishType] = React.useState("English Level");
-    const handleDropDownChange = event => {
-        setEnglishType(event.target.value);
-    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -74,7 +84,7 @@ const SignUp = ({ history }) => {
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
-                <form onSubmit={handleSignUp} className={classes.form} noValidate>
+                <form id="signupForm" className={classes.form}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField
@@ -148,39 +158,44 @@ const SignUp = ({ history }) => {
                                 placeholder="Password"
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} >
+                            <InputLabel id="demo-controlled-open-select-label">English Type:</InputLabel>
                             <Select
-                                labelId="demo-simple-select-label"
-                                onChange={handleDropDownChange}
-                                id="demo-simple-select"
-                                value= {englishType}
-                                //placeholder='Select Friend'
-                                //label="Password"
+                                value = {category}
+                                label="English Type"
+                                required
+                                fullWidth
+                                id="englishType"
+                                onChange={handleChange}
                             >
-                                <MenuItem value={0}>Kids</MenuItem>
-                                <MenuItem value={1}>Adults</MenuItem>
-                                <MenuItem value={2}>Business</MenuItem>
-                                <MenuItem value={3}>Spoken</MenuItem>
+                                <MenuItem value="" disabled>
+                                    <em>select a value</em>
+                                </MenuItem>
+
+                                <MenuItem value={"kids"}>Kids</MenuItem>
+                                <MenuItem value={"adults"}>Adults</MenuItem>
+                                <MenuItem value={"business"}>Business</MenuItem>
+                                <MenuItem value={"spoken"}>Spoken</MenuItem>
                             </Select>
                         </Grid>
                     </Grid>
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        className={classes.submit}
-                    >
-                        Sign Up
-                    </Button>
-                    <Grid container justify="flex-end">
-                        <Grid item>
-                            <Link href="./login" variant="body2">
-                                Already have an account? Sign in
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </form>
+                <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                    onClick={handleSignUp}
+                >
+                    Sign Up
+                </Button>
+                <Grid container justify="flex-end">
+                    <Grid item>
+                        <Link href="./login" variant="body2">
+                            Already have an account? Sign in
+                        </Link>
+                    </Grid>
+                </Grid>
             </div>
             <Box mt={5}>
                 <Copyright />

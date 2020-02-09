@@ -32,12 +32,17 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import {isDate} from "moment";
-import Transition from "react-transition-group/Transition";
+//import Transition from "react-transition-group/Transition";
+import Slide from "@material-ui/core/Slide";
 
 
 const useStyles = makeStyles(styles);
 
 const useStylesPopup = makeStyles(stylesPopup);
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="down" ref={ref} {...props} />;
+});
 
 export default  function ExtendedTables({history}) {
     const [checked, setChecked] = React.useState(0);

@@ -105,7 +105,7 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
 
 async function updateAdminStudentData(studentData) {
     let studentMail = studentData.student_mail;
-    let adminMails = getAllAdminMails();
+    let adminMails = await getAllAdminMails();
     let adminData = await db.collection('admins').doc(adminMails[0]).get();
     let students = adminData.data().all_students;
     students[studentMail] = studentData;

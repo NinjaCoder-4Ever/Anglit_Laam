@@ -147,7 +147,17 @@ async function clearAllLessons(student_mail, teacher_mail, deleted = false){
 }
 
 export async function deleteStudent(student_mail){
+
+    //should delete student from firebase
+    //var user = firebase.auth().currentUser;
+
+    //user.delete().then(function() {
+        // User deleted.
+    //}, function(error) {
+        // An error happened.
+    //});
     let studentData = await getStudentByMail(student_mail);
+    console.log(studentData);
     let teacherMail = studentData.teacher.email;
     let teacherData = await getTeacherByMail(teacherMail);
     let studentList = teacherData.students;
