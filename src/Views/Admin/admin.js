@@ -44,7 +44,7 @@ export default function Admin({ ...rest }) {
     //const [image, setImage] = React.useState(bgImage);
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [miniActive, setMiniActive] = React.useState(false);
-    const [bgColor, setBgColor] = React.useState("black");
+    const [bgColor] = React.useState("black");
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
     };

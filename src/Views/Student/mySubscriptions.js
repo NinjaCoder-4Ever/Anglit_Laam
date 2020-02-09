@@ -2,15 +2,12 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "assets/img/LogoText.png";
 import firebase from 'Config/fire';
 import SweetAlert from "react-bootstrap-sweetalert";
 
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Edit from "@material-ui/icons/Edit";
-import Close from "@material-ui/icons/Close";
 import Check from "@material-ui/icons/Check";
 
 // core components
@@ -24,7 +21,7 @@ import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
-import {getStudentByUID, cancelLesson, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
+import {getStudentByUID, getAllPastLessonsForStudent} from "Actions/firestore_functions_student";
 import Loader from "Components/Loader/Loader.js";
 
 const useStyles = makeStyles(styles);
@@ -32,7 +29,6 @@ function printFeedback(feedback) {
     return "this is feedback for the class"
 }
 export default  function ExtendedTables() {
-    const [checked, setChecked] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [studentData,setStudentData] = React.useState({first_name: '',
@@ -132,7 +128,7 @@ export default  function ExtendedTables() {
                             <h4 className={classes.cardIconTitle}>Past Lessons</h4>
                         </CardHeader>
                         {
-                            loading == true ?
+                            loading === true ?
                                 <Loader width={'20%'}/>:
                                 <CardBody>
                                     <Table

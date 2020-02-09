@@ -43,7 +43,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignUp = ({ history }) => {
-    const inputLabel = React.useRef(null);
     const classes = useStyles();
     const [category, setCategory] = React.useState('');
     const [alert, setAlert] = React.useState(null);
