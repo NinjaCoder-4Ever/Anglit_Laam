@@ -41,6 +41,7 @@ import Transition from "react-transition-group/Transition";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {saveFeedback, setFeedbackForLesson} from "../../Actions/firestore_functions_teacher";
+import {getAvailableTeachersInDate, swapTeachersForLesson} from "../../Actions/firestore_functions_admin";
 
 const localizer = momentLocalizer(moment);
 
@@ -61,6 +62,7 @@ export default function Calendar({history}) {
     const [selectedEvent, setSelectedEvent] = React.useState({
         lesson_id:"",
         student_mail: "",
+        teacher_mail: "",
         student_name: "",
         start: "",
         duration: "",
@@ -72,9 +74,11 @@ export default function Calendar({history}) {
 
     const [modal, setModal] = React.useState(false);
     const [modal2, setModal2] = React.useState(false);
+    const [availableTeachersModal, setAvailableTeachersModal] = React.useState(false);
     const Transition = React.forwardRef(function Transition(props, ref) {
         return <Slide direction="down" ref={ref} {...props} />;
     });
+    const [triggerMount, setTriggerMount] = React.useState(true);
 
     React.useEffect(() => {
         let newEvents = [];
@@ -111,7 +115,8 @@ export default function Calendar({history}) {
                             started: lesson_data.started,
                             no_show: lesson_data.no_show,
                             lesson_id: lesson_data.lesson_id,
-                            feedback_given: lesson_data.feedback_given
+                            feedback_given: lesson_data.feedback_given,
+                            teacher_mail: teacherInfo.email
                         };
                         newEvents.push(slotInfo);
                     }
@@ -120,7 +125,7 @@ export default function Calendar({history}) {
             }
             setLoading(false);
         });
-    }, []);
+    }, [triggerMount]);
 
     const selectEvent = event => {
         setSelectedEvent(event);
@@ -152,76 +157,6 @@ export default function Calendar({history}) {
         selectedEvent.started = false;
         setModal(false);
         unmarkAlert();
-    };
-
-    const submitFeedback =() => {
-        var formInfo = document.getElementById("feedbackForm");
-        let student_mail = selectedEvent.student_mail;
-        let teacher_mail = teacherData.email;
-        let lesson_id = selectedEvent.lesson_id;
-        let feedback = {
-            grammar_corrections: formInfo.elements["grammar_corrections"].value,
-            pronunciation_corrections: formInfo.elements["pronunciation_corrections"].value,
-            vocabulary: formInfo.elements["vocabulary"].value,
-            home_work: formInfo.elements["home_work"].value,
-        };
-        setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
-        formInfo.reset();
-        selectedEvent.feedback_given = true;
-        setModal2(false);
-        confirmMessage()
-    };
-
-    const closeModal = () => {
-        document.getElementById("feedbackForm").reset();
-        setModal2(false)
-    };
-
-    const saveTempFeedback = () => {
-        var formInfo = document.getElementById("feedbackForm");
-        let teacher_mail = teacherData.email;
-        let lesson_id = selectedEvent.lesson_id;
-        let feedback = {
-            grammar_corrections: formInfo.elements["grammar_corrections"].value,
-            pronunciation_corrections: formInfo.elements["pronunciation_corrections"].value,
-            vocabulary: formInfo.elements["vocabulary"].value,
-            home_work: formInfo.elements["home_work"].value,
-        };
-        saveFeedback(feedback, lesson_id, teacher_mail);
-        formInfo.reset();
-        setModal2(false)
-    };
-
-    const confirmMessage = () => {
-        setAlert(
-            <SweetAlert
-                success
-                style={{ display: "block"}}
-                title="Lesson Feedback Submitted!"
-                onConfirm={() => setAlert(null)}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-                confirmBtnText="OK!"
-            >
-            </SweetAlert>
-        );
-    };
-    const warningWithConfirmMessage = () => {
-        setAlert(
-            <SweetAlert
-                warning
-                style={{ display: "block"}}
-                title="Are you sure you want to submit the feedback?"
-                onConfirm={() => submitFeedback()}
-                onCancel={() => setAlert(null)}
-                confirmBtnCssClass={classes.button + " " + classes.success}
-                cancelBtnCssClass={classes.button + " " + classes.danger}
-                confirmBtnText="Yes, Submit"
-                cancelBtnText="No wait..."
-                showCancel
-            >
-                Once submitted no additional changes in the feedback are possible!
-            </SweetAlert>
-        );
     };
 
     const wasFeedbackGiven =(event) => {
@@ -318,11 +253,88 @@ export default function Calendar({history}) {
             className: backgroundColor
         };
     };
+
+    const setupAvailableTeachers = () =>{
+        setAlert(
+            <SweetAlert
+                customButtons={
+                    <React.Fragment>
+                    </React.Fragment>
+                }>
+                <Loader width={'30%'}/>
+            </SweetAlert>
+        );
+        setModal(false);
+        let selectTeacher = document.getElementById('teacherSelect');
+        getAvailableTeachersInDate(firebase.auth().currentUser.uid, selectedEvent.teacher_mail,
+          selectedEvent.student_mail, selectedEvent.start).then( (availableTeacherList) => {
+              if (availableTeacherList.length === 0){
+                  noTeachers();
+                  return 0
+              }
+              for (const teacherInfo of availableTeacherList){
+                  let opt = document.createElement('option');
+                  opt.textContent = teacherInfo.teacher_name;
+                  opt.value = teacherInfo.teacher_mail + "---" + teacherInfo.teacher_name;
+                  selectTeacher.appendChild(opt);
+              }
+              setAvailableTeachersModal(true);
+              setAlert(null)
+      });
+    };
+
+    const noTeachers = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="No Available Teachers Found"
+                onConfirm={() => setAlert(null)}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            />
+        );
+    };
+
+    const substitueTeacherFunction = () => {
+        setAvailableTeachersModal(false);
+        setAlert(
+            <SweetAlert
+                customButtons={
+                    <React.Fragment>
+                    </React.Fragment>
+                }>
+                <Loader width={'30%'}/>
+            </SweetAlert>
+        );
+        let chosenTeacherInfo = document.getElementById('teacherSelect').value.split('---');
+        let chosenTeacherName = chosenTeacherInfo[1];
+        let chosenTeacherMail = chosenTeacherInfo[0];
+        swapTeachersForLesson(selectedEvent, chosenTeacherMail, chosenTeacherName).then(() =>{
+            setTriggerMount(!triggerMount);
+            LessonSwapConfirm();
+        })
+
+    };
+
+    const LessonSwapConfirm = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Lesson Swapped"
+                onConfirm={() => setAlert(null)}
+                onCancel={() => hideAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            />
+        );
+    };
+
     return (
         <div>
             {alert}
             <GridContainer justify="center">
-                {/*<GridItem xs={5} sm={5} lg={5} md={5}>
+                {<GridItem xs={5} sm={5} lg={5} md={5}>
                     <Card pricing className={classes.textCenter}>
                         <CardHeader color="info">
                             <CardIcon color="rose">
@@ -344,7 +356,7 @@ export default function Calendar({history}) {
                             }
                         </CardBody>
                     </Card>
-                </GridItem>*/}
+                </GridItem>}
                 {
                     loading === false &&
                     <GridItem xs={12} sm={12} md={10}>
@@ -379,7 +391,7 @@ export default function Calendar({history}) {
                 open={modal}
                 transition={Transition}
                 keepMounted
-                onClose={() => closeModal()}
+                onClose={() => setModal(false)}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -415,26 +427,34 @@ export default function Calendar({history}) {
                     className={classesPopup.modalFooterCenter + " " +
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
-                    <Button  disabled={selectedEvent.started || selectedEvent.feedback_given}
-                             onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
-                    <Button disabled={selectedEvent.no_show || selectedEvent.feedback_given}
-                            onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
-                    <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
-                            onClick={() => unmarkLesson()} color="default">Unmark</Button>
+                    <GridContainer>
+                        <GridItem>
+                            <Button  disabled={selectedEvent.started || selectedEvent.feedback_given}
+                                     onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
+                            <Button disabled={selectedEvent.no_show || selectedEvent.feedback_given}
+                                    onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
+                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
+                                    onClick={() => unmarkLesson()} color="default">Unmark</Button>
+                        </GridItem>
+                        <GridItem>
+                            <Button disabled={selectedEvent.no_show || selectedEvent.started || selectedEvent.feedback_given}
+                                    onClick={() => setupAvailableTeachers()} color="primary">Substitute Teacher</Button>
+                        </GridItem>
+                    </GridContainer>
                 </DialogActions>
             </Dialog>
 
             <Dialog
                 classes={{
-                    root: classesPopup.center
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
                 }}
-                open={modal2}
+                open={availableTeachersModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => closeModal()}
+                onClose={() => setAvailableTeachersModal(false)}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
-                maxWidth={"90%"}
             >
                 <DialogTitle
                     id="classic-modal-slide-title"
@@ -447,117 +467,35 @@ export default function Calendar({history}) {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setModal(false)}
+                        onClick={() => setAvailableTeachersModal(false)}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
-                    <h3 className={classesPopup.modalTitle}>Submit Feedback</h3>
+                    <h3 className={classesPopup.modalTitle}>Choose Teacher</h3>
                 </DialogTitle>
-                <DialogContent>
-                    <form id="feedbackForm" className={classes.form} noValidate>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    readOnly
-                                    autoComplete="student_name"
-                                    name="student_name"
-                                    variant="outlined"
-                                    fullWidth
-                                    id="student_name"
-                                    label="Student"
-                                    value={selectedEvent.student_name}
-                                    autoFocus
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField
-                                    readOnly
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="lesson_date"
-                                    label="Date"
-                                    value={new Date(selectedEvent.start).toString()}
-                                    name="lesson_date"
-                                    autoComplete="lesson_date"
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <h5>Grammar Corrections</h5>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="grammar_corrections"
-                                    label="Grammar corrections that happened during the lesson."
-                                    name="Grammar Corrections"
-                                    multiline={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <h5>Pronunciation Corrections</h5>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="pronunciation_corrections"
-                                    label="Pronunciation corrections from the lesson."
-                                    name="Pronunciation Corrections"
-                                    multiline={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <h5>Vocabulary</h5>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="vocabulary"
-                                    label="New vocabulary that the student learned in the lesson."
-                                    name="Vocabulary"
-                                    multiline={5}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <h5>Home Work</h5>
-                                <TextField
-                                    variant="outlined"
-                                    required
-                                    fullWidth
-                                    id="home_work"
-                                    label="Home work for the student."
-                                    name="Home Work"
-                                    multiline={5}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Grid>
-                            <br/>
-                        </Grid>
+                <DialogContent
+                    id="modal-teachers-select"
+                    className={classesPopup.modalBody}
+                >
+                    <form>
+                        <select id={'teacherSelect'}/>
                     </form>
                 </DialogContent>
                 <DialogActions
-                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                    className={classesPopup.modalFooterCenter + " " +
+                    classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer>
                         <GridItem>
-                            <Button onClick={() => warningWithConfirmMessage()} color="info">
-                                Submit Feedback
-                            </Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => saveTempFeedback()} color="rose">
-                                Save Feedback
-                            </Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => closeModal()} color="default">
-                                Close
-                            </Button>
+                            <Button
+                                onClick={() => substitueTeacherFunction()} color="info">Substitute</Button>
+                            <Button
+                                    onClick={() => setAvailableTeachersModal()} color="default">NeverMind</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
             </Dialog>
+
         </div>
     );
 }
