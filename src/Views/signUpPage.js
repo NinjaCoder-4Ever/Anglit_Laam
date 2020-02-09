@@ -11,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import firebase from '../Config/fire';
-import {withRouter} from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import Copyright from "../Common/Copyright";
 import {setNewStudent} from "../Actions/firestore_functions_student.js";
 import MenuItem from '@material-ui/core/MenuItem';
@@ -41,7 +41,17 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignUp = ({ history }) => {
+    const inputLabel = React.useRef(null);
     const classes = useStyles();
+    const [category, setCategory] = React.useState('');
+    //const [labelWidth, setLabelWidth] = React.useState(0);
+    //React.useEffect(() => {
+     //   setLabelWidth(inputLabel.current.offsetWidth);
+    //}, []);
+
+    const handleChange = event => {
+        setCategory(event.target.value);
+    };
 
     const handleSignUp = useCallback(async () => {
         let email = document.getElementById('email').value;
@@ -50,16 +60,17 @@ const SignUp = ({ history }) => {
         let lastName = document.getElementById('lastName').value;
         let phone = document.getElementById('phone').value;
         let englishType = document.getElementById('englishType').innerText.toLowerCase();
-        try {
+        //try {
             await firebase
                 .auth()
                 .createUserWithEmailAndPassword(email, password);
             await setNewStudent(firebase.auth().currentUser.uid,
                 email, firstName, lastName, phone, englishType);
             history.push("/Student/homePage");
-        } catch (error) {
-            history.push("/Student/homePage");
-        }
+        //} catch (error) {
+        //    console.log("the error: " + error);
+            //   history.push("/Student/homePage");
+        //}
     }, [history]);
 
 
@@ -147,20 +158,24 @@ const SignUp = ({ history }) => {
                                 placeholder="Password"
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <p>English Type</p>
+                        <Grid item xs={12} >
+                            <InputLabel id="demo-controlled-open-select-label">English Type:</InputLabel>
                             <Select
+                                value = {category}
                                 label="English Type"
                                 required
                                 fullWidth
                                 id="englishType"
-                                //placeholder='Select Friend'
-                                //label="Password"
+                                onChange={handleChange}
                             >
-                                <option value={"kids"}>Kids</option>
-                                <option value={"adults"}>Adults</option>
-                                <option value={"business"}>Business</option>
-                                <option value={"spoken"}>Spoken</option>
+                                <MenuItem value="" disabled>
+                                    <em>select a value</em>
+                                </MenuItem>
+
+                                <MenuItem value={"kids"}>Kids</MenuItem>
+                                <MenuItem value={"adults"}>Adults</MenuItem>
+                                <MenuItem value={"business"}>Business</MenuItem>
+                                <MenuItem value={"spoken"}>Spoken</MenuItem>
                             </Select>
                         </Grid>
                     </Grid>
