@@ -7,7 +7,6 @@ import SweetAlert from "react-bootstrap-sweetalert";
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Edit from "@material-ui/icons/Edit";
 import Close from "@material-ui/icons/Close";
 
 // core components
@@ -19,7 +18,6 @@ import Card from "Components/Card/Card.js";
 import CardBody from "Components/Card/CardBody.js";
 import CardIcon from "Components/Card/CardIcon.js";
 import CardHeader from "Components/Card/CardHeader.js";
-import CardAvatar from "Components/Card/CardAvatar.js";
 import RoundLogo from "Components/RoundLogo.js";
 import Loader from "Components/Loader/Loader.js";
 

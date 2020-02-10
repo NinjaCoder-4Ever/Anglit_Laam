@@ -17,11 +17,9 @@
 */
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
-import Person from "@material-ui/icons/Person";
-import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
+import School from "@material-ui/icons/School";
 import Calendar from "@material-ui/icons/Today";
-import Help from "@material-ui/icons/Help";
+import People from "@material-ui/icons/PeopleAlt";
 // core components/views for userSideBar layout
 import Teachers from './Views/Admin/teachers';
 import Students from './Views/Admin/students';
@@ -31,21 +29,21 @@ const dashboardRoutes = [
     {
         path: "/teachers",
         name: "Teachers",
-        icon: Dashboard,
+        icon: People,
         component: Teachers,
         layout: "/Admin"
     },
     {
         path: "/teacherCalendar",
         name: "Teacher Calendar",
-        icon: Dashboard,
+        icon: Calendar,
         component: TeacherCalendar,
         layout: "/Admin"
     },
     {
         path: "/students",
         name: "Students",
-        icon: Help,
+        icon: School,
         component: Students,
         layout: "/Admin"
     }
