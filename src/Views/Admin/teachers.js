@@ -44,7 +44,6 @@ import {
 import {updateCredits} from "../../Actions/firestore_functions_student";
 import {Redirect} from "react-router-dom";
 import {Checkbox} from "@material-ui/core";
-
 import Slide from "@material-ui/core/Slide";
 
 const useStyles = makeStyles(styles);
