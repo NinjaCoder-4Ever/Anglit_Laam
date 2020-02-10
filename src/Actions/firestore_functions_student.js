@@ -151,7 +151,7 @@ async function setLogOnStudent(student_data){
     let lastLogOn = new Date();
     if (student_data !== undefined){
         if (student_data.last_log_on !== undefined){
-            lastLogOn = new Date(student_data.last_log_on.toString());
+            lastLogOn = new Date(student_data.last_log_on);
         }
     }
     // if (lastLogOn === undefined || currentDate.getMonth() !== lastLogOn.getMonth()){
@@ -162,10 +162,12 @@ async function setLogOnStudent(student_data){
 
     if (student_data.subscription.recurring && !(checkSameWeek(lastLogOn, currentDate))){
         console.log('updating credits for student');
+        console.log(checkSameWeek(lastLogOn, currentDate));
+        console.log(lastLogOn.toString());
         await updateCredits(student_data.email, student_data.subscription.lessons_num)
     }
     db.collection('students').doc(student_data.email).update({
-        last_log_on: currentDate
+        last_log_on: currentDate.toString()
     });
     return student_data
 }
