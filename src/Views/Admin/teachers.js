@@ -473,12 +473,10 @@ export default  function ExtendedTables() {
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => updateContactInfoFunction()} color="info">Update Changes</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setContactInfoModal(false)} color="default">Never Mind...</Button>
+                        <GridItem   xs={5} sm={5} md={5}>
+                            <Button onClick={() => updateContactInfoFunction()} color="info" style={{width:"100%"}}>Update Changes</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => setContactInfoModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
@@ -533,12 +531,10 @@ export default  function ExtendedTables() {
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => updateCategoryFunction()} color="info">Update Categories</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setCategoryModal(false)} color="default">Never Mind...</Button>
+                        <GridItem   xs={5} sm={5} md={5}>
+                            <Button onClick={() => updateCategoryFunction()} color="info" style={{width:"100%"}}>Update Categories</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => setCategoryModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
