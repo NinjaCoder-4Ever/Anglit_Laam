@@ -160,7 +160,8 @@ async function setLogOnStudent(student_data){
     //     student_data.lessons_this_month = newCurrentMonthLessons;
     // }
 
-    if (student_data.subscription.recurring && !checkSameWeek(lastLogOn, currentDate)){
+    if (student_data.subscription.recurring && !(checkSameWeek(lastLogOn, currentDate))){
+        console.log('updating credits for student');
         await updateCredits(student_data.email, student_data.subscription.lessons_num)
     }
     db.collection('students').doc(student_data.email).update({
