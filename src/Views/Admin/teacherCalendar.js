@@ -260,6 +260,7 @@ export default function Calendar({history}) {
             </SweetAlert>
         );
         setModal(false);
+        document.getElementById('teacherSelectionForm').reset();
         let selectTeacher = document.getElementById('teacherSelect');
         getAvailableTeachersInDate(firebase.auth().currentUser.uid, selectedEvent.teacher_mail,
           selectedEvent.student_mail, selectedEvent.start).then( (availableTeacherList) => {
@@ -472,7 +473,7 @@ export default function Calendar({history}) {
                     id="modal-teachers-select"
                     className={classesPopup.modalBody}
                 >
-                    <form>
+                    <form id={"teacherSelectionForm"}>
                         <select id={'teacherSelect'}/>
                     </form>
                 </DialogContent>

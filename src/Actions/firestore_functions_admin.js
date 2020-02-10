@@ -170,23 +170,10 @@ export async function deleteStudent(student_mail){
     db.collection('teachers').doc(teacherMail).update({
         students: newStudentList
     });
+    // delete all future lessons
     let lessons = [];
-    let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
-        .where('student_mail', '==', student_mail)
+    let snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
         .where('date_utc.full_date', '>=', new Date()).get();
-
-    snapshot.forEach(doc => {
-        lessons.push(doc.data());
-    });
-
-    for (const lesson of lessons){
-        db.collection('teachers').doc(teacherMail).collection('teacher_lessons').doc(lesson.lesson_id).delete();
-    }
-
-    // get lessons with the non-permanent teacher
-    lessons = [];
-    snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
-        .where('teacher_mail', '!=', teacherMail).get();
 
     snapshot.forEach( doc => {
         lessons.push(doc.data())

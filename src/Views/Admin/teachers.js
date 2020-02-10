@@ -224,7 +224,6 @@ export default  function ExtendedTables() {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
-        let selectedCategories = document.getElementById('catogorySelect').options;
         let categoryList = [];
         let kids = document.getElementById('kidsBox');
         let adults = document.getElementById('adultsBox');

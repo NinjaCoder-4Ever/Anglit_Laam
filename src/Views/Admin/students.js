@@ -73,6 +73,7 @@ export default  function ExtendedTables() {
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const [allTeacherMailsList, setAllTeacherMailsList] =React.useState([]);
     const [triggerMount, setTriggerMount] = React.useState(true);
+    const [firstLoad, setFirstLoad] = React.useState(true);
 
 
     React.useEffect(() => {
@@ -106,12 +107,16 @@ export default  function ExtendedTables() {
             });
             setStudentsTable(studentsInfoTable);
             setLoading(false);
-            let selectTeacher = document.getElementById('teacherSelect');
-            for (const teacherMail of Object.keys(adminData.all_teachers)){
-                let opt = document.createElement('option');
-                opt.textContent = teacherMail;
-                opt.value = teacherMail;
-                selectTeacher.appendChild(opt);
+            // create selected list only on first load.
+            if (firstLoad) {
+                let selectTeacher = document.getElementById('teacherSelect');
+                for (const teacherMail of Object.keys(adminData.all_teachers)) {
+                    let opt = document.createElement('option');
+                    opt.textContent = teacherMail;
+                    opt.value = teacherMail;
+                    selectTeacher.appendChild(opt);
+                }
+                setFirstLoad(false);
             }
         });
     },[triggerMount]);
