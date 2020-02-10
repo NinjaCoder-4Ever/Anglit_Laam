@@ -294,7 +294,7 @@ export default  function ExtendedTables(callback, deps) {
                                     required
                                     fullWidth
                                     id="grammar_corrections"
-                                    label="Grammar corrections that happened during the lesson."
+                                    helperText="Grammar corrections that happened during the lesson."
                                     name="Grammar Corrections"
                                     defaultValue={selectedLesson.grammar_corrections}
                                     multiline={5}
@@ -307,7 +307,7 @@ export default  function ExtendedTables(callback, deps) {
                                     required
                                     fullWidth
                                     id="pronunciation_corrections"
-                                    label="Pronunciation corrections from the lesson."
+                                    helperText="Pronunciation corrections from the lesson."
                                     name="Pronunciation Corrections"
                                     defaultValue={selectedLesson.pronunciation_corrections}
                                     multiline={5}
@@ -320,7 +320,7 @@ export default  function ExtendedTables(callback, deps) {
                                     required
                                     fullWidth
                                     id="vocabulary"
-                                    label="New vocabulary that the student learned in the lesson."
+                                    helperText="New vocabulary that the student learned in the lesson."
                                     name="Vocabulary"
                                     defaultValue={selectedLesson.vocabulary}
                                     multiline={5}
@@ -333,7 +333,7 @@ export default  function ExtendedTables(callback, deps) {
                                     required
                                     fullWidth
                                     id="home_work"
-                                    label="Home work for the student."
+                                    helperText="Home work for the student."
                                     name="Home Work"
                                     defaultValue={selectedLesson.home_work}
                                     multiline={5}
