@@ -422,7 +422,7 @@ class Sidebar extends React.Component {
                     target="_blank"
                     className={logoMini}
                 >
-                    <img src={logo} alt="logo" className={classes.img} />
+                    <img src={logo} alt="logo" className={classes.img + " " + classes.logoAL} />
                 </a>
                 <a
                     href="https://www.creative-tim.com?ref=mdpr-sidebar"

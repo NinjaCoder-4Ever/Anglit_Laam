@@ -531,6 +531,9 @@ const sidebarStyle = theme => ({
     "&:hover,&:focus": {
       color: whiteColor
     }
+  },
+  logoAL: {
+    borderRadius: "50%"
   }
 });
 

@@ -556,12 +556,10 @@ export default  function ExtendedTables() {
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => updateCreditstFunction()} color="info">Add Credits</Button>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => setCreditsModal(false)} color="default">Never Mind...</Button>
+                        <GridItem  xs={5} sm={5} md={5}>
+                            <Button onClick={() => updateCreditstFunction()} color="info" style={{width:"100%"}}>Add Credits</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => setCreditsModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
@@ -619,17 +617,13 @@ export default  function ExtendedTables() {
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => updateSubscriptionFunction(false, 1)} color="info">Pay as you Learn</Button>
-                            <Button onClick={() => updateSubscriptionFunction(true, 1)} color="info">1 lesson per week</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => updateSubscriptionFunction(true, 2)} color="info">2 lessons per week</Button>
-                            <Button onClick={() => updateSubscriptionFunction(true, 3)} color="info">3 lessons per week</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setSubscriptionModal(false)} color="default">Never Mind...</Button>
+                        <GridItem  xs={5} sm={5} md={5}>
+                            <Button onClick={() => updateSubscriptionFunction(false, 1)} color="info" style={{width:"100%"}}>Pay as you Learn</Button>
+                            <Button onClick={() => updateSubscriptionFunction(true, 1)} color="info" style={{width:"100%"}}>1 lesson per week</Button>
+                            <Button onClick={() => updateSubscriptionFunction(true, 2)} color="info" style={{width:"100%"}}>2 lessons per week</Button>
+                            <Button onClick={() => updateSubscriptionFunction(true, 3)} color="info" style={{width:"100%"}}>3 lessons per week</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => setSubscriptionModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
@@ -680,13 +674,11 @@ export default  function ExtendedTables() {
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
                     <GridContainer justify="center">
-                        <GridItem>
-                            <Button onClick={() => warningWithConfirmMessageTeacher(false)} color="info">Choose Teacher For Me</Button>
-                            <Button onClick={() => warningWithConfirmMessageTeacher(true)} color="info">Use Selected Teacher</Button>
-                        </GridItem>
-                        <GridItem>
-                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
-                            <Button onClick={() => setTeacherChangeModal(false)} color="default">Never Mind...</Button>
+                        <GridItem  xs={5} sm={5} md={5}>
+                            <Button onClick={() => warningWithConfirmMessageTeacher(false)} color="info" style={{width:"100%"}}>Choose Teacher For Me</Button>
+                            <Button onClick={() => warningWithConfirmMessageTeacher(true)} color="info" style={{width:"100%"}}>Use Selected Teacher</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => setTeacherChangeModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>

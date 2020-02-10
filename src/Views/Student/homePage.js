@@ -97,7 +97,7 @@ export default  function ExtendedTables({history}) {
 
     const openSkype = () => {
         let skype_user = studentData.teacher.skype_username;
-        let url = "skype:" + {skype_user} + "?chat";
+        let url = `skype:live:${skype_user}?chat`;
         window.open(url, '_blank');
     };
 
