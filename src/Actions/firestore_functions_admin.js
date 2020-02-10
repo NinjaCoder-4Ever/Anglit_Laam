@@ -350,3 +350,19 @@ export async function editTeacherCategory(teacher_mail, category_list) {
         });
     }
 }
+
+export async function editStudentCategory(stuent_mail, category) {
+    await db.collection('students').doc(stuent_mail).update({
+        category: category
+    });
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let students = adminInfo.data().all_students;
+    students[stuent_mail]['category'] = category;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_students: students
+        });
+    }
+}

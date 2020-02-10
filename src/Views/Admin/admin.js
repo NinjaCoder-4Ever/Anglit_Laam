@@ -8,6 +8,7 @@ import { makeStyles } from "@material-ui/core/styles";
 // core components
 import Sidebar from "../../Components/Sidebar/Sidebar";
 import routes from "../../adminRoutes";
+import routesToPresent from "../../adminRoutesToPresent";
 import styles from "../../Layouts/adminStyle";
 import logo from '../../assets/img/logo512.png';
 import image from '../../assets/img/sidebarBackground.jpg';
@@ -96,7 +97,7 @@ export default function Admin({ ...rest }) {
     return (
         <div className={classes.wrapper}>
             <Sidebar
-                routes={routes}
+                routes={routesToPresent}
                 logoText={"Anglit Laam"}
                 logo={logo}
                 image={image}

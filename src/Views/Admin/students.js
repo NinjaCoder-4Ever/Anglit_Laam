@@ -29,12 +29,13 @@ import Dialog from "@material-ui/core/Dialog";
 import TextField from "@material-ui/core/TextField";
 import {
     changeTeacherForStudent,
-    deleteStudent,
+    deleteStudent, editStudentCategory,
     getAdminByUid,
     updateSubscriptionForStudent
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
 import Slide from "@material-ui/core/Slide";
+import {Checkbox} from "@material-ui/core";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -55,6 +56,7 @@ export default  function ExtendedTables() {
     const [creditsModal, setCreditsModal] = React.useState(false);
     const [subscriptionModal, setSubscriptionModal] = React.useState(false);
     const [teacherChangeModal, setTeacherChangeModal] = React.useState(false);
+    const [categoryModal, setCategoryModal] = React.useState(false);
     const [selectedStudent, setSelectedStudent] = React.useState({
         category: "",
         credits: 0,
@@ -93,11 +95,14 @@ export default  function ExtendedTables() {
                 row.push(all_students[student].phone_number);
                 row.push(all_students[student].category);
                 row.push(all_students[student].teacher_name);
-                //if (student.subscription.recurring === true)
-                //    row.push("recurring");
-               //else
-                //    row.push(student.subscription.lessons_num);
-
+                let subscriptiontext = "";
+                if (all_students[student].subscription.recurring){
+                    subscriptiontext = all_students[student].subscription.lessons_num + " Lessons Per Week"
+                }
+                else {
+                    subscriptiontext = all_students[student].subscription.lessons_num + " Lessons Package"
+                }
+                row.push(subscriptiontext);
                 row.push(all_students[student].credits);
                 row.push(getSimpleButtons(all_students[student], index));
                 console.log(row);
@@ -162,10 +167,10 @@ export default  function ExtendedTables() {
             </SweetAlert>
         );
       updateCredits(selectedStudent.student_mail, amountToUpdate).then(() => {
-          studentsTable[selectedIndex][5] = studentsTable[selectedIndex][5] + amountToUpdate;
           confirmCreditsAlert();
           document.getElementById('creditsForm').reset();
           setCreditsModal(false);
+          setTriggerMount(!triggerMount);
       })
     };
 
@@ -205,6 +210,7 @@ export default  function ExtendedTables() {
             ConfirmSubscriptionAlert();
             setSubscriptionModal(false);
             document.getElementById('subscriptionForm').reset();
+            setTriggerMount(!triggerMount);
         });
     };
 
@@ -339,6 +345,80 @@ export default  function ExtendedTables() {
         setModal(true);
     };
 
+    const categoryChangeSetup = () => {
+        setModal(false);
+        setCategoryModal(true);
+    };
+
+    const changeCategoryFunction = () => {
+        setAlert(
+            <SweetAlert
+                customButtons={
+                    <React.Fragment>
+                    </React.Fragment>
+                }>
+                <Loader width={'30%'}/>
+            </SweetAlert>
+        );
+        let chosenCategory = "";
+        let kids = document.getElementById('kidsBox');
+        let adults = document.getElementById('adultsBox');
+        let business = document.getElementById('businessBox');
+        let spoken = document.getElementById('spokenBox');
+        if (kids.checked){
+            chosenCategory ='kids';
+        }
+        if (adults.checked){
+            chosenCategory = 'adults';
+        }
+        if (business.checked){
+            chosenCategory ='business';
+        }
+        if (spoken.checked){
+            chosenCategory = 'spoken';
+        }
+        if (chosenCategory.length === 0){
+            noCategoryChosenAlert();
+            return 0;
+        }
+        else {
+            editStudentCategory(selectedStudent.student_mail, chosenCategory).then(() => {
+                setTriggerMount(!triggerMount);
+                setCategoryModal(false);
+                successCategoryChange();
+            })
+        }
+
+    };
+
+    const noCategoryChosenAlert = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="Category Updated"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                No Category Selected!
+            </SweetAlert>
+        );
+    };
+
+    const successCategoryChange = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title="Teacher Updated"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Category Changed for {selectedStudent.student_name}!
+            </SweetAlert>
+        );
+    };
+
     return (
         <div>
             {alert}
@@ -363,7 +443,7 @@ export default  function ExtendedTables() {
                                             "Phone",
                                             "Category",
                                             "Teacher",
-                                            //"Subscription",
+                                            "Subscription",
                                             "Credit",
                                         ]}
                                         tableData={
@@ -419,6 +499,7 @@ export default  function ExtendedTables() {
                             <div>
                             <Button onClick={() => updateCreditsModalSetup()} color="info" style={{width:"100%"}}>Update Credits</Button>
                             <Button onClick={() => subscriptionModalSetup()} color="info" style={{width:"100%"}}>Update Subscription</Button>
+                            <Button onClick={() => categoryChangeSetup()} color="info" style={{width:"100%"}}>Update Category</Button>
                             <Button onClick={() => teacherChangeSetup()} color="info" style={{width:"100%"}}>Change Teacher</Button>
                             <Button onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Student</Button>
                             <Button onClick={() => setModal(false)} color="default" style={{width:"100%"}}>Never Mind..</Button>
@@ -598,6 +679,64 @@ export default  function ExtendedTables() {
                             <Button onClick={() => warningWithConfirmMessageTeacher(true)} color="info" style={{width:"100%"}}>Use Selected Teacher</Button>
                             <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
                             <Button onClick={() => setTeacherChangeModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
+                        </GridItem>
+                    </GridContainer>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={categoryModal}
+                transition={Transition}
+                keepMounted
+                onClose={() => setCategoryModal(false)}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setCategoryModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Category for {selectedStudent.student_name}</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h5>Current Category: {selectedStudent.category}</h5>
+                    <h5>Choose new category:</h5>
+                    <form id={"categoryForm"}>
+                        <input type={'radio'} name={"category"} id={'kidsBox'} value={"kids"} color={'primary'} label={'Kids'}/>Kids
+                        <input type={'radio'} name={"category"} id={'adultsBox'} value={"adults"} color={'primary'} label={'Adults'}/>Adults
+                        <input type={'radio'} name={"category"} id={'businessBox'} value={"business"} color={'primary'} label={'Business'}/>Business
+                        <input type={'radio'} name={"category"} id={'spokenBox'} value={"spoken"} color={'primary'} label={"Spoken"}/>Spoken
+                    </form>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooterCenter + " " +
+                    classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
+                >
+                    <GridContainer justify="center">
+                        <GridItem>
+                            <Button onClick={() => changeCategoryFunction()} color="info">Update Category</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
+                        </GridItem>
+                        <GridItem>
+                            <Button onClick={() => setCategoryModal(false)} color="default">Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
