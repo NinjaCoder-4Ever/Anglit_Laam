@@ -105,7 +105,7 @@ export default  function ExtendedTables({history}) {
 
     const deleteLesson = (line) => {
         let student_mail = studentData.email;
-        let teacher_mail = studentData.teacher.email;
+        let teacher_mail = line.teacher_mail;
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
@@ -226,11 +226,12 @@ export default  function ExtendedTables({history}) {
 
     let lessons = Object.keys(nextLesson).map((lesson_id,index) => {
         let teacher_name = nextLesson[lesson_id].teacher_name;
+        let teacher_mail = nextLesson[lesson_id].teacher_mail;
         let lesson_full_date = new Date(nextLesson[lesson_id].date_utc.full_date_string);
         let lesson_date = new Date(nextLesson[lesson_id].date_utc.full_date_string).toString().slice(0, 21);
         let duration = nextLesson[lesson_id].duration;
         return (
-            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id})]
+            [teacher_name, lesson_date, duration,getSimpleButtons({lesson_date: lesson_full_date, index: lesson_id, teacher_mail: teacher_mail})]
         );
 
     });

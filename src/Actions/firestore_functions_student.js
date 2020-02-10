@@ -557,7 +557,7 @@ export async function cancelLesson(student_mail, teacher_mail, lesson_date){
     let currentLocalDate = new Date();
     let nextDay = new Date(currentLocalDate);
     nextDay.setDate(nextDay.getDate() + 1);
-    if (!new Date(lesson_date) < nextDay){
+    if (!(new Date(lesson_date) < nextDay)){
         await updateCredits(student_mail, 1)
     }
 
