@@ -68,12 +68,12 @@ const SignUp = ({ history }) => {
         let phone = document.getElementById('phone').value;
         let englishType = document.getElementById('englishType').innerText.toLowerCase();
         //try {
-            await firebase
-                .auth()
-                .createUserWithEmailAndPassword(email, password);
-            await setNewStudent(firebase.auth().currentUser.uid,
-                email, firstName, lastName, phone, englishType);
-            history.push("/Student/homePage");
+        await firebase
+            .auth()
+            .createUserWithEmailAndPassword(email, password);
+        await setNewStudent(firebase.auth().currentUser.uid,
+            email, firstName, lastName, phone, englishType);
+        history.push("/Student/homePage");
         //} catch (error) {
         //    console.log("the error: " + error);
             //   history.push("/Student/homePage");
@@ -180,7 +180,7 @@ const SignUp = ({ history }) => {
                                     <em>select a value</em>
                                 </MenuItem>
 
-                                <MenuItem value={"kids"}>Kids</MenuItem>
+                                <MenuItem default={true} value={"kids"}>Kids</MenuItem>
                                 <MenuItem value={"adults"}>Adults</MenuItem>
                                 <MenuItem value={"business"}>Business</MenuItem>
                                 <MenuItem value={"spoken"}>Spoken</MenuItem>

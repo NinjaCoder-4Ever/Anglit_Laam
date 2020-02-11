@@ -200,6 +200,7 @@ export default  function ExtendedTables(callback, deps) {
     return (
         <div>
             {alert}
+            <br/>
             <GridContainer>
                 <GridItem xs={12}>
                     <Card>

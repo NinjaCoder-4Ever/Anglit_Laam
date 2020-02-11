@@ -42,7 +42,10 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         last_name: lastName,
         phone_number: phoneNumber,
         lessons_this_month:{},
-        subscription: 'PAL',
+        subscription: {
+            recurring: false,
+            lessons_num: 1
+        },
         teacher: {},
         credits: 1,
         uid: uid,
@@ -92,14 +95,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         last_log_on: new Date()
     };
 
-    Promise.all([
-        db.collection('students').doc(email).set(newStudentData).then(function() {
-            console.log('Added student with ID: ', email)
-        }),
-        db.collection('users').doc(email).set(usersData).then(function () {
-            console.log('Added user to users collection')
-        }),
-    ]);
+    await db.collection('students').doc(email).set(newStudentData).then(function() {
+        console.log('Added student with ID: ', email)
+    });
+    await db.collection('users').doc(email).set(usersData).then(function () {
+        console.log('Added user to users collection')
+    });
     await updateAdminStudentData(adminStudentInfo);
 }
 

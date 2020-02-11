@@ -45,10 +45,12 @@ export async function getUserDataByUid(uid) {
      * Returns {collection: *, email: *, uid: *}
      */
     let returnVal = [];
-    const snapshot = await db.collection('users').where('uid', '==', uid).get();
-    snapshot.forEach(doc =>{
-        returnVal.push(doc.data())
-    });
+    while (returnVal.length === 0) {
+        const snapshot = await db.collection('users').where('uid', '==', uid).get();
+        snapshot.forEach(doc => {
+            returnVal.push(doc.data())
+        });
+    }
     return returnVal[0]
 }
 

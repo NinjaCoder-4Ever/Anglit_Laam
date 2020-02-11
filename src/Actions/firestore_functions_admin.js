@@ -49,6 +49,8 @@ export async function deleteTeacher(teacher_mail) {
             all_teachers: teachers
         });
     }
+
+    await db.collection('users').doc(teacher_mail).delete();
 }
 
 export async function changeTeacherForStudent(student_mail, teacher_mail = null, teacher_deleted = false) {
@@ -197,6 +199,8 @@ export async function deleteStudent(student_mail){
             all_students: students
         });
     }
+
+    await db.collection('users').doc(student_mail).delete();
 }
 
 export async function updateSubscriptionForStudent(student_mail, recurring, lessons_num) {

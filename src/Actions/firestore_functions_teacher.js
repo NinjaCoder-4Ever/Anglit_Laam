@@ -911,12 +911,17 @@ function getWorkingHoursForDay(working_hours, day) {
 
 export async function getStudentLastFeedbackByMail(student_mail) {
     const collectionRef = db.collection('students').doc(student_mail).collection('student_lessons');
-    let studentLastLessonWithFeedback = []
+    let studentLastLessonWithFeedback = [];
     let querySnapshot = await collectionRef.where('feedback_given', '==', true).
     orderBy('date_utc.full_date', 'desc').limit(1).get();
     querySnapshot.forEach(doc => {
         studentLastLessonWithFeedback.push(doc.data());
     });
+
+    // no feedback given to student as of yet
+    if (studentLastLessonWithFeedback.length === 0){
+        return null
+    }
 
     return studentLastLessonWithFeedback[0]
 
