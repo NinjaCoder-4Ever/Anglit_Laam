@@ -454,7 +454,7 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     return true
 }
 
-export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name){
+export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name, lower_credits=true){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
      *
@@ -532,7 +532,9 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     //         lessons_this_week: currentWeekLessons
     //     });
     // }
-    await updateCredits(student_mail, -1);
+    if (lower_credits) {
+        await updateCredits(student_mail, -1);
+    }
     return true
 }
 

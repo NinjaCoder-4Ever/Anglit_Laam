@@ -304,7 +304,7 @@ export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_t
     await db.collection('teachers').doc(old_teacher_mail).collection('teacher_lessons').doc(old_lesson_id).delete();
 
     await setNewLesson(student_mail, new_teacher_mail,
-        lesson_data.start, lesson_data.duration, lesson_data.student_name, new_teacher_name)
+        lesson_data.start, lesson_data.duration, lesson_data.student_name, new_teacher_name, false);
 }
 
 export async function getAllStudents(){
