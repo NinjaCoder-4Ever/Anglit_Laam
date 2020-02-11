@@ -227,8 +227,9 @@ export async function updateSubscriptionForStudent(student_mail, recurring, less
 
 export async function getAvailableTeachersInDate(uid, current_teacher_mail, student_mail, lesson_date) {
     let admin_data = await getAdminByUid(uid);
-    let teacherMailList = Object.keys(admin_data.all_teachers);
-    delete teacherMailList[current_teacher_mail];
+    let all_teachers = admin_data.all_teachers;
+    delete all_teachers[current_teacher_mail];
+    let teacherMailList = Object.keys(all_teachers);
     let lessonDay = WEEKDAYS[lesson_date.getDay()];
     let filteredTeacherList = [];
     let fullTeachersList = admin_data.all_teachers;

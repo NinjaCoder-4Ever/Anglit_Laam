@@ -59,6 +59,7 @@ export default  function ExtendedTables({history}) {
     const [modal, setModal] = React.useState(false);
     const [buttonLesson, setButtonLesson] = React.useState(null);
     const classesPopup = useStylesPopup();
+    const [triggerMount, setTriggerMount] = React.useState(true);
 
 
     React.useEffect(() => {
@@ -93,7 +94,7 @@ export default  function ExtendedTables({history}) {
             setLoading(false);
             console.log(res);
         });
-    },[]);
+    },[triggerMount]);
 
     const openSkype = () => {
         let skype_user = studentData.teacher.skype_username;
@@ -107,11 +108,9 @@ export default  function ExtendedTables({history}) {
         let lesson_date = new Date(line.lesson_date);
         console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
-        if (new Date(lesson_date) === new Date(nextLessonDate)){
-            delete nextLesson[Object.keys(nextLesson)[0]];
-            let nextLessonData = nextLesson[Object.keys(nextLesson)[0]];
-            console.log(nextLessonData);
-            setNextLessonDate(new Date(nextLessonData.date_utc.full_date_string).toString().slice(0, 21));
+        if (new Date(lesson_date).toString() === new Date(nextLessonDate).toString()){
+            setLoading(true);
+            setTriggerMount(!triggerMount);
         }
         else {
             delete nextLesson[line.index];

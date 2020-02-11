@@ -303,14 +303,18 @@ export default function Calendar({history}) {
                 <Loader width={'30%'}/>
             </SweetAlert>
         );
+        let selectFormElement = document.getElementById('teacherSelect');
         let chosenTeacherInfo = document.getElementById('teacherSelect').value.split('---');
         let chosenTeacherName = chosenTeacherInfo[1];
         let chosenTeacherMail = chosenTeacherInfo[0];
         swapTeachersForLesson(selectedEvent, chosenTeacherMail, chosenTeacherName).then(() =>{
             setTriggerMount(!triggerMount);
             LessonSwapConfirm();
-        })
-
+            let length = selectFormElement.options.length;
+            for (let i=length-1; i>=0; i--){
+                selectFormElement.options[i] = null;
+            }
+        });
     };
 
     const LessonSwapConfirm = () => {
@@ -324,6 +328,15 @@ export default function Calendar({history}) {
                 confirmBtnCssClass={classes.button + " " + classes.success}
             />
         );
+    };
+
+    const closeAvailableTeachersModal = () => {
+        let selectFormElement = document.getElementById('teacherSelect');
+        let length = selectFormElement.options.length;
+        for (let i=length-1; i>=0; i--){
+            selectFormElement.options[i] = null;
+        }
+        setAvailableTeachersModal(false)
     };
 
     return (
@@ -448,7 +461,7 @@ export default function Calendar({history}) {
                 open={availableTeachersModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setAvailableTeachersModal(false)}
+                onClose={() => closeAvailableTeachersModal()}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -463,7 +476,7 @@ export default function Calendar({history}) {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setAvailableTeachersModal(false)}
+                        onClick={() => closeAvailableTeachersModal()}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
@@ -486,7 +499,7 @@ export default function Calendar({history}) {
                             <Button
                                 onClick={() => substitueTeacherFunction()} color="info">Substitute</Button>
                             <Button
-                                    onClick={() => setAvailableTeachersModal()} color="default">NeverMind</Button>
+                                    onClick={() => closeAvailableTeachersModal()} color="default">NeverMind</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>

@@ -342,6 +342,10 @@ export default  function ExtendedTables() {
         setCreditsModal(false);
         setTeacherChangeModal(false);
         setSubscriptionModal(false);
+        document.getElementById('kidsBox').checked = false;
+        document.getElementById('adultsBox').checked = false;
+        document.getElementById('businessBox').checked = false;
+        document.getElementById('spokenBox').checked = false;
         setModal(true);
     };
 
@@ -367,15 +371,19 @@ export default  function ExtendedTables() {
         let spoken = document.getElementById('spokenBox');
         if (kids.checked){
             chosenCategory ='kids';
+            kids.checked = false;
         }
         if (adults.checked){
             chosenCategory = 'adults';
+            adults.checked = false;
         }
         if (business.checked){
             chosenCategory ='business';
+            business.checked = false;
         }
         if (spoken.checked){
             chosenCategory = 'spoken';
+            spoken.checked = false;
         }
         if (chosenCategory.length === 0){
             noCategoryChosenAlert();
@@ -417,6 +425,14 @@ export default  function ExtendedTables() {
                 Category Changed for {selectedStudent.student_name}!
             </SweetAlert>
         );
+    };
+
+    const closeCategoryModal = () => {
+        document.getElementById('kidsBox').checked = false;
+        document.getElementById('adultsBox').checked = false;
+        document.getElementById('businessBox').checked = false;
+        document.getElementById('spokenBox').checked = false;
+        setCategoryModal(false);
     };
 
     return (
@@ -692,7 +708,7 @@ export default  function ExtendedTables() {
                 open={categoryModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setCategoryModal(false)}
+                onClose={() => closeCategoryModal()}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -707,7 +723,7 @@ export default  function ExtendedTables() {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setCategoryModal(false)}
+                        onClick={() => closeCategoryModal()}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
@@ -736,7 +752,7 @@ export default  function ExtendedTables() {
                             <Button onClick={() => backToControlPanel()} color="primary">Back to Control Panel</Button>
                         </GridItem>
                         <GridItem>
-                            <Button onClick={() => setCategoryModal(false)} color="default">Never Mind...</Button>
+                            <Button onClick={() => closeCategoryModal()} color="default">Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
