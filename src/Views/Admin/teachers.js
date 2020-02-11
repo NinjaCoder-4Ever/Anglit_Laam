@@ -230,15 +230,19 @@ export default  function ExtendedTables() {
         let spoken = document.getElementById('spokenBox');
         if (kids.checked){
             categoryList.push('kids');
+            kids.checked = false;
         }
         if (adults.checked){
-            categoryList.push('adults')
+            categoryList.push('adults');
+            adults.checked = false;
         }
         if (business.checked){
-            categoryList.push('business')
+            categoryList.push('business');
+            business.checked = false;
         }
         if (spoken.checked){
-            categoryList.push('spoken')
+            categoryList.push('spoken');
+            spoken.checked = false;
         }
         if(categoryList.length === 0){
             noCategorySelectedAlert();
@@ -249,10 +253,6 @@ export default  function ExtendedTables() {
             setCategoryModal(false);
             confirmCategoryUpdateAlert();
             setTriggerMount(!triggerMount);
-            kids.checked = false;
-            spoken.checked = false;
-            business.checked = false;
-            adults.checked = false;
         })
     };
 
@@ -282,6 +282,14 @@ export default  function ExtendedTables() {
                 Updated categories info for {selectedTeacher.teacher_name}
             </SweetAlert>
         );
+    };
+
+    const closeCategoryModal = () => {
+        document.getElementById('kidsBox').checked = false;
+        document.getElementById('adultsBox').checked = false;
+        document.getElementById('businessBox').checked = false;
+        document.getElementById('spokenBox').checked = false;
+        setCategoryModal(false);
     };
 
     const warningWithConfirmMessage = () => {
@@ -327,6 +335,10 @@ export default  function ExtendedTables() {
     const backToControlPanel = () => {
         setContactInfoModal(false);
         setCategoryModal(false);
+        document.getElementById('kidsBox').checked = false;
+        document.getElementById('adultsBox').checked = false;
+        document.getElementById('businessBox').checked = false;
+        document.getElementById('spokenBox').checked = false;
         setModal(true);
     };
 
@@ -493,7 +505,7 @@ export default  function ExtendedTables() {
                 open={categoryModal}
                 transition={Transition}
                 keepMounted
-                onClose={() => setCategoryModal(false)}
+                onClose={() => closeCategoryModal()}
                 aria-labelledby="modal-slide-title"
                 aria-describedby="modal-slide-description"
             >
@@ -508,7 +520,7 @@ export default  function ExtendedTables() {
                         key="close"
                         aria-label="Close"
                         color="transparent"
-                        onClick={() => setCategoryModal(false)}
+                        onClick={() => closeCategoryModal()}
                     >
                         <Close className={classesPopup.modalClose} />
                     </Button>
@@ -536,7 +548,7 @@ export default  function ExtendedTables() {
                         <GridItem   xs={5} sm={5} md={5}>
                             <Button onClick={() => updateCategoryFunction()} color="info" style={{width:"100%"}}>Update Categories</Button>
                             <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
-                            <Button onClick={() => setCategoryModal(false)} color="default" style={{width:"100%"}}>Never Mind...</Button>
+                            <Button onClick={() => closeCategoryModal()} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
