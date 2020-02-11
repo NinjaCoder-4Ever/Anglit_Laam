@@ -89,6 +89,7 @@ export default function MyProfile() {
     return (
         <div>
             {alert}
+            <br/>
             <GridContainer>
                 <GridItem xs={12} sm={12} md={8}>
                     <Card>

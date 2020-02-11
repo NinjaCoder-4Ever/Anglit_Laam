@@ -49,6 +49,8 @@ export async function deleteTeacher(teacher_mail) {
             all_teachers: teachers
         });
     }
+
+    await db.collection('users').doc(teacher_mail).delete();
 }
 
 export async function changeTeacherForStudent(student_mail, teacher_mail = null, teacher_deleted = false) {
@@ -197,6 +199,8 @@ export async function deleteStudent(student_mail){
             all_students: students
         });
     }
+
+    await db.collection('users').doc(student_mail).delete();
 }
 
 export async function updateSubscriptionForStudent(student_mail, recurring, lessons_num) {
@@ -300,7 +304,7 @@ export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_t
     await db.collection('teachers').doc(old_teacher_mail).collection('teacher_lessons').doc(old_lesson_id).delete();
 
     await setNewLesson(student_mail, new_teacher_mail,
-        lesson_data.start, lesson_data.duration, lesson_data.student_name, new_teacher_name)
+        lesson_data.start, lesson_data.duration, lesson_data.student_name, new_teacher_name, false);
 }
 
 export async function getAllStudents(){

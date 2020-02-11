@@ -34,6 +34,7 @@ import Dialog from "@material-ui/core/Dialog";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Slide from "@material-ui/core/Slide";
+import SweetAlert from "react-bootstrap-sweetalert";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -101,11 +102,29 @@ export default  function ExtendedTables() {
     const popFeedback = (studentMail) => {
         setLoading(true);
         getStudentLastFeedbackByMail(studentMail).then((lessonInfo) => {
+            if (lessonInfo === null){
+                noFeedbacksAlert();
+                setLoading(false);
+                return 0;
+            }
             setLessonData(lessonInfo);
             setModal(true);
             setLoading(false);
     });
 
+    };
+
+    const noFeedbacksAlert = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="No Feedback Given To This Student Yet."
+                onConfirm={() => setAlert(null)}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+            </SweetAlert>
+        );
     };
 
     const closeModal = () => {
@@ -137,7 +156,7 @@ export default  function ExtendedTables() {
     return (
         <div>
             {alert}
-
+            <br/>
             <GridContainer>
                 <GridItem xs={12}>
                     <Card>

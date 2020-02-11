@@ -42,7 +42,10 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         last_name: lastName,
         phone_number: phoneNumber,
         lessons_this_month:{},
-        subscription: 'PAL',
+        subscription: {
+            recurring: false,
+            lessons_num: 1
+        },
         teacher: {},
         credits: 1,
         uid: uid,
@@ -92,14 +95,12 @@ export async function setNewStudent(uid, email, firstName, lastName, phoneNumber
         last_log_on: new Date()
     };
 
-    Promise.all([
-        db.collection('students').doc(email).set(newStudentData).then(function() {
-            console.log('Added student with ID: ', email)
-        }),
-        db.collection('users').doc(email).set(usersData).then(function () {
-            console.log('Added user to users collection')
-        }),
-    ]);
+    await db.collection('students').doc(email).set(newStudentData).then(function() {
+        console.log('Added student with ID: ', email)
+    });
+    await db.collection('users').doc(email).set(usersData).then(function () {
+        console.log('Added user to users collection')
+    });
     await updateAdminStudentData(adminStudentInfo);
 }
 
@@ -453,7 +454,7 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     return true
 }
 
-export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name){
+export async function setNewLesson(student_mail, teacher_mail, start_time, duration, student_name, teacher_name, lower_credits=true){
     /**
      * Function sets a new lesson in both "student_lessons" and "teacher_lessons" collections.
      *
@@ -531,7 +532,9 @@ export async function setNewLesson(student_mail, teacher_mail, start_time, durat
     //         lessons_this_week: currentWeekLessons
     //     });
     // }
-    await updateCredits(student_mail, -1);
+    if (lower_credits) {
+        await updateCredits(student_mail, -1);
+    }
     return true
 }
 
