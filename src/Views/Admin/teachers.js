@@ -249,7 +249,10 @@ export default  function ExtendedTables() {
             setCategoryModal(false);
             confirmCategoryUpdateAlert();
             setTriggerMount(!triggerMount);
-            document.getElementById('categoryForm').reset();
+            kids.checked = false;
+            spoken.checked = false;
+            business.checked = false;
+            adults.checked = false;
         })
     };
 
