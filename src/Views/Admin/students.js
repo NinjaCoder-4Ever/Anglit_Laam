@@ -367,15 +367,19 @@ export default  function ExtendedTables() {
         let spoken = document.getElementById('spokenBox');
         if (kids.checked){
             chosenCategory ='kids';
+            kids.checked = false;
         }
         if (adults.checked){
             chosenCategory = 'adults';
+            adults.checked = false;
         }
         if (business.checked){
             chosenCategory ='business';
+            business.checked = false;
         }
         if (spoken.checked){
             chosenCategory = 'spoken';
+            spoken.checked = false;
         }
         if (chosenCategory.length === 0){
             noCategoryChosenAlert();
