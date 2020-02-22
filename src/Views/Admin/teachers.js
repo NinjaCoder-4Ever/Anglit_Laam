@@ -2,14 +2,8 @@
 import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-import logo from "assets/img/LogoText.png";
 import firebase from 'Config/fire';
 import SweetAlert from "react-bootstrap-sweetalert";
-
-
-// material-ui icons
-import Assignment from "@material-ui/icons/Assignment";
-import Check from "@material-ui/icons/Check";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
@@ -25,23 +19,13 @@ import {School} from "@material-ui/icons";
 import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Loader from "Components/Loader/Loader.js";
-import {getAllStudents} from 'Actions/firestore_functions_admin.js'
-import {getStudentLastFeedbackByMail} from "../../Actions/firestore_functions_teacher";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-import Transition from "react-transition-group/Transition";
-import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-import {
-    changeTeacherForStudent,
-    deleteStudent, deleteTeacher, editTeacherCategory, editTeacherContactInfo,
-    getAdminByUid,
-    updateSubscriptionForStudent
-} from "../../Actions/firestore_functions_admin";
-import {updateCredits} from "../../Actions/firestore_functions_student";
+import {deleteTeacher, editTeacherCategory, editTeacherContactInfo, getAdminByUid} from "../../Actions/firestore_functions_admin";
 import {Redirect} from "react-router-dom";
 import {Checkbox} from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";

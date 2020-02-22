@@ -23,7 +23,7 @@ import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID, updateFirstTimeEntry} from "Actions/firestore_functions_student";
-import {CalendarToday, School} from "@material-ui/icons";
+import {School} from "@material-ui/icons";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";

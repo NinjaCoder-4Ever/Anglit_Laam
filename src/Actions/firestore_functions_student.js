@@ -1,31 +1,6 @@
 import {db} from '../Config/fire'
-import {constructLessonId, convertLocalTimeToUtc, convertUtcToLocalTime, applyTimezoneoffset, checkSameWeek} from './firestore_functions_general'
+import {constructLessonId, convertUtcToLocalTime, checkSameWeek} from './firestore_functions_general'
 import {getAllAdminMails} from "./firestore_functions_admin";
-
-const WEEKDAYS = {
-    0: 'Sunday',
-    1: 'Monday',
-    2: 'Tuesday',
-    3: 'Wednesday',
-    4: 'Thursday',
-    5: 'Friday',
-    6: 'Saturday'
-};
-const LEAP_YEAR = 2020;
-const MONTH_DAYS = {
-    1: 31,
-    2: 28,
-    3: 31,
-    4: 30,
-    5: 31,
-    6: 30,
-    7: 31,
-    8: 31,
-    9: 30,
-    10: 31,
-    11: 30,
-    12: 31
-};
 
 db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################

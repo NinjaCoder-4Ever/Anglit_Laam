@@ -35,7 +35,6 @@ import {
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
 import Slide from "@material-ui/core/Slide";
-import {Checkbox} from "@material-ui/core";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);

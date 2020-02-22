@@ -7,7 +7,6 @@ import {
     updateCredits
 } from "./firestore_functions_student";
 import {WEEKDAYS} from "./firestore_functions_general"
-import teacher from "../Views/Teacher/teacher";
 
 export async function getAdminByUid(uid){
     let adminInfo = [];

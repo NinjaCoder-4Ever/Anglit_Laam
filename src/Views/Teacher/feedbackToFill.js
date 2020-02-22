@@ -1,12 +1,11 @@
 
-import React, {useCallback} from "react";
+import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import firebase from 'Config/fire';
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Check from "@material-ui/icons/Check";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
@@ -28,7 +27,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Dialog from "@material-ui/core/Dialog";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-//import Transition from "react-transition-group/Transition";
 import SweetAlert from "react-bootstrap-sweetalert";
 import Loader from "../../Components/Loader/Loader";
 import DialogActions from "@material-ui/core/DialogActions";
