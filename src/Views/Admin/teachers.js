@@ -99,7 +99,6 @@ export default  function ExtendedTables() {
                 row.push(all_teachers[teacher].category.toString());
                 row.push(getScheduleButtons(all_teachers[teacher], index));
                 row.push(getInfoButtons(all_teachers[teacher], index));
-                console.log(row);
 
                 teacherInfoTable.push(row);
                 index = index + 1;

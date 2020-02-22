@@ -55,7 +55,6 @@ export default function MyProfile() {
                 )
             }
             setLoading(false);
-            console.log(res);
         });
     }, []);
 

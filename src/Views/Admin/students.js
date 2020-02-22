@@ -105,7 +105,6 @@ export default  function ExtendedTables() {
                 row.push(subscriptiontext);
                 row.push(all_students[student].credits);
                 row.push(getSimpleButtons(all_students[student], index));
-                console.log(row);
 
                 studentsInfoTable.push(row);
                 index = index + 1;
@@ -306,7 +305,6 @@ export default  function ExtendedTables() {
         let newTeacherMail = null;
         if (use_preset_teacher) {
             newTeacherMail = document.getElementById('teacherSelect').value;
-            console.log(newTeacherMail);
         }
         setAlert(
             <SweetAlert

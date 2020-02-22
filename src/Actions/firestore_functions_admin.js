@@ -149,7 +149,6 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     }
 
     for (const mail of allAdminMails){
-        console.log(mail);
         await db.collection('admins').doc(mail).update({
             all_students: students,
             all_teachers: teachers
@@ -204,7 +203,6 @@ export async function deleteStudent(student_mail){
         // An error happened.
     //});
     let studentData = await getStudentByMail(student_mail);
-    console.log(studentData);
     let teacherMail = studentData.teacher.email;
     let teacherData = await getTeacherByMail(teacherMail);
     let studentList = teacherData.students;

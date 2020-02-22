@@ -858,7 +858,6 @@ function getFreeTimeToday(working_hours, weeks_lessons, day) {
                 continue
             }
             if (checkIfBeforeNow(currentHour, currentMin, working_hours_subarray[i])){
-                console.log(working_hours_subarray[i]);
                 working_hours_subarray[i] = 'busy';
                 continue
             }

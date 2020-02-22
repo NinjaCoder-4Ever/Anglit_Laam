@@ -274,7 +274,6 @@ export async function updateCredits(email, addedCredits) {
     if (newCreditStatus < 0){
         newCreditStatus = 0;
     }
-    console.log("%%%%%%%%%%%%%%%%%%%" + newCreditStatus);
     await collectionRef.doc(email).update({
         "credits": newCreditStatus
     }).then(function () {

@@ -44,19 +44,18 @@ export default  function ExtendedTables() {
 
     React.useEffect(() => {
 
-        getStudentByUID(firebase.auth().currentUser.uid).then((res)=>{
-            if(res != null){
-                setStudentData(res);
+        getStudentByUID(firebase.auth().currentUser.uid).then((studentInfo)=>{
+            if(studentInfo != null){
+                setStudentData(studentInfo);
             }
-            console.log('getStudentByUID '+res);
+            getAllPastLessonsForStudent(studentInfo.email).then((res)=>{
+                if(res != null){
+                    setPastLessons(res);
+                }
+                setLoading(false);
+            });
         });
-        getAllPastLessonsForStudent('some@mail.com').then((res)=>{
-            if(res != null){
-                setPastLessons(res);
-            }
-            console.log('past lessons: '+res);
-            setLoading(false);
-        });
+
     },[]);
 
     const hideAlert = () => {
@@ -64,8 +63,6 @@ export default  function ExtendedTables() {
     };
 
     const popFeedback = (line) => {
-        console.log("feedback: "+ line.feedback)
-
         setAlert(
             <SweetAlert
 

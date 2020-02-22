@@ -104,7 +104,6 @@ export default  function ExtendedTables(callback, deps) {
     }
 
     const modalPopUp = (student_mail, teacher_mail, lesson_id, lesson_date, duration, student_name, feedback, index) => {
-        console.log(student_mail);
         let lessonInfo = {
             student_mail: student_mail,
             teacher_mail: teacher_mail,
@@ -136,7 +135,6 @@ export default  function ExtendedTables(callback, deps) {
         setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
         let tempFeedbacks = feedbacks;
         delete tempFeedbacks[selectedLesson.index];
-        console.log(tempFeedbacks);
         setFeedbacks(tempFeedbacks);
         formInfo.reset();
         setModal(false);
