@@ -12,6 +12,14 @@ import teacher from "../Views/Teacher/teacher";
 export async function getAdminByUid(uid){
     let adminInfo = [];
     let snapshot = await db.collection('admins').where('uid', '==', uid).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await db.collection('admins').where('uid', '==', uid).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
+
     snapshot.forEach(doc => {
         adminInfo.push(doc.data());
     });
@@ -21,6 +29,14 @@ export async function getAdminByUid(uid){
 export async function getAllAdminMails() {
     let adminsMails = [];
     let snapshot = await db.collection('admins').get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await db.collection('admins').get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
+
     snapshot.forEach(admin => {
         adminsMails.push(admin.data().email);
     });
@@ -42,6 +58,14 @@ export async function deleteTeacher(teacher_mail) {
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+
     let teachers = adminInfo.data().all_teachers;
     delete teachers[teacher_mail];
     for (const mail of adminMails){
@@ -88,6 +112,14 @@ export async function changeTeacherForStudent(student_mail, teacher_mail = null,
     // go through all the admins
     let allAdminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(allAdminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(allAdminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+
     let students = adminInfo.data().all_students;
     let teachers = adminInfo.data().all_teachers;
 
@@ -134,6 +166,19 @@ async function clearAllLessons(student_mail, teacher_mail, deleted = false){
         .where('student_mail', '==', student_mail)
         .where('teacher_mail', '==', teacher_mail)
         .where('date_utc.full_date', '>=', new Date()).get();
+
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
+            .where('student_mail', '==', student_mail)
+            .where('teacher_mail', '==', teacher_mail)
+            .where('date_utc.full_date', '>=', new Date()).get();
+
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
+
     snapshot.forEach(doc => {
         lessons.push(doc.data());
     });
@@ -176,6 +221,14 @@ export async function deleteStudent(student_mail){
     let lessons = [];
     let snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
         .where('date_utc.full_date', '>=', new Date()).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
+            .where('date_utc.full_date', '>=', new Date()).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.forEach( doc => {
         lessons.push(doc.data())
@@ -189,6 +242,14 @@ export async function deleteStudent(student_mail){
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+
     let teachers = adminInfo.data().all_teachers;
     let students = adminInfo.data().all_students;
     delete students[student_mail];
@@ -213,6 +274,14 @@ export async function updateSubscriptionForStudent(student_mail, recurring, less
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+
     let students = adminInfo.data().all_students;
     students[student_mail]['subscription'] ={
         recurring: recurring,
@@ -271,6 +340,15 @@ export async function getAvailableTeachersInDate(uid, current_teacher_mail, stud
     for (const teacherMail of categoryFilteredList){
         let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
             .where('date_utc.full_date', '==', lesson_date).get();
+        let noSuccess = (snapshot === null || snapshot === undefined);
+
+        // error handling
+        while (noSuccess){
+            snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+                .where('date_utc.full_date', '==', lesson_date).get();
+            noSuccess = (snapshot === null || snapshot === undefined);
+        }
+
         if (snapshot.length !== 0){
             finalList.push({
                 teacher_mail: teacherMail,
@@ -284,6 +362,15 @@ export async function getAvailableTeachersInDate(uid, current_teacher_mail, stud
         for (const teacherMail of backupList){
             let snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
                 .where('date_utc.full_date', '==', lesson_date).get();
+            let noSuccess = (snapshot === null || snapshot === undefined);
+
+            // error handling
+            while (noSuccess){
+                snapshot = await db.collection('teachers').doc(teacherMail).collection('teacher_lessons')
+                    .where('date_utc.full_date', '==', lesson_date).get();
+                noSuccess = (snapshot === null || snapshot === undefined);
+            }
+
             if (snapshot.length !== 0){
                 finalList.push({
                     teacher_mail: teacherMail,
@@ -311,6 +398,14 @@ export async function swapTeachersForLesson(lesson_data, new_teacher_mail, new_t
 export async function getAllStudents(){
     let studentsInfo = [];
     let snapshot = await db.collection('students').get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await db.collection('students').get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
+
     snapshot.forEach(student => {
         studentsInfo.push(student.data());
     });
@@ -330,6 +425,13 @@ export async function editTeacherContactInfo(teacher_mail, phone_number, skype_u
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
     let teachers = adminInfo.data().all_teachers;
     teachers[teacher_mail]['phone_number'] = phone_number;
     teachers[teacher_mail]['skype_username'] = skype_username;
@@ -347,6 +449,13 @@ export async function editTeacherCategory(teacher_mail, category_list) {
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
     let teachers = adminInfo.data().all_teachers;
     teachers[teacher_mail]['category'] = category_list;
     for (const mail of adminMails){
@@ -363,6 +472,13 @@ export async function editStudentCategory(stuent_mail, category) {
 
     let adminMails = await getAllAdminMails();
     let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
     let students = adminInfo.data().all_students;
     students[stuent_mail]['category'] = category;
     for (const mail of adminMails){
