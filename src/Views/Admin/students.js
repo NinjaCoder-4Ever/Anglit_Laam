@@ -35,7 +35,6 @@ import {
 } from "../../Actions/firestore_functions_admin";
 import {updateCredits} from "../../Actions/firestore_functions_student";
 import Slide from "@material-ui/core/Slide";
-import {Checkbox} from "@material-ui/core";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -105,7 +104,6 @@ export default  function ExtendedTables() {
                 row.push(subscriptiontext);
                 row.push(all_students[student].credits);
                 row.push(getSimpleButtons(all_students[student], index));
-                console.log(row);
 
                 studentsInfoTable.push(row);
                 index = index + 1;
@@ -306,7 +304,6 @@ export default  function ExtendedTables() {
         let newTeacherMail = null;
         if (use_preset_teacher) {
             newTeacherMail = document.getElementById('teacherSelect').value;
-            console.log(newTeacherMail);
         }
         setAlert(
             <SweetAlert
@@ -418,7 +415,7 @@ export default  function ExtendedTables() {
             <SweetAlert
                 success
                 style={{ display: "block"}}
-                title="Teacher Updated"
+                title="Category Updated"
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >

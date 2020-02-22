@@ -65,9 +65,8 @@ const LoginSide = ({ history }) => {
                 .signInWithEmailAndPassword(email.value, password.value);
 
             const userType = await getUserData(email.value).then(function (data) {
-                console.log(data.collection);
                 return data.collection
-            })
+            });
 
             if (userType === "students") {
                 window.$userType = 'students';

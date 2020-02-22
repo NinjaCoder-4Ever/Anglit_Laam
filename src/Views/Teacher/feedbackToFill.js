@@ -1,12 +1,11 @@
 
-import React, {useCallback} from "react";
+import React from "react";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 import firebase from 'Config/fire';
 
 // material-ui icons
 import Assignment from "@material-ui/icons/Assignment";
-import Check from "@material-ui/icons/Check";
 
 // core components
 import GridContainer from "Components/Grid/GridContainer.js";
@@ -28,7 +27,6 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Dialog from "@material-ui/core/Dialog";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
-//import Transition from "react-transition-group/Transition";
 import SweetAlert from "react-bootstrap-sweetalert";
 import Loader from "../../Components/Loader/Loader";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -104,7 +102,6 @@ export default  function ExtendedTables(callback, deps) {
     }
 
     const modalPopUp = (student_mail, teacher_mail, lesson_id, lesson_date, duration, student_name, feedback, index) => {
-        console.log(student_mail);
         let lessonInfo = {
             student_mail: student_mail,
             teacher_mail: teacher_mail,
@@ -136,7 +133,6 @@ export default  function ExtendedTables(callback, deps) {
         setFeedbackForLesson(feedback, lesson_id, teacher_mail, student_mail);
         let tempFeedbacks = feedbacks;
         delete tempFeedbacks[selectedLesson.index];
-        console.log(tempFeedbacks);
         setFeedbacks(tempFeedbacks);
         formInfo.reset();
         setModal(false);

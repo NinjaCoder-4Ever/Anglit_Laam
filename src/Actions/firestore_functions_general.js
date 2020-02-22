@@ -33,7 +33,14 @@ export async function getUserData(email) {
      *
      * Returns {collection: *, email: *, uid: *}
      */
-    const doc = await db.collection('users').doc(email).get();
+    let doc = await db.collection('users').doc(email).get();
+    let noSuccess = (doc === null || doc === undefined);
+
+    // error handling
+    while (noSuccess){
+        doc = await db.collection('users').doc(email).get();
+        noSuccess = (doc === null || doc === undefined);
+    }
 
     return doc.data()
 }
@@ -64,7 +71,14 @@ export async function lookup(collection, field, value) {
      */
     const values = [];
     const collectionRef = db.collection(collection);
-    const snapshot = await collectionRef.where(field, '==', value).get();
+    let snapshot = await collectionRef.where(field, '==', value).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await collectionRef.where(field, '==', value).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.docs.forEach(doc =>{
         values.push(doc.data())
@@ -170,6 +184,14 @@ export function checkSameWeek(date1, date2){
 export async function getFullNameByUID(uid) {
     let userData = await getUserDataByUid(uid);
     let docRef = await db.collection(userData.collection).doc(userData.email).get();
+    let noSuccess = (docRef === null || docRef === undefined);
+
+    // error handling
+    while (noSuccess){
+        docRef = await db.collection(userData.collection).doc(userData.email).get();
+        noSuccess = (docRef === null || docRef === undefined);
+    }
+
     let first_name = docRef.data().first_name;
     let last_name = docRef.data().last_name;
 
