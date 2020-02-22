@@ -91,6 +91,14 @@ async function updateAdminDataForTeacher(teacherData) {
     let teacherMail = teacherData.teacher_mail;
     let adminMails = await getAllAdminMails();
     let adminData = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminData === null || adminData === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminData = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminData === null || adminData === undefined);
+    }
+
     let teachers = adminData.data().all_teachers;
     teachers[teacherMail] = teacherData;
     for (const mail of adminMails){
@@ -195,7 +203,14 @@ export async function getTeacherByMail(email) {
      */
 
     const collectionRef = db.collection('teachers');
-    const doc = await collectionRef.doc(email).get();
+    let doc = await collectionRef.doc(email).get();
+    let noSuccess = (doc === null || doc === undefined);
+
+    // error handling
+    while (noSuccess){
+        doc = await collectionRef.doc(email).get();
+        noSuccess = (doc === null || doc === undefined);
+    }
 
     return  await setLogOnTeacher(doc.data())
 }
@@ -226,7 +241,15 @@ export async function getTeacherByUID(uid) {
      */
 
     const collectionRef = db.collection('teachers');
-    const snapshot = await collectionRef.where('uid', '==', uid).get();
+    let snapshot = await collectionRef.where('uid', '==', uid).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await collectionRef.where('uid', '==', uid).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
+
     let docs = [];
     snapshot.forEach(doc => {
         docs.push(doc.data())
@@ -282,7 +305,14 @@ export async function getThisWeekLessonsTeacher(email) {
      */
     const lessonsThisWeek = [];
     const collectionRef = db.collection('teachers');
-    const doc = await collectionRef.doc(email).get();
+    let doc = await collectionRef.doc(email).get();
+    let noSuccess = (doc === null || doc === undefined);
+
+    // error handling
+    while (noSuccess){
+        doc = await collectionRef.doc(email).get();
+        noSuccess = (doc === null || doc === undefined);
+    }
 
     let lessons = doc.data().lessons_this_week;
     let i;
@@ -322,8 +352,16 @@ export async function getStudentsPastFeedbackForTeacher(teacher_mail, student_ma
      */
     const pastFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    const snapshot = await collectionRef.where('student_mail', '==', student_mail)
+    let snapshot = await collectionRef.where('student_mail', '==', student_mail)
         .where('feedback_given', '==', true).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await collectionRef.where('student_mail', '==', student_mail)
+            .where('feedback_given', '==', true).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -362,8 +400,16 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
      */
     const futureFeedbacks = [];
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
-    const snapshot = await collectionRef.where('feedback_given', '==', false)
+    let snapshot = await collectionRef.where('feedback_given', '==', false)
         .where('started', '==', true).orderBy("date_utc.full_date").get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await collectionRef.where('feedback_given', '==', false)
+            .where('started', '==', true).orderBy("date_utc.full_date").get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -396,7 +442,23 @@ export async function setFeedbackForLesson(feedback, lesson_id, teacher_mail, st
     });
 
     let lessonInfo = await studentLessons.doc(lesson_id).get();
+    let noSuccess = (lessonInfo === null || lessonInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        lessonInfo = await studentLessons.doc(lesson_id).get();
+        noSuccess = (lessonInfo === null || lessonInfo === undefined);
+    }
+
     let studentInfo = await db.collection('students').doc(student_mail).get();
+    noSuccess = (studentInfo === null || studentInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        studentInfo = await db.collection('students').doc(student_mail).get();
+        noSuccess = (studentInfo === null || studentInfo === undefined);
+    }
+
     if ( studentInfo.data().last_feedback_given === undefined || studentInfo.data().last_feedback_given.lesson_date === undefined ||
         new Date(studentInfo.data().last_feedback_given.lesson_date) < new Date(lessonInfo.data().date_utc.full_date)){
         let last_feedback_updated = {
@@ -606,9 +668,18 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     let searchedSunday2 = new Date(searchedSunday);
     let oneDayMore = new Date(searchedSaturday);
     oneDayMore.setDate(oneDayMore.getDate() + 1);
-    const snapshot = await collectionRef.orderBy('date_utc.full_date')
+    let snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday2)
         .where('date_utc.full_date', '<', oneDayMore).get();
+    let noSuccess = (snapshot === null || snapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        snapshot = await collectionRef.orderBy('date_utc.full_date')
+            .where('date_utc.full_date', '>=', searchedSunday2)
+            .where('date_utc.full_date', '<', oneDayMore).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.forEach(doc =>{
         weekLessons.push(doc.data());
@@ -914,6 +985,14 @@ export async function getStudentLastFeedbackByMail(student_mail) {
     let studentLastLessonWithFeedback = [];
     let querySnapshot = await collectionRef.where('feedback_given', '==', true).
     orderBy('date_utc.full_date', 'desc').limit(1).get();
+    let noSuccess = (querySnapshot === null || querySnapshot === undefined);
+
+    // error handling
+    while (noSuccess){
+        querySnapshot = await collectionRef.where('feedback_given', '==', true).
+        orderBy('date_utc.full_date', 'desc').limit(1).get();
+        noSuccess = (querySnapshot === null || querySnapshot === undefined);
+    }
     querySnapshot.forEach(doc => {
         studentLastLessonWithFeedback.push(doc.data());
     });
