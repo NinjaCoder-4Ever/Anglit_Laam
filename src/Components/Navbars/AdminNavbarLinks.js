@@ -12,20 +12,16 @@ import Paper from "@material-ui/core/Paper";
 import Grow from "@material-ui/core/Grow";
 import Hidden from "@material-ui/core/Hidden";
 import Popper from "@material-ui/core/Popper";
-import Divider from "@material-ui/core/Divider";
 
 // @material-ui/icons
 import Person from "@material-ui/icons/Person";
-import Notifications from "@material-ui/icons/Notifications";
-import Dashboard from "@material-ui/icons/Dashboard";
-import Search from "@material-ui/icons/Search";
 
 // core components
-import CustomInput from "../CustomInput/CustomInput.js";
 import Button from "../CustomButtons/Button.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/components/adminNavbarLinksStyle.js";
 import firebase from "../../Config/fire";
+import Cookies from 'js-cookie';
 
 const useStyles = makeStyles(styles);
 
@@ -56,7 +52,7 @@ export default function HeaderLinks(props) {
   const userLogOut = () => {
       try {
           firebase.auth().signOut();
-          window.$userType = 'none';
+          Cookies.remove('userType');
       } catch (error) {
           alert(error);
       }

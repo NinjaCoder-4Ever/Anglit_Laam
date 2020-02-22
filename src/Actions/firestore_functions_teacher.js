@@ -2,7 +2,6 @@ import {db} from '../Config/fire'
 import {convertUtcToLocalTime, checkSameWeek, WEEKDAYS} from './firestore_functions_general'
 import {getAllAdminMails} from "./firestore_functions_admin";
 
-db.settings({ timestampsInSnapshots: true });
 /// ############################# USERS FUNCTIONS #######################################
 export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours, skype_username, category){
     /**

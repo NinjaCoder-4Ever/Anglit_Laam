@@ -4,7 +4,6 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './Config/serviceWorker';
 
-window.$userType = 'none';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

@@ -16,6 +16,7 @@ import firebase from '../Config/fire';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
 import {getUserData} from "../Actions/firestore_functions_general";
+import Cookies from 'js-cookie';
 
 import backgroundPic from '../assets/img/AnglitLaam.jpg'
 
@@ -69,13 +70,13 @@ const LoginSide = ({ history }) => {
             });
 
             if (userType === "students") {
-                window.$userType = 'students';
+                Cookies.set('userType','students', {expires: 1});
                 history.push("/Student/homePage");
             } else if (userType === "teachers") {
-                window.$userType = 'teachers';
+                Cookies.set('userType','teachers', {expires: 1});
                 history.push("/Teacher/homePage");
             } else if (userType === "admins"){
-                window.$userType = 'admins';
+                Cookies.set('userType','admins', {expires: 1});
                 history.push("/Admin/teachers");
             } else {
                 throw new Error("An error has occurred, unknown user");
