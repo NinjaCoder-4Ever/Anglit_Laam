@@ -269,12 +269,12 @@ export async function updateCredits(email, addedCredits) {
     }
 
     let currentCreditValue = studentInfo.data().credits;
-    let newCreditStatus = currentCreditValue[0] + addedCredits;
+    let newCreditStatus = parseInt(currentCreditValue) + parseInt(addedCredits);
 
     if (newCreditStatus < 0){
         newCreditStatus = 0;
     }
-
+    console.log("%%%%%%%%%%%%%%%%%%%" + newCreditStatus);
     await collectionRef.doc(email).update({
         "credits": newCreditStatus
     }).then(function () {
