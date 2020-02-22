@@ -15,6 +15,9 @@ import React, { useCallback, useContext } from "react";
 import firebase from '../Config/fire';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
+import {getUserData} from "../Actions/firestore_functions_general";
+
+import backgroundPic from '../assets/img/AnglitLaam.jpg'
 
 
 const useStyles = makeStyles(theme => ({
@@ -22,7 +25,7 @@ const useStyles = makeStyles(theme => ({
         height: '100vh',
     },
     image: {
-        backgroundImage: 'url(https://source.unsplash.com/random)',
+        backgroundImage: `url(${backgroundPic})`,
         backgroundRepeat: 'no-repeat',
         backgroundColor:
             theme.palette.type === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50],
@@ -60,7 +63,25 @@ const LoginSide = ({ history }) => {
             await firebase
                 .auth()
                 .signInWithEmailAndPassword(email.value, password.value);
-            history.push("/Student/homePage");
+
+            const userType = await getUserData(email.value).then(function (data) {
+                console.log(data.collection);
+                return data.collection
+            })
+
+            if (userType === "students") {
+                window.$userType = 'students';
+                history.push("/Student/homePage");
+            } else if (userType === "teachers") {
+                window.$userType = 'teachers';
+                history.push("/Teacher/homePage");
+            } else if (userType === "admins"){
+                window.$userType = 'admins';
+                history.push("/Admin/teachers");
+            } else {
+                throw new Error("An error has occurred, unknown user");
+            }
+
         } catch (error) {
             alert(error);
         }
@@ -72,12 +93,13 @@ const LoginSide = ({ history }) => {
 
         /* call prompt() with custom message to get user input from alert-like dialog */
         const enteredName = prompt('Please enter the email address you wish to reset')
-
-        try {
-             firebase.auth().sendPasswordResetEmail(enteredName);
-            alert('Please check your email for further instructions')
-        } catch (error) {
-            alert(error);
+        if (enteredName) {
+            try {
+                firebase.auth().sendPasswordResetEmail(enteredName);
+                alert('Please check your email for further instructions')
+            } catch (error) {
+                alert(error);
+            }
         }
     }
 
@@ -97,7 +119,7 @@ const LoginSide = ({ history }) => {
                         <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
-                        Login
+                        Anglit Laam - Login
                     </Typography>
                     <form onSubmit={handleLogin} className={classes.form} noValidate>
                         <TextField

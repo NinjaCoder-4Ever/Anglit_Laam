@@ -19,14 +19,15 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import BubbleChart from "@material-ui/icons/BubbleChart";
-import Notifications from "@material-ui/icons/Notifications";
-import Unarchive from "@material-ui/icons/Unarchive";
+import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
+import Calendar from "@material-ui/icons/Today";
+import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Student/homePage'
-import MyLessons from './Views/Student/myLessons'
+import SetNewLesson from './Views/Student/SetNewLesson'
+import MyFeedback from './Views/Student/myFeedback'
+import MySubscriptions from './Views/Student/mySubscriptions'
 import MyProfile from './Views/Student/myProfile'
-import MySubscription from './Views/Student/mySubscription'
 import ContactUs from './Views/Student/contactUs'
 
 const dashboardRoutes = [
@@ -38,22 +39,29 @@ const dashboardRoutes = [
         layout: "/Student"
     },
     {
-        path: "/myLessons",
-        name: "My Lessons",
-        icon: Notifications,
-        component: MyLessons,
+        path: "/setNewLesson",
+        name: "Set New Lesson",
+        icon: Calendar,
+        component: SetNewLesson,
         layout: "/Student"
     },
     {
-        path: "/mySubscription",
-        name: "My Subscription",
-        icon: "content_paste",
-        component: MySubscription,
+        path: "/myFeedback",
+        name: "My Feedback",
+        icon: LibraryBooks,
+        component: MyFeedback,
         layout: "/Student"
     },
+    // {
+    //     path: "/mySubscriptions",
+    //     name: "My Subscriptions",
+    //     icon: AccountBalance,
+    //     component: MySubscriptions,
+    //     layout: "/Student"
+    // },
     {
         path: "/myProfile",
-        name: "Student Profile",
+        name: "My Profile",
         icon: Person,
         component: MyProfile,
         layout: "/Student"
@@ -61,22 +69,7 @@ const dashboardRoutes = [
     {
         path: "/contactUs",
         name: "Contact Us",
-        icon: LibraryBooks,
-        component: ContactUs,
-        layout: "/Student"
-    },
-    {
-        path: "/contactUs",
-        name: "Contact Us",
-        icon: BubbleChart,
-        component: ContactUs,
-        layout: "/Student"
-    },
-
-    {
-        path: "/contactUs",
-        name: "Contact Us",
-        icon: Unarchive,
+        icon: Help,
         component: ContactUs,
         layout: "/Student"
     }
