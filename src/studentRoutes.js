@@ -19,14 +19,14 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
 import LibraryBooks from "@material-ui/icons/LibraryBooks";
-import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
+//import AccountBalance from "@material-ui/icons/AccountBalanceWallet";
 import Calendar from "@material-ui/icons/Today";
 import Help from "@material-ui/icons/Help";
 // core components/views for userSideBar layout
 import HomePage from './Views/Student/homePage'
 import SetNewLesson from './Views/Student/SetNewLesson'
 import MyFeedback from './Views/Student/myFeedback'
-import MySubscriptions from './Views/Student/mySubscriptions'
+//import MySubscriptions from './Views/Student/mySubscriptions'
 import MyProfile from './Views/Student/myProfile'
 import ContactUs from './Views/Student/contactUs'
 

@@ -25,7 +25,7 @@ const MONTH_DAYS = {
     12: 31
 };
 
-db.settings({ timestampsInSnapshots: true });
+
 
 export async function getUserData(email) {
     /**
