@@ -56,6 +56,7 @@ const useStyles = makeStyles(theme => ({
 const LoginSide = ({ history }) => {
 
     const classes = useStyles();
+    const { currentUser } = useContext(AuthContext);
 
     const handleLogin = useCallback(async event => {
         event.preventDefault();
@@ -103,10 +104,10 @@ const LoginSide = ({ history }) => {
         }
     }
 
-    const { currentUser } = useContext(AuthContext);
 
     if (currentUser) {
-        return <Redirect to="/" />;
+        window.$userType = Cookies.get('userType') !== undefined ? (Cookies.get('userType')) : ('/login');
+        return <Redirect to= {window.$userType} />;
     }
 
     return (
