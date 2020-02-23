@@ -70,13 +70,13 @@ const LoginSide = ({ history }) => {
             });
 
             if (userType === "students") {
-                Cookies.set('userType','students', {expires: 1});
+                Cookies.set('userType',"/Student/homePage", {expires: 1});
                 history.push("/Student/homePage");
             } else if (userType === "teachers") {
-                Cookies.set('userType','teachers', {expires: 1});
+                Cookies.set('userType',"/Teacher/homePage", {expires: 1});
                 history.push("/Teacher/homePage");
             } else if (userType === "admins"){
-                Cookies.set('userType','admins', {expires: 1});
+                Cookies.set('userType',"/Admin/teachers", {expires: 1});
                 history.push("/Admin/teachers");
             } else {
                 throw new Error("An error has occurred, unknown user");

@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './Config/serviceWorker';
+import Cookies from 'js-cookie';
 
+window.$userType = Cookies.get('userType') != undefined ? (Cookies.get('userType')) : ('/login');
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
