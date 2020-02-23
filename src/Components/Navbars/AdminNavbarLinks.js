@@ -71,27 +71,6 @@ export default function HeaderLinks(props) {
   return (
     <div className={wrapper}>
       <div className={managerClasses}>
-        <Button
-          color="transparent"
-          justIcon
-          aria-label="Notifications"
-          aria-owns={openNotification ? "notification-menu-list" : null}
-          aria-haspopup="true"
-          onClick={handleClickNotification}
-          className={rtlActive ? classes.buttonLinkRTL : classes.buttonLink}
-          muiClasses={{
-            label: rtlActive ? classes.labelRTL : ""
-          }}
-        >
-          <Hidden mdUp implementation="css">
-            <span
-              onClick={handleClickNotification}
-              className={classes.linkText}
-            >
-              {rtlActive ? "إعلام" : "Notification"}
-            </span>
-          </Hidden>
-        </Button>
         <Popper
           open={Boolean(openNotification)}
           anchorEl={openNotification}
