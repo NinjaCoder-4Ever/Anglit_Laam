@@ -102,6 +102,11 @@ const extendedTablesStyle = {
   left: {
     textAlign: "left"
   },
+  formControl: {
+    minWidth: 120,
+    width:"25%",
+    marginRight:"1%",
+  },
   ...buttonStyle
 };
 

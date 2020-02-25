@@ -20,7 +20,7 @@ import stylesPopup from "assets/jss/material-dashboard-pro-react/modalStyle.js";
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import Loader from "Components/Loader/Loader.js";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import Close from "@material-ui/core/SvgIcon/SvgIcon";
+import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
@@ -29,6 +29,13 @@ import {deleteTeacher, editTeacherCategory, editTeacherContactInfo, getAdminByUi
 import {Redirect} from "react-router-dom";
 import {Checkbox} from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
+import Grid from "@material-ui/core/Grid";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import ListItemText from "@material-ui/core/ListItemText";
+import Input from "@material-ui/core/Input";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -42,8 +49,12 @@ export default  function ExtendedTables() {
     const [redirect, setRedirect] = React.useState(false);
     const [teachersTable, setTeachersTable] = React.useState([]);
     const [modal, setModal] = React.useState(false);
+    const [modal2, setModal2] = React.useState(false);
     const [contactInfoModal, setContactInfoModal] = React.useState(false);
     const [categoryModal, setCategoryModal] = React.useState(false);
+    const [category, setCategory] = React.useState([]);
+    const [workingTimes, setWorkingTimes] = React.useState([]);
+    const categories = ["Kids","Adults","Business","Spoken"];
 
     const Transition = React.forwardRef(function Transition(props, ref) {
         return <Slide direction="down" ref={ref} {...props} />;
@@ -176,6 +187,107 @@ export default  function ExtendedTables() {
           document.getElementById('conactForm').reset();
       })
     };
+
+    const closeModal2 = () => {
+        document.getElementById("feedbackForm").reset();
+        setModal2(false)
+    };
+
+    const MenuProps = {
+        PaperProps: {
+            style: {
+                maxHeight: 48 * 4.5 + 8,
+                width: "20%",
+            },
+        },
+    };
+
+    const timeSelect = (
+    <div>
+        <FormControl className={classes.formControl}>
+        <InputLabel>Day</InputLabel>
+        <Select
+            labelId="day-select-label"
+            className={"day"}
+        >
+            <MenuItem value={'Sunday'}>Sunday</MenuItem>
+            <MenuItem value={'Monday'}>Monday</MenuItem>
+            <MenuItem value={'Tuesday'}>Tuesday</MenuItem>
+            <MenuItem value={'Wednesday'}>Wednesday</MenuItem>
+            <MenuItem value={'Thursday'}>Thursday</MenuItem>
+            <MenuItem value={'Friday'}>Friday</MenuItem>
+            <MenuItem value={'Saturday'}>Saturday</MenuItem>
+        </Select>
+        </FormControl>
+        <FormControl className={classes.formControl} >
+            <InputLabel>Start time</InputLabel>
+        <Select
+            className={"startTime"}
+        >
+            <MenuItem value={'00:00'}>00:00</MenuItem>
+            <MenuItem value={'01:00'}>01:00</MenuItem>
+            <MenuItem value={'02:00'}>02:00</MenuItem>
+            <MenuItem value={'03:00'}>03:00</MenuItem>
+            <MenuItem value={'04:00'}>04:00</MenuItem>
+            <MenuItem value={'05:00'}>05:00</MenuItem>
+            <MenuItem value={'06:00'}>06:00</MenuItem>
+            <MenuItem value={'07:00'}>07:00</MenuItem>
+            <MenuItem value={'08:00'}>08:00</MenuItem>
+            <MenuItem value={'09:00'}>09:00</MenuItem>
+            <MenuItem value={'10:00'}>10:00</MenuItem>
+            <MenuItem value={'11:00'}>11:00</MenuItem>
+            <MenuItem value={'12:00'}>12:00</MenuItem>
+            <MenuItem value={'13:00'}>13:00</MenuItem>
+            <MenuItem value={'14:00'}>14:00</MenuItem>
+            <MenuItem value={'15:00'}>15:00</MenuItem>
+            <MenuItem value={'16:00'}>16:00</MenuItem>
+            <MenuItem value={'17:00'}>17:00</MenuItem>
+            <MenuItem value={'18:00'}>18:00</MenuItem>
+            <MenuItem value={'19:00'}>19:00</MenuItem>
+            <MenuItem value={'20:00'}>20:00</MenuItem>
+            <MenuItem value={'21:00'}>21:00</MenuItem>
+            <MenuItem value={'22:00'}>22:00</MenuItem>
+            <MenuItem value={'23:00'}>23:00</MenuItem>
+            <MenuItem value={'24:00'}>24:00</MenuItem>
+        </Select>
+        </FormControl>
+        <FormControl className={classes.formControl} >
+            <InputLabel>End time</InputLabel>
+        <Select
+            className={"endTime"}
+        >
+            <MenuItem value={'00:00'}>00:00</MenuItem>
+            <MenuItem value={'01:00'}>01:00</MenuItem>
+            <MenuItem value={'02:00'}>02:00</MenuItem>
+            <MenuItem value={'03:00'}>03:00</MenuItem>
+            <MenuItem value={'04:00'}>04:00</MenuItem>
+            <MenuItem value={'05:00'}>05:00</MenuItem>
+            <MenuItem value={'06:00'}>06:00</MenuItem>
+            <MenuItem value={'07:00'}>07:00</MenuItem>
+            <MenuItem value={'08:00'}>08:00</MenuItem>
+            <MenuItem value={'09:00'}>09:00</MenuItem>
+            <MenuItem value={'10:00'}>10:00</MenuItem>
+            <MenuItem value={'11:00'}>11:00</MenuItem>
+            <MenuItem value={'12:00'}>12:00</MenuItem>
+            <MenuItem value={'13:00'}>13:00</MenuItem>
+            <MenuItem value={'14:00'}>14:00</MenuItem>
+            <MenuItem value={'15:00'}>15:00</MenuItem>
+            <MenuItem value={'16:00'}>16:00</MenuItem>
+            <MenuItem value={'17:00'}>17:00</MenuItem>
+            <MenuItem value={'18:00'}>18:00</MenuItem>
+            <MenuItem value={'19:00'}>19:00</MenuItem>
+            <MenuItem value={'20:00'}>20:00</MenuItem>
+            <MenuItem value={'21:00'}>21:00</MenuItem>
+            <MenuItem value={'22:00'}>22:00</MenuItem>
+            <MenuItem value={'23:00'}>23:00</MenuItem>
+            <MenuItem value={'24:00'}>24:00</MenuItem>
+        </Select>
+        </FormControl>
+        <Button onClick={(event) => {}} color="danger">
+            Delete
+        </Button>
+    </div>
+    )
 
     const confirmContactUpdateAlert = () => {
         setAlert(
@@ -325,6 +437,31 @@ export default  function ExtendedTables() {
         setModal(true);
     };
 
+    const handleChange = event => {
+        setCategory(event.target.value);
+    };
+
+    const handleChangeMultiple = event => {
+        const { options } = event.target;
+        const value = [];
+        for (let i = 0, l = options.length; i < l; i += 1) {
+            if (options[i].selected) {
+                value.push(options[i].value);
+            }
+        }
+        setCategory(value);
+    };
+
+    const handleDay = event => {
+        const { options } = event.target;
+        const value = [];
+        // for (let i = 0, l = options.length; i < l; i += 1) {
+        //     if (options[i].selected) {
+        //         value.push(options[i].value);
+        //     }
+        // }
+    };
+
     return (
         <div>
             {redirect}
@@ -349,7 +486,8 @@ export default  function ExtendedTables() {
                                             "Mail",
                                             "Phone",
                                             "Skype Username",
-                                            "Categories"
+                                            "Categories",
+                                            <Button onClick={() => setModal2(true)} color="success">ADD TEACHER</Button>
                                         ]}
                                         tableData={
                                             teachersTable
@@ -532,6 +670,142 @@ export default  function ExtendedTables() {
                             <Button onClick={() => updateCategoryFunction()} color="info" style={{width:"100%"}}>Update Categories</Button>
                             <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
                             <Button onClick={() => closeCategoryModal()} color="default" style={{width:"100%"}}>Never Mind...</Button>
+                        </GridItem>
+                    </GridContainer>
+                </DialogActions>
+            </Dialog>
+
+
+
+
+
+
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center
+                }}
+                open={modal2}
+                transition={Transition}
+                keepMounted
+                onClose={() => closeModal2()}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+                maxWidth={"90%"}
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => setModal(false)}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Add new teacher</h3>
+                </DialogTitle>
+                <DialogContent>
+                    <form id="feedbackForm" className={classes.form}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    name="first_name"
+                                    variant="outlined"
+                                    fullWidth
+                                    id="first_name"
+                                    label="First name"
+                                    autoFocus
+                                    autoComplete="first_name"
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="last_name"
+                                    label="Last name"
+                                    name="last_name"
+                                    autoComplete="last_name"
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="phone_number"
+                                    label="Phone number"
+                                    name="phone_number"
+                                    autoComplete="phone_number"
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                <TextField
+                                    readOnly
+                                    variant="outlined"
+                                    required
+                                    fullWidth
+                                    id="skype_id"
+                                    label="Skype id"
+                                    name="skype_id"
+                                    autoComplete="skype_id"
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Categories</h5>
+                                <Select
+                                    labelId="demo-mutiple-checkbox-label"
+                                    id="demo-mutiple-checkbox"
+                                    multiple
+                                    value={category}
+                                    onChange={handleChange}
+                                    input={<Input />}
+                                    renderValue={selected => selected.join(', ')}
+                                    MenuProps={MenuProps}
+                                    style={{width:"100%"}}
+                                >
+                                    {categories.map(name => (
+                                        <MenuItem key={name} value={name}>
+                                            <Checkbox checked={category.indexOf(name) > -1} />
+                                            <ListItemText primary={name} />
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h5>Working hours</h5>
+                                {timeSelect}
+
+                            </Grid>
+                        </Grid>
+                        <Grid>
+                            <br/>
+                        </Grid>
+                    </form>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooter + " " + classesPopup.modalFooterCenter}
+                >
+                    <GridContainer>
+                        <GridItem>
+                            <Button onClick={() => warningWithConfirmMessage()} color="info">
+                                ADD TEACHER
+                            </Button>
+                        </GridItem>
+                        <GridItem>
+                            <Button onClick={() => closeModal2()} color="default">
+                                Close
+                            </Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
