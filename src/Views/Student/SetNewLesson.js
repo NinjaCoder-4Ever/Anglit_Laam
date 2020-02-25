@@ -71,14 +71,12 @@ export default function Calendar({history}) {
             let newEvents = [];
             for (i=0; i<=2; i++) {
                 let displayDay = new Date(currentDay.toString());
-                console.log(displayDay);
                 displayDay.setDate(currentDay.getDate() - currentDay.getDay() + 7*i);
                 getTeachersWeekFreeTime(displayDay.getFullYear(), displayDay.getMonth() + 1,
                     displayDay.getDate(), teacherMail).then(freeTime => {
                         setTeacherFreeTime({...freeTime, ...teacherFreeTime});
                         var dateIndex;
                         var possibleLessonIndex;
-                        console.log(freeTime);
                         for (dateIndex in Object.keys(freeTime)) {
                             // freeTimeOnDayArray looks like [{time: 12:00, duration: [30,60]}, {time: 12:30, duration: [30]}]
                             var freeTimeOnDayArray = freeTime[Object.keys(freeTime)[dateIndex]];

@@ -4,8 +4,6 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import firebase from 'Config/fire';
 
-
-
 // material-ui icons
 import Check from "@material-ui/icons/Check";
 
@@ -30,7 +28,6 @@ import Close from "@material-ui/core/SvgIcon/SvgIcon";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
-//import Transition from "react-transition-group/Transition";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Slide from "@material-ui/core/Slide";
@@ -39,13 +36,9 @@ import SweetAlert from "react-bootstrap-sweetalert";
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
 
-function printFeedback(feedback) {
-    return "this is feedback for the class"
-}
 export default  function ExtendedTables() {
     const classesPopup = useStylesPopup();
     const classes = useStyles();
-    const [checked, setChecked] = React.useState(0);
     const [loading, setLoading] = React.useState(true);
     const [alert, setAlert] = React.useState(null);
     const [lessonData,setLessonData] = React.useState({

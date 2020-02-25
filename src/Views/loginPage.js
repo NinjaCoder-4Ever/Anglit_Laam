@@ -16,6 +16,7 @@ import firebase from '../Config/fire';
 import { AuthContext } from "../Actions/auth";
 import Copyright from "../Common/Copyright";
 import {getUserData} from "../Actions/firestore_functions_general";
+import Cookies from 'js-cookie';
 
 import backgroundPic from '../assets/img/AnglitLaam.jpg'
 
@@ -55,6 +56,7 @@ const useStyles = makeStyles(theme => ({
 const LoginSide = ({ history }) => {
 
     const classes = useStyles();
+    const { currentUser } = useContext(AuthContext);
 
     const handleLogin = useCallback(async event => {
         event.preventDefault();
@@ -65,18 +67,17 @@ const LoginSide = ({ history }) => {
                 .signInWithEmailAndPassword(email.value, password.value);
 
             const userType = await getUserData(email.value).then(function (data) {
-                console.log(data.collection);
                 return data.collection
-            })
+            });
 
             if (userType === "students") {
-                window.$userType = 'students';
+                Cookies.set('userType',"/Student/homePage", {expires: 1});
                 history.push("/Student/homePage");
             } else if (userType === "teachers") {
-                window.$userType = 'teachers';
+                Cookies.set('userType',"/Teacher/homePage", {expires: 1});
                 history.push("/Teacher/homePage");
             } else if (userType === "admins"){
-                window.$userType = 'admins';
+                Cookies.set('userType',"/Admin/teachers", {expires: 1});
                 history.push("/Admin/teachers");
             } else {
                 throw new Error("An error has occurred, unknown user");
@@ -103,10 +104,10 @@ const LoginSide = ({ history }) => {
         }
     }
 
-    const { currentUser } = useContext(AuthContext);
 
     if (currentUser) {
-        return <Redirect to="/" />;
+        window.$userType = Cookies.get('userType') !== undefined ? (Cookies.get('userType')) : ('/login');
+        return <Redirect to= {window.$userType} />;
     }
 
     return (

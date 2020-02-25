@@ -23,7 +23,7 @@ import Loader from "Components/Loader/Loader.js";
 
 import styles from "assets/jss/material-dashboard-pro-react/views/extendedTablesStyle.js";
 import {getStudentByUID, cancelLesson, getNextLessonsStudentByUID, updateFirstTimeEntry} from "Actions/firestore_functions_student";
-import {CalendarToday, School} from "@material-ui/icons";
+import {School} from "@material-ui/icons";
 import Dialog from "@material-ui/core/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -92,7 +92,6 @@ export default  function ExtendedTables({history}) {
                 }
             }
             setLoading(false);
-            console.log(res);
         });
     },[triggerMount]);
 
@@ -106,7 +105,6 @@ export default  function ExtendedTables({history}) {
         let student_mail = studentData.email;
         let teacher_mail = line.teacher_mail;
         let lesson_date = new Date(line.lesson_date);
-        console.log(line);
         cancelLesson(student_mail, teacher_mail, lesson_date);
         if (new Date(lesson_date).toString() === new Date(nextLessonDate).toString()){
             setLoading(true);
