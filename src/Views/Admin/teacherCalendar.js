@@ -119,6 +119,7 @@ export default function Calendar({history}) {
                 });
             }
             setLoading(false);
+
         });
     }, [triggerMount]);
 
@@ -367,7 +368,7 @@ export default function Calendar({history}) {
                     </Card>
                 </GridItem>}
                 {
-                    loading === false &&
+                    loading === false && events.length != 0 &&
                     <GridItem xs={12} sm={12} md={10}>
                         <Card>
                             <CardBody calendar>
