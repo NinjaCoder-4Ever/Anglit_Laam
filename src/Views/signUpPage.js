@@ -51,33 +51,66 @@ const SignUp = ({ history }) => {
         setCategory(event.target.value);
     };
 
+
+    function checkErrors(firstName, lastName, phone, email, verifyEmail, password, englishType){
+        let regName = /[a-zA-Z]+/;
+        let regPhone = /[0-9]+/;
+        let regEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/
+        let error = '';
+
+        if ((firstName.length < 2) || (!regName.test(firstName)))
+            error = error + 'First Name should be at least 2 english letters\n';
+
+        if ((lastName.length < 2) || (!regName.test(lastName)))
+            error = error + 'Last Name should be at least 2 english letters\n';
+
+        if ((phone.length !== 10) ||  (!regPhone.test(phone)))
+            error = error + 'Phone number should contain 10 digits\n';
+
+        if (!regEmail.test(email))
+            error = error + 'Please provide a valid email';
+
+        if (email !== verifyEmail)
+            error = error + 'The email addresses you entered does not match\n';
+
+        if (password.length < 6)
+            error = error + 'Password should contain at least 6 characters\n';
+
+        if (error === '')
+            return true;
+        else {
+            window.alert(error);
+            return false;
+        }
+    }
+
     const handleSignUp = useCallback(async () => {
-        setAlert(
-            <SweetAlert
-                customButtons={
-                    <React.Fragment>
-                    </React.Fragment>
-                }>
-                <Loader width={'30%'}/>
-            </SweetAlert>
-        );
         let email = document.getElementById('email').value;
+        let verifyEmail = document.getElementById('verify_email').value;
         let password = document.getElementById('password').value;
         let firstName = document.getElementById('firstName').value;
         let lastName = document.getElementById('lastName').value;
         let phone = document.getElementById('phone').value;
         let englishType = document.getElementById('englishType').innerText.toLowerCase();
-        //try {
-        await firebase
-            .auth()
-            .createUserWithEmailAndPassword(email, password);
-        await setNewStudent(firebase.auth().currentUser.uid,
-            email, firstName, lastName, phone, englishType);
-        history.push("/Student/homePage");
-        //} catch (error) {
-        //    console.log("the error: " + error);
-            //   history.push("/Student/homePage");
-        //}
+        if (checkErrors(firstName, lastName, phone, email, verifyEmail, password, englishType) === true) {
+            setAlert(
+                <SweetAlert
+                    customButtons={
+                        <React.Fragment>
+                        </React.Fragment>
+                    }>
+                    <Loader width={'30%'}/>
+                </SweetAlert>
+            );
+
+            await firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, password);
+            await setNewStudent(firebase.auth().currentUser.uid,
+                email, firstName, lastName, phone, englishType);
+            history.push("/Student/homePage");
+        }
+
     }, [history]);
 
 
