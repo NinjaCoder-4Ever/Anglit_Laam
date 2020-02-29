@@ -55,7 +55,7 @@ const SignUp = ({ history }) => {
     function checkErrors(firstName, lastName, phone, email, verifyEmail, password, englishType){
         let regName = /[a-zA-Z]+/;
         let regPhone = /[0-9]+/;
-        let regEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/
+        let regEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/;
         let error = '';
 
         if ((firstName.length < 2) || (!regName.test(firstName)))

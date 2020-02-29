@@ -246,7 +246,7 @@ export default function Calendar({history}) {
                         </CardHeader>
                         <CardBody pricing>
                             {
-                                loading == true ?
+                                loading === true ?
                                     <Loader width={'20%'}/> :
                                     studentData.credits > 0 ?
                                         <h3 className={`${classes.cardTitle}`}
@@ -270,7 +270,7 @@ export default function Calendar({history}) {
                 </GridItem>
                 <GridItem xs={12} sm={12} md={10}>
                     {
-                        loading == false && studentData.credits > 0 &&
+                        loading === false && studentData.credits > 0 &&
                         <Card>
                             <CardBody calendar>
                                 <BigCalendar

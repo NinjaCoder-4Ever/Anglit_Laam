@@ -26,7 +26,7 @@ import "assets/scss/material-dashboard-pro-react.scss?v=1.8.0";
 const App = () => {
 
     console.log('App Func' + window.$userType);
-    window.$userType = Cookies.get('userType') != undefined ? (Cookies.get('userType')) : ('/login');
+    window.$userType = Cookies.get('userType') !== undefined ? (Cookies.get('userType')) : ('/login');
 
     return (
         <AuthProvider>
