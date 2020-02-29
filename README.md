@@ -37,16 +37,22 @@ We have 3 types of users in the system, each with their own features. Here is a 
 7) Can change his contact info.
 
 #### Admin
+There are two types of admins: super admins and minor admins.
+super admins have access to the firebase console while minor admins do not.
+##### Minor Admins
 1) Can see all the teachers and students info.
-2) Can delete a student or teacher from the system.
-3) Can change a permanent teacher for a student.
-4) Can substitute a teacher for a given lesson.
-5) Can add credits to students.
-6) Can change a student's subscription.
-7) Can change the lesson status to `started`, `absent student`. Can also reset the lesson status.
-8) Can change a student's or teacher's category.
-9) Can edit a student's or teacher's contact info.
+2) Can change a permanent teacher for a student.
+3) Can substitute a teacher for a given lesson.
+4) Can add credits to students.
+5) Can change a student's subscription.
+6) Can change the lesson status to `started`, `absent student`. Can also reset the lesson status.
+7) Can change a student's or teacher's category.
+8) Can edit a student's or teacher's contact info.
+##### Super Admins
+9) Can delete a student or teacher from the system.
 10) Can sign-up a new teacher.
+11) Can change the working days of teachers.
+* The super admin's capabilities lean on the fact that they can approach the firebase console and authenticate new users as well as change minute details in the database itself.
 
 ## Architectural Overview
 
