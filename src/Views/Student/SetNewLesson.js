@@ -185,7 +185,7 @@ export default function Calendar({history}) {
             <SweetAlert
                 success
                 style={{ display: "block"}}
-                title="Your All Set!"
+                title="You Are All Set!"
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
@@ -261,6 +261,7 @@ export default function Calendar({history}) {
                                         <h3 className={`${classes.cardTitle}`}
                                             style={{fontSize: "16px",}}>
                                             Currently you have don't have any credits, please update your subscription.
+                                            You can purchase additional credits <a href="https://www.anglitlaam.com/">here!</a>
                                         </h3>
 
                             }

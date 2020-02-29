@@ -358,7 +358,7 @@ export default  function ExtendedTables(callback, deps) {
                         </GridItem>
                         <GridItem>
                             <Button onClick={() => closeModal()} color="default">
-                                Close
+                                Close and Discard Changes
                             </Button>
                         </GridItem>
                     </GridContainer>
