@@ -25,7 +25,14 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
 import Dialog from "@material-ui/core/Dialog";
 import TextField from "@material-ui/core/TextField";
-import {deleteTeacher, editTeacherCategory, editTeacherContactInfo, getAdminByUid, setNewAdmin} from "../../Actions/firestore_functions_admin";
+import {
+    deleteTeacher,
+    editTeacherCategory,
+    editTeacherContactInfo,
+    editTeacherWorkingDays,
+    getAdminByUid,
+    setNewAdmin
+} from "../../Actions/firestore_functions_admin";
 import {Redirect} from "react-router-dom";
 import {Checkbox} from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
@@ -54,6 +61,7 @@ export default  function ExtendedTables() {
     const [modal3, setModal3] = React.useState(false);
     const [contactInfoModal, setContactInfoModal] = React.useState(false);
     const [categoryModal, setCategoryModal] = React.useState(false);
+    const [workingDaysModal, setWorkingDaysModal] = React.useState(false);
     const [category, setCategory] = React.useState([]);
     const [workingDays, setWorkingDays] = React.useState([]);
     const [breakTime, setBreaKTime] = React.useState("");
@@ -73,7 +81,8 @@ export default  function ExtendedTables() {
         teacher_name: "",
         teacher_mail: "",
         uid: "",
-        students: ""
+        students: "",
+        working_days: []
     });
     const [selectedIndex, setSelectedIndex] = React.useState(0);
     const [allTeacherMailsList, setAllTeacherMailsList] =React.useState([]);
@@ -312,6 +321,16 @@ export default  function ExtendedTables() {
         setCategoryModal(false);
     };
 
+    const workingDaysModalSetup = () => {
+        setModal(false);
+        setWorkingDaysModal(true);
+    };
+
+    const closeWorkingDays = () => {
+        document.getElementById('working-days-change-form').reset();
+        setWorkingDaysModal(false);
+    };
+
     const warningWithConfirmMessage = () => {
         setAlert(
             <SweetAlert
@@ -364,6 +383,7 @@ export default  function ExtendedTables() {
     const backToControlPanel = () => {
         setContactInfoModal(false);
         setCategoryModal(false);
+        setWorkingDaysModal(false);
         document.getElementById('kidsBox').checked = false;
         document.getElementById('adultsBox').checked = false;
         document.getElementById('businessBox').checked = false;
@@ -432,6 +452,27 @@ export default  function ExtendedTables() {
                 success
                 style={{ display: "block"}}
                 title="Admin Signd up"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+            </SweetAlert>
+        );
+    };
+
+    const changeWorkingDays = () => {
+        editTeacherWorkingDays(selectedTeacher.teacher_mail, workingDays, breakTime).then(function () {
+            confirmWorkingDaysChange();
+            closeWorkingDays();
+            setTriggerMount(!triggerMount);
+        })
+    };
+
+    const confirmWorkingDaysChange = () => {
+        setAlert(
+            <SweetAlert
+                success
+                style={{ display: "block"}}
+                title={"Updated Working Days for " + selectedTeacher.teacher_name}
                 onConfirm={() => closeAlert()}
                 confirmBtnCssClass={classes.button + " " + classes.success}
             >
@@ -519,7 +560,7 @@ export default  function ExtendedTables() {
                     <GridContainer justify="center">
                         <GridItem  xs={5} sm={5} md={5}>
                             <div>
-                                <Button disabled={!firebaseAccess} onClick={() => setModal(false)} color="info" style={{width:"100%"}}>Edit working time</Button>
+                                <Button disabled={!firebaseAccess} onClick={() => workingDaysModalSetup()} color="info" style={{width:"100%"}}>Edit working time</Button>
                                 <Button onClick={() => contactInfoSetup()} color="info" style={{width:"100%"}}>Edit contact info</Button>
                                 <Button onClick={() => categoryModalSetup()} color="info" style={{width:"100%"}}>Edit categories</Button>
                                 <Button disabled={!firebaseAccess} onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Teacher</Button>
@@ -803,31 +844,15 @@ export default  function ExtendedTables() {
                                     value={breakTime}
                                     onChange={handleChange_break}
                                 >
-                                    <MenuItem value={'00:00'}>00:00</MenuItem>
-                                    <MenuItem value={'01:00'}>01:00</MenuItem>
-                                    <MenuItem value={'02:00'}>02:00</MenuItem>
-                                    <MenuItem value={'03:00'}>03:00</MenuItem>
-                                    <MenuItem value={'04:00'}>04:00</MenuItem>
-                                    <MenuItem value={'05:00'}>05:00</MenuItem>
-                                    <MenuItem value={'06:00'}>06:00</MenuItem>
-                                    <MenuItem value={'07:00'}>07:00</MenuItem>
-                                    <MenuItem value={'08:00'}>08:00</MenuItem>
-                                    <MenuItem value={'09:00'}>09:00</MenuItem>
-                                    <MenuItem value={'10:00'}>10:00</MenuItem>
-                                    <MenuItem value={'11:00'}>11:00</MenuItem>
-                                    <MenuItem value={'12:00'}>12:00</MenuItem>
-                                    <MenuItem value={'13:00'}>13:00</MenuItem>
-                                    <MenuItem value={'14:00'}>14:00</MenuItem>
-                                    <MenuItem value={'15:00'}>15:00</MenuItem>
-                                    <MenuItem value={'16:00'}>16:00</MenuItem>
-                                    <MenuItem value={'17:00'}>17:00</MenuItem>
-                                    <MenuItem value={'18:00'}>18:00</MenuItem>
-                                    <MenuItem value={'19:00'}>19:00</MenuItem>
-                                    <MenuItem value={'20:00'}>20:00</MenuItem>
-                                    <MenuItem value={'21:00'}>21:00</MenuItem>
-                                    <MenuItem value={'22:00'}>22:00</MenuItem>
-                                    <MenuItem value={'23:00'}>23:00</MenuItem>
-                                    <MenuItem value={'24:00'}>24:00</MenuItem>
+                                    <MenuItem value={'08:00'}>10:00</MenuItem>
+                                    <MenuItem value={'09:00'}>11:00</MenuItem>
+                                    <MenuItem value={'10:00'}>12:00</MenuItem>
+                                    <MenuItem value={'11:00'}>13:00</MenuItem>
+                                    <MenuItem value={'12:00'}>14:00</MenuItem>
+                                    <MenuItem value={'13:00'}>15:00</MenuItem>
+                                    <MenuItem value={'14:00'}>16:00</MenuItem>
+                                    <MenuItem value={'15:00'}>17:00</MenuItem>
+                                    <MenuItem value={'16:00'}>18:00</MenuItem>
                                 </Select>
                             </Grid>
                         </Grid>
@@ -962,6 +987,100 @@ export default  function ExtendedTables() {
                             <Button onClick={() => closeModal3()} color="default">
                                 Close
                             </Button>
+                        </GridItem>
+                    </GridContainer>
+                </DialogActions>
+            </Dialog>
+
+            <Dialog
+                classes={{
+                    root: classesPopup.center,
+                    paper: classesPopup.modal
+                }}
+                open={workingDaysModal}
+                transition={Transition}
+                keepMounted
+                onClose={() => closeWorkingDays()}
+                aria-labelledby="modal-slide-title"
+                aria-describedby="modal-slide-description"
+            >
+                <DialogTitle
+                    id="classic-modal-slide-title"
+                    disableTypography
+                    className={classesPopup.modalHeader}
+                >
+                    <Button
+                        justIcon
+                        className={classesPopup.modalCloseButton}
+                        key="close"
+                        aria-label="Close"
+                        color="transparent"
+                        onClick={() => closeWorkingDays()}
+                    >
+                        <Close className={classesPopup.modalClose} />
+                    </Button>
+                    <h3 className={classesPopup.modalTitle}>Set Category for {selectedTeacher.teacher_name}</h3>
+                </DialogTitle>
+                <DialogContent
+                    id="modal-slide-description"
+                    className={classesPopup.modalBody}
+                >
+                    <h5>Current Working Days: {selectedTeacher.working_days.toString()}</h5>
+                    <h5>Would you like to change his work days?</h5>
+                    <br/>
+                    <form id="working-days-change-form" className={classes.form}>
+                    <Grid item xs={12}>
+
+                        <h5>Working Days</h5>
+                        <Select
+                            labelId="demo-mutiple-checkbox-label"
+                            id="working-days-checkbox-2"
+                            multiple
+                            value={workingDays}
+                            onChange={handleChange_working_days}
+                            input={<Input />}
+                            renderValue={selected => selected.join(', ')}
+                            MenuProps={MenuProps}
+                            style={{width:"100%"}}
+                        >
+                            {days.map(name => (
+                                <MenuItem key={name} value={name}>
+                                    <Checkbox checked={workingDays.indexOf(name) > -1} />
+                                    <ListItemText primary={name} />
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <h5>Break Time</h5>
+                        <Select
+                            className={"startTime"}
+                            id="break-time-select-2"
+                            value={breakTime}
+                            onChange={handleChange_break}
+                        >
+                            <MenuItem value={'08:00'}>10:00</MenuItem>
+                            <MenuItem value={'09:00'}>11:00</MenuItem>
+                            <MenuItem value={'10:00'}>12:00</MenuItem>
+                            <MenuItem value={'11:00'}>13:00</MenuItem>
+                            <MenuItem value={'12:00'}>14:00</MenuItem>
+                            <MenuItem value={'13:00'}>15:00</MenuItem>
+                            <MenuItem value={'14:00'}>16:00</MenuItem>
+                            <MenuItem value={'15:00'}>17:00</MenuItem>
+                            <MenuItem value={'16:00'}>18:00</MenuItem>
+                        </Select>
+                    </Grid>
+                    </form>
+                </DialogContent>
+                <DialogActions
+                    className={classesPopup.modalFooterCenter + " " +
+                    classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
+                >
+                    <GridContainer justify="center">
+                        <GridItem   xs={5} sm={5} md={5}>
+                            <Button onClick={() => changeWorkingDays()} color="info" style={{width:"100%"}}>Update Working Days</Button>
+                            <Button onClick={() => backToControlPanel()} color="primary" style={{width:"100%"}}>Back to Control Panel</Button>
+                            <Button onClick={() => closeWorkingDays()} color="default" style={{width:"100%"}}>Never Mind...</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>

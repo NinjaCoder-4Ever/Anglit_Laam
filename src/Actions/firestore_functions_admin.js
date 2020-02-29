@@ -1,5 +1,5 @@
 import {db} from '../Config/fire'
-import {getTeacherByMail} from "./firestore_functions_teacher";
+import {getTeacherByMail, setup_working_hours} from "./firestore_functions_teacher";
 import {
     addStudentToTeacher,
     chooseTeacherForStudent,
@@ -523,4 +523,30 @@ export async function setNewAdmin(uid, email, first_name, last_name, firebase_ac
         collection: "admins"
     };
     db.collection('users').doc(email).set(usersData);
+}
+
+export async function editTeacherWorkingDays(teacher_mail, working_days, break_time) {
+    let working_hours = setup_working_hours(working_days, break_time);
+    db.collection('teachers').doc(teacher_mail).update({
+        working_hours: working_hours,
+        working_days: working_days
+    });
+
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+
+    let teachers = adminInfo.data().all_teachers;
+    teachers[teacher_mail]['working_days'] = working_days;
+    for (const mail of adminMails){
+        db.collection('admins').doc(mail).update({
+            all_teachers: teachers
+        });
+    }
 }
