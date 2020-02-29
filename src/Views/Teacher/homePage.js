@@ -408,12 +408,18 @@ export default function Calendar({history}) {
                     className={classesPopup.modalFooterCenter + " " +
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
-                    <Button  disabled={selectedEvent.started || selectedEvent.feedback_given}
-                             onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
-                    <Button disabled={selectedEvent.no_show || selectedEvent.feedback_given}
-                            onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
-                    <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
-                            onClick={() => unmarkLesson()} color="default">Unmark</Button>
+                    <GridContainer justify="center">
+                        <GridItem>
+                            <Button  disabled={selectedEvent.started || selectedEvent.feedback_given}
+                                onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
+                            <Button disabled={selectedEvent.no_show || selectedEvent.feedback_given}
+                                    onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
+                        </GridItem>
+                        <GridItem >
+                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
+                                    onClick={() => unmarkLesson()} color="default">Reset Lesson Status</Button>
+                        </GridItem>
+                    </GridContainer>
                 </DialogActions>
             </Dialog>
 
@@ -545,7 +551,7 @@ export default function Calendar({history}) {
                         </GridItem>
                         <GridItem>
                             <Button onClick={() => closeModal()} color="default">
-                                Close
+                                Close and Discard Changes
                             </Button>
                         </GridItem>
                     </GridContainer>
