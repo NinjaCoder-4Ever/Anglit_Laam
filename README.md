@@ -52,7 +52,7 @@ super admins have access to the firebase console while minor admins do not.
 Can do all the above and:
 
 9) Can delete a student or teacher from the system.
-10) Can sign-up a new teacher.
+10) Can sign-up a new teacher and admin.
 11) Can change the working days of teachers.
 * The super admin's capabilities lean on the fact that they can approach the firebase console and authenticate new users as well as change minute details in the database itself.
 
