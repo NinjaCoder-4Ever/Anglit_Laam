@@ -50,6 +50,7 @@ super admins have access to the firebase console while minor admins do not.
 8) Can edit a student's or teacher's contact info.
 ##### Super Admins
 Can do all the above and:
+
 9) Can delete a student or teacher from the system.
 10) Can sign-up a new teacher.
 11) Can change the working days of teachers.
