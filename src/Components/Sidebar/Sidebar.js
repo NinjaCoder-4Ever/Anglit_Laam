@@ -368,17 +368,6 @@ class Sidebar extends React.Component {
                             <ListItemText
                                 /* This is where the user name should be used */
                                 primary={rtlActive ? "تانيا أندرو" : this.state.userName}
-                                secondary={
-                                    <b
-                                        className={
-                                            caret +
-                                            " " +
-                                            classes.userCaret +
-                                            " " +
-                                            (this.state.openAvatar ? classes.caretActive : "")
-                                        }
-                                    />
-                                }
                                 disableTypography={true}
                                 className={itemText + " " + classes.userItemText}
                             />
