@@ -436,18 +436,16 @@ export default function Calendar({history}) {
                     className={classesPopup.modalFooterCenter + " " +
                     classesPopup.modalFooterCenter + " " + classesPopup.modalFooterCenter}
                 >
-                    <GridContainer>
+                    <GridContainer justify="center">
                         <GridItem>
                             <Button  disabled={selectedEvent.started || selectedEvent.feedback_given}
                                      onClick={() => setLessonToStarted()} color="success">Lesson Started</Button>
                             <Button disabled={selectedEvent.no_show || selectedEvent.feedback_given}
                                     onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
-                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
-                                    onClick={() => unmarkLesson()} color="default">Unmark</Button>
                         </GridItem>
-                        <GridItem>
-                            <Button disabled={selectedEvent.no_show || selectedEvent.started || selectedEvent.feedback_given}
-                                    onClick={() => setupAvailableTeachers()} color="primary">Substitute Teacher</Button>
+                        <GridItem >
+                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
+                                    onClick={() => unmarkLesson()} color="default">Reset Lesson Status</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>

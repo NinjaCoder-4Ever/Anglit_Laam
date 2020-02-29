@@ -78,11 +78,20 @@ export default  function ExtendedTables() {
                         let teacher_name = lesson.teacher_name;
                         let lesson_date = new Date(lesson.date_utc.full_date_string).toString();
                         let feedback = lesson.feedback;
-                        lessonsTable.push([
-                            teacher_name,
-                            lesson_date,
-                            getSimpleButtons(lesson.feedback_given, feedback, teacher_name, lesson_date)
-                        ]);
+                        if (lesson.feedback_given === true){
+                            lessonsTable.push([
+                                teacher_name,
+                                lesson_date,
+                                getSimpleButtons(lesson.feedback_given, feedback, teacher_name, lesson_date)
+                            ]);
+                        }
+                        else {
+                            lessonsTable.push([
+                                teacher_name,
+                                lesson_date,
+                                null
+                            ]);
+                        }
 
                     })
                 }
@@ -151,7 +160,7 @@ export default  function ExtendedTables() {
                                         tableHead={[
                                             "Teacher",
                                             "Date",
-                                            "Duration"
+                                            ""
                                         ]}
                                         tableData={
                                             pastLessonsTable
