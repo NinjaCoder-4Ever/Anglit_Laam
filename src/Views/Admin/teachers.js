@@ -44,6 +44,7 @@ import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import {setNewTeachers} from "../../Actions/firestore_functions_teacher";
+import admin from "./admin";
 
 const useStyles = makeStyles(styles);
 const useStylesPopup = makeStyles(stylesPopup);
@@ -252,33 +253,15 @@ export default  function ExtendedTables() {
             </SweetAlert>
         );
         let categoryList = [];
-        let kids = document.getElementById('kidsBox');
-        let adults = document.getElementById('adultsBox');
-        let business = document.getElementById('businessBox');
-        let spoken = document.getElementById('spokenBox');
-        if (kids.checked){
-            categoryList.push('kids');
-            kids.checked = false;
+        for (const cat of category){
+            categoryList.push(cat.toLowerCase());
         }
-        if (adults.checked){
-            categoryList.push('adults');
-            adults.checked = false;
-        }
-        if (business.checked){
-            categoryList.push('business');
-            business.checked = false;
-        }
-        if (spoken.checked){
-            categoryList.push('spoken');
-            spoken.checked = false;
-        }
-        if(categoryList.length === 0){
+        if (categoryList.length === 0){
             noCategorySelectedAlert();
-            return 0
+            return 0;
         }
-
         editTeacherCategory(selectedTeacher.teacher_mail, categoryList).then(() =>{
-            setCategoryModal(false);
+            closeCategoryModal();
             confirmCategoryUpdateAlert();
             document.getElementById("categoryForm").reset();
             setTriggerMount(!triggerMount);
@@ -314,10 +297,7 @@ export default  function ExtendedTables() {
     };
 
     const closeCategoryModal = () => {
-        document.getElementById('kidsBox').checked = false;
-        document.getElementById('adultsBox').checked = false;
-        document.getElementById('businessBox').checked = false;
-        document.getElementById('spokenBox').checked = false;
+        document.getElementById("categoryForm").reset();
         setCategoryModal(false);
     };
 
@@ -382,12 +362,8 @@ export default  function ExtendedTables() {
 
     const backToControlPanel = () => {
         setContactInfoModal(false);
-        setCategoryModal(false);
-        setWorkingDaysModal(false);
-        document.getElementById('kidsBox').checked = false;
-        document.getElementById('adultsBox').checked = false;
-        document.getElementById('businessBox').checked = false;
-        document.getElementById('spokenBox').checked = false;
+        closeCategoryModal();
+        closeWorkingDays();
         setModal(true);
     };
 
@@ -414,6 +390,23 @@ export default  function ExtendedTables() {
         let phone_number = document.getElementById('phone_number').value;
         let skype_id = document.getElementById('skype_id').value;
         let teacher_mail = document.getElementById('email').value;
+        if (first_name === null || first_name === undefined || first_name.length === 0 ||
+            last_name === null || last_name === undefined || last_name.length === 0 ||
+            uid === null || uid === undefined || uid.length === 0 ||
+            phone_number === null || phone_number === undefined || phone_number.length === 0 ||
+            skype_id === null || skype_id === undefined || skype_id.length === 0 ||
+            teacher_mail === null || teacher_mail === undefined || teacher_mail.length === 0){
+            fillFullFormAlertTeacher();
+            return 0;
+        }
+        if (category.length === 0){
+            noCategorySelectedAlert();
+            return 0;
+        }
+        if (workingDays.length === 0){
+            noWorkingDaysAlert();
+            return 0;
+        }
         setNewTeachers(uid, teacher_mail, first_name, last_name, phone_number, skype_id, category,
             workingDays, breakTime).then(function () {
             confirmTeacherSignUp();
@@ -440,6 +433,13 @@ export default  function ExtendedTables() {
         let last_name = document.getElementById("admin_last_name").value;
         let uid = document.getElementById("admin_uid").value;
         let admin_mail = document.getElementById('admin_email').value;
+        if (first_name === null || first_name === undefined || first_name.length === 0 ||
+            last_name === null || last_name === undefined || last_name.length === 0 ||
+            uid === null || uid === undefined || uid.length === 0 ||
+            admin_mail === null || admin_mail === undefined || admin_mail.length === 0){
+            fillFullFormAlertAdmin();
+            return 0;
+        }
         setNewAdmin(uid, admin_mail, first_name, last_name, firebaseAccess).then(function () {
             confirmAdminSignup();
             closeModal3();
@@ -460,6 +460,10 @@ export default  function ExtendedTables() {
     };
 
     const changeWorkingDays = () => {
+        if (workingDays.length === 0){
+            noWorkingDaysAlert();
+            return 0
+        }
         editTeacherWorkingDays(selectedTeacher.teacher_mail, workingDays, breakTime).then(function () {
             confirmWorkingDaysChange();
             closeWorkingDays();
@@ -479,6 +483,47 @@ export default  function ExtendedTables() {
             </SweetAlert>
         );
     };
+
+    const noWorkingDaysAlert = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="No Working Days Selected"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+                Please select a working days for the teacher.
+            </SweetAlert>
+        );
+    };
+
+    const fillFullFormAlertTeacher = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="Please Fill All The Details to Sign Up a new Teacher"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+            </SweetAlert>
+        );
+    };
+
+    const fillFullFormAlertAdmin = () => {
+        setAlert(
+            <SweetAlert
+                warning
+                style={{ display: "block"}}
+                title="Please Fill All The Details to Sign Up a new Admin"
+                onConfirm={() => closeAlert()}
+                confirmBtnCssClass={classes.button + " " + classes.success}
+            >
+            </SweetAlert>
+        );
+    };
+
 
     return (
         <div>
@@ -671,13 +716,29 @@ export default  function ExtendedTables() {
                     className={classesPopup.modalBody}
                 >
                     <h5>Current Categories: {selectedTeacher.category.toString()}</h5>
-                    <h5>Would you like to change the categories?</h5>
                     <br/>
                     <form id={"categoryForm"}>
-                        <Checkbox id={'kidsBox'} value={"kids"} color={'primary'} label={'Kids'}/>Kids
-                        <Checkbox id={'adultsBox'} value={"adults"} color={'primary'} label={'Adults'}/>Adults
-                        <Checkbox id={'businessBox'} value={"business"} color={'primary'} label={'Business'}/>Business
-                        <Checkbox id={'spokenBox'} value={"spoken"} color={'primary'} label={"Spoken"}/>Spoken
+                        <Grid item xs={12}>
+                            <h5>Would you like to change the categories?</h5>
+                            <Select
+                                labelId="demo-mutiple-checkbox-label"
+                                id="categories-checkbox"
+                                multiple
+                                value={category}
+                                onChange={handleChange_category}
+                                input={<Input />}
+                                renderValue={selected => selected.join(', ')}
+                                MenuProps={MenuProps}
+                                style={{width:"100%"}}
+                            >
+                                {categories.map(name => (
+                                    <MenuItem key={name} value={name}>
+                                        <Checkbox checked={category.indexOf(name) > -1} />
+                                        <ListItemText primary={name} />
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Grid>
                     </form>
                 </DialogContent>
                 <DialogActions
