@@ -315,13 +315,6 @@ export async function chooseTeacherForStudent(studentMail, studentName, category
     const chosenTeacher = [];
     const teacherCollection = db.collection('teachers');
     let snapshot = await teacherCollection.where('category', 'array-contains', category).get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await teacherCollection.where('category', 'array-contains', category).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     let minimalStudents = 10000000000000000000;
     snapshot.forEach(doc => {
@@ -430,14 +423,6 @@ export async function getAllPastLessonsForStudent(email){
     let lastYear = new Date().setFullYear(today.getFullYear() - 1);
     let snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
         .where("date_utc.full_date", ">=", new Date(lastYear)).orderBy("date_utc.full_date", 'desc').get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await collectionRef.where('date_utc.full_date', '<=', today)
-            .where("date_utc.full_date", ">=", new Date(lastYear)).orderBy("date_utc.full_date", 'desc').get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -491,12 +476,6 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     let existingLessons = [];
 
     let snapshot = await teacherLessons.where('date_utc.full_date', '==', start_time).get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    while (noSuccess){
-        snapshot = await teacherLessons.where('date_utc.full_date', '==', start_time).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc => {
         existingLessons.push(doc.data());
@@ -509,13 +488,6 @@ async function checkLessonAvailability(student_mail, teacher_mail, start_time, d
     if (duration > 30){
         let nextHalfHour = new Date(start_time.getTime() + 60000*30);
         let snapshot = await teacherLessons.where('date_utc.full_date', '==', nextHalfHour).get();
-        let noSuccess = (snapshot === null || snapshot === undefined);
-
-        // error handling
-        while (noSuccess){
-            snapshot = await teacherLessons.where('date_utc.full_date', '==', nextHalfHour).get();
-            noSuccess = (snapshot === null || snapshot === undefined);
-        }
 
         snapshot.forEach(doc => {
             existingLessons.push(doc.data());
@@ -694,13 +666,6 @@ export async function getNextLessonsStudentByUID(uid, limit) {
     };
      */
     let snapshot1 = await db.collection('students').where('uid', '==', uid).get();
-    let noSuccess = (snapshot1 === null || snapshot1 === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot1 = await db.collection('students').where('uid', '==', uid).get();
-        noSuccess = (snapshot1 === null || snapshot1 === undefined);
-    }
 
     let docs = [];
     snapshot1.forEach(doc => {
@@ -712,14 +677,6 @@ export async function getNextLessonsStudentByUID(uid, limit) {
     let nextLessons = [];
     let snapshot = await lessonscollectionRef.where('started', '==', false).where("no_show", '==', false)
         .orderBy('date_utc.full_date').limit(limit).get();
-    noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await lessonscollectionRef.where('started', '==', false).where("no_show", '==', false)
-            .orderBy('date_utc.full_date').limit(limit).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc =>{
         let lessonInfo = doc.data();
@@ -763,14 +720,6 @@ export async function getMonthLessonsStudent(student_mail, month_num, year){
     let monthLessons = [];
     let snapshot = await collectionRef.where('date_utc.month', '==', month_num)
         .where('date_utc.year', '==', year).get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await collectionRef.where('date_utc.month', '==', month_num)
-            .where('date_utc.year', '==', year).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc => {
         let lessonInfo = doc.data();

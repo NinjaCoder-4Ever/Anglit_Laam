@@ -3,13 +3,16 @@ import {convertUtcToLocalTime, checkSameWeek, WEEKDAYS} from './firestore_functi
 import {getAllAdminMails} from "./firestore_functions_admin";
 
 /// ############################# USERS FUNCTIONS #######################################
-export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, working_hours, skype_username, category){
+export async function setNewTeachers(uid, email, firstName, lastName, phoneNumber, skype_username, category, working_days,
+                               break_time){
     /**
      * Function enters a new teacher to the "teachers" collection.
      * Also enters the teacher to the "users" collection.
      */
-    let parsed_working_hours = setWorkingHours(working_hours);
-    let working_days = setWorkingDays(parsed_working_hours);
+    let parsrd_category = [];
+    for (const cat of category){
+        parsrd_category.push(cat.toLowerCase())
+    }
     let newTeacherData = {
         email: email,
         first_name: firstName,
@@ -26,11 +29,11 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         },
         uid: uid,
         students: [],
-        working_hours: parsed_working_hours,
+        working_hours: setup_working_hours(working_days, break_time),
         working_days: working_days,
         last_log_on: new Date(),
         skype_username: skype_username,
-        category: category
+        category: parsrd_category
     };
 
     let usersData = {
@@ -46,17 +49,17 @@ export function setNewTeachers(uid, email, firstName, lastName, phoneNumber, wor
         teacher_name: firstName + " " + lastName,
         teacher_mail: email,
         uid: uid,
-        working_days: working_days
+        working_days: working_days,
+        skype_username: skype_username,
+        phone_number: phoneNumber
     };
 
-    Promise.all([
-        db.collection('teachers').doc(email).set(newTeacherData).then(function() {
-            console.log('Added teacher with ID: ', email)
-        }),
-        db.collection('users').doc(email).set(usersData).then(function () {
-            console.log('Added user to users collection')
-        })
-    ]);
+    db.collection('teachers').doc(email).set(newTeacherData).then(function() {
+        console.log('Added teacher with ID: ', email)
+    });
+    db.collection('users').doc(email).set(usersData).then(function () {
+        console.log('Added user to users collection')
+    });
     updateAdminDataForTeacher(adminTeacherData);
 }
 
@@ -81,52 +84,27 @@ async function updateAdminDataForTeacher(teacherData) {
     }
 }
 
-function setWorkingHours(working_hours){
-    /**
-     * Function gets working_hours and parses them to utc and returns a working hours struct for the teacher's working_hours field
-     *
-     * Return example: ["Sunday-12:00-21:00", "Monday-13:00-17:00"]
-     */
-    let i;
-    let currentDate = new Date();
-    let parsed_working_hours = [];
-    for (i = 0; i < 7; i++){
-        if (working_hours[WEEKDAYS[i]].from !== "00:00" && working_hours[WEEKDAYS[i]].to !== "00:00"){
-            let startTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
-                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[0]),
-                parseInt(working_hours[WEEKDAYS[i]].from.split(':')[1]));
-            let endtTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(),
-                parseInt(working_hours[WEEKDAYS[i]].to.split(':')[0]),
-                parseInt(working_hours[WEEKDAYS[i]].to.split(':')[1]));
-            if (startTime.getUTCDay() === endtTime.getUTCDay()){
-                parsed_working_hours.push(startTime.getUTCDay() + "-" + startTime.getUTCHours() + ":" + startTime.getUTCMinutes()
-                + "-" + endtTime.getUTCHours() + ":" + endtTime.getUTCMinutes());
+export function setup_working_hours(working_days, break_time){
+    let working_hours_array = [];
+    for (const day of working_days){
+        if (break_time !== null){
+            let hours_to_break = day + "-07:00-" + break_time;
+            let break_hour = parseInt(break_time.split(":")[0]);
+            let break_min = break_time.split(":")[1];
+            let post_break_hour = break_hour + 1;
+            if (post_break_hour < 10){
+                post_break_hour = "0" + post_break_hour;
             }
-            else {
-                parsed_working_hours.push(startTime.getUTCDay() + "-" + startTime.getUTCHours() + ":" + startTime.getUTCMinutes()
-                + "-00:00");
-                parsed_working_hours.push(endtTime.getUTCDay() + "-00:00-" + endtTime.getUTCHours() + ":" + endtTime.getUTCMinutes());
-            }
+            let hours_after_break = day + "-" + post_break_hour + ":" + break_min + "-18:00";
+            working_hours_array.push(hours_to_break);
+            working_hours_array.push(hours_after_break);
+        }
+        else {
+            let hours_full_day = day + "-07:00-18:00";
+            working_hours_array.push(hours_full_day);
         }
     }
-}
-
-function setWorkingDays(working_hours){
-    /**
-     * gets the working days and creates working days array.
-     */
-    let i, j;
-    let workingDays = []
-    for (i=0; i< working_hours.length; i++){
-        for (j=0; j< 7; j++){
-            if (working_hours[i].includes(WEEKDAYS[j])){
-                if (!workingDays.includes(WEEKDAYS[j])){
-                    workingDays.push(WEEKDAYS[j]);
-                }
-            }
-        }
-    }
-    return workingDays
+    return working_hours_array
 }
 
 async function setLogOnTeacher(teacher_data){
@@ -185,7 +163,7 @@ export async function getTeacherByMail(email) {
         noSuccess = (doc === null || doc === undefined);
     }
 
-    return  await setLogOnTeacher(doc.data())
+    return  doc.data()
 }
 
 export async function getTeacherByUID(uid) {
@@ -229,23 +207,6 @@ export async function getTeacherByUID(uid) {
     });
 
     return  await setLogOnTeacher(docs[0])
-}
-
-export async function updateTeacherWorkingHours(email,working_hours) {
-    /**
-     * Function updates the teacher's working_hours fields.
-     * working_hours field should have the following structure:
-     * {Sunday: {from: XX:XX, to: XX:XX, working: True}, Monday: {from: '', to: '', working: False}....}
-     */
-    let parsed_working_hours = setWorkingHours(working_hours);
-    let working_days = setWorkingDays(parsed_working_hours);
-    const collectionRef = db.collection('teachers');
-    collectionRef.doc(email).update({
-        working_hours: parsed_working_hours,
-        working_days: working_days
-    }).then(function () {
-        console.log("updated teachers working hours");
-    });
 }
 
 // ################################# LESSON FUNCTIONS #####################################
@@ -327,14 +288,6 @@ export async function getStudentsPastFeedbackForTeacher(teacher_mail, student_ma
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let snapshot = await collectionRef.where('student_mail', '==', student_mail)
         .where('feedback_given', '==', true).get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await collectionRef.where('student_mail', '==', student_mail)
-            .where('feedback_given', '==', true).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -375,14 +328,6 @@ export async function getFeedbackNecessaryLessonsForTeacher(teacher_mail) {
     const collectionRef = db.collection('teachers').doc(teacher_mail).collection('teacher_lessons');
     let snapshot = await collectionRef.where('feedback_given', '==', false)
         .where('started', '==', true).orderBy("date_utc.full_date").get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await collectionRef.where('feedback_given', '==', false)
-            .where('started', '==', true).orderBy("date_utc.full_date").get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
 
     snapshot.forEach(doc =>{
         let lessonData = doc.data();
@@ -644,16 +589,9 @@ export async function getWeekLessonByDateTeacher(teacher_mail, searchedSunday, s
     let snapshot = await collectionRef.orderBy('date_utc.full_date')
         .where('date_utc.full_date', '>=', searchedSunday2)
         .where('date_utc.full_date', '<', oneDayMore).get();
-    let noSuccess = (snapshot === null || snapshot === undefined);
-
-    // error handling
-    while (noSuccess){
-        snapshot = await collectionRef.orderBy('date_utc.full_date')
-            .where('date_utc.full_date', '>=', searchedSunday2)
-            .where('date_utc.full_date', '<', oneDayMore).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
+    if (snapshot === null){
+        return []
     }
-
     snapshot.forEach(doc =>{
         weekLessons.push(doc.data());
     });
@@ -715,7 +653,8 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
     searchedSunday.setHours(0,0);
     let searchedSaturday = new Date(searchedSunday.toISOString());
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
-    let weeksLessons = parseWeeksLessons(await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday));
+    let unparsed_week_lessons = await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday);
+    let weeksLessons = parseWeeksLessons(unparsed_week_lessons);
     let working = await getTeacherWorkingDaysAndHours(teacher_mail);
     let workingDays = working[0];
     let workingHours = working[1];
@@ -735,14 +674,17 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
         let key = day.getFullYear() + "-" + month + "-" + dayDate;
         // if the day is today and the teacher is working on that day check only future hours.
         if (day.toDateString() === currentDate.toDateString() && workingDays.includes(WEEKDAYS[day.getDay()])){
+            console.log("this is not good");
             teacherFreeTime[key] = getFreeTimeToday(workingHours, weeksLessons, day);
         }
         // if the day is before today - dont display it.
         if (day < currentDate){
+            console.log("skipping day");
             continue
         }
         // if it is a future day and the teacher is working on that day - get all possible hours
         if (workingDays.includes(WEEKDAYS[day.getDay()])){
+            console.log("got here");
             teacherFreeTime[key] = getFreeTimeOnDay(workingHours, weeksLessons, day);
         }
     }
@@ -822,7 +764,10 @@ function getFreeTimeToday(working_hours, weeks_lessons, day) {
     let currentMin = currentDate.getUTCMinutes();
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
     // get the day's lessons - if no lessons exist this would be undefined.
-    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
+    let dayLessons = [];
+    if (weeks_lessons.length > 0) {
+        dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
+    }
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
         let i, j;
@@ -834,7 +779,7 @@ function getFreeTimeToday(working_hours, weeks_lessons, day) {
                 working_hours_subarray[i] = 'busy';
                 continue
             }
-            if (dayLessons) {
+            if (dayLessons.length > 0) {
                 for (j = 0; j < dayLessons.length; j++)
                     if (working_hours_subarray[i] === dayLessons[j].time) {
                         working_hours_subarray[i] = 'busy';
@@ -856,7 +801,10 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
      */
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
     // get the day's lessons - if no lessons exist this would be undefined.
-    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
+    let dayLessons = [];
+    if (weeks_lessons.length > 0) {
+        dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
+    }
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
         let i, j;
@@ -864,7 +812,7 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
             if (working_hours_subarray[i] === 'busy'){
                 continue
             }
-            if (dayLessons) {
+            if (dayLessons.length > 0) {
                 for (j = 0; j < dayLessons.length; j++)
                     if (working_hours_subarray[i] === dayLessons[j].time) {
                         working_hours_subarray[i] = 'busy';
@@ -945,6 +893,7 @@ function getWorkingHoursForDay(working_hours, day) {
                     }
                 }
             }
+            console.log(totalSchedule);
             working_hours_array.push(totalSchedule)
         }
     }
@@ -957,14 +906,7 @@ export async function getStudentLastFeedbackByMail(student_mail) {
     let studentLastLessonWithFeedback = [];
     let querySnapshot = await collectionRef.where('feedback_given', '==', true).
     orderBy('date_utc.full_date', 'desc').limit(1).get();
-    let noSuccess = (querySnapshot === null || querySnapshot === undefined);
 
-    // error handling
-    while (noSuccess){
-        querySnapshot = await collectionRef.where('feedback_given', '==', true).
-        orderBy('date_utc.full_date', 'desc').limit(1).get();
-        noSuccess = (querySnapshot === null || querySnapshot === undefined);
-    }
     querySnapshot.forEach(doc => {
         studentLastLessonWithFeedback.push(doc.data());
     });
