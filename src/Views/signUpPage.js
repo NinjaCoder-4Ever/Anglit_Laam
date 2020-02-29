@@ -55,7 +55,7 @@ const SignUp = ({ history }) => {
     function checkErrors(firstName, lastName, phone, email, verifyEmail, password, englishType){
         let regName = /[a-zA-Z]+/;
         let regPhone = /[0-9]+/;
-        let regEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/
+        let regEmail = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/;
         let error = '';
 
         if ((firstName.length < 2) || (!regName.test(firstName)))
@@ -76,6 +76,9 @@ const SignUp = ({ history }) => {
         if (password.length < 6)
             error = error + 'Password should contain at least 6 characters\n';
 
+        if (!regName.test(englishType))
+            error = error + 'Please select an English Type\n';
+
         if (error === '')
             return true;
         else {
@@ -92,6 +95,7 @@ const SignUp = ({ history }) => {
         let lastName = document.getElementById('lastName').value;
         let phone = document.getElementById('phone').value;
         let englishType = document.getElementById('englishType').innerText.toLowerCase();
+
         if (checkErrors(firstName, lastName, phone, email, verifyEmail, password, englishType) === true) {
             setAlert(
                 <SweetAlert
