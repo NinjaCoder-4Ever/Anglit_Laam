@@ -75,12 +75,14 @@ export default  function ExtendedTables() {
     const [allTeacherMailsList, setAllTeacherMailsList] =React.useState([]);
     const [triggerMount, setTriggerMount] = React.useState(true);
     const [firstLoad, setFirstLoad] = React.useState(true);
+    const [firebaseAccess, setFirebaseAccess] = React.useState(true);
 
 
     React.useEffect(() => {
 
         getAdminByUid(firebase.auth().currentUser.uid).then((adminData)=>{
             setAllTeacherMailsList(Object.keys(adminData.all_teachers));
+            setFirebaseAccess(adminData.firebase_access);
             let all_students = adminData.all_students;
             //table for all rows/students
             let studentsInfoTable = [];
@@ -117,7 +119,9 @@ export default  function ExtendedTables() {
                     let opt = document.createElement('option');
                     opt.textContent = teacherMail;
                     opt.value = teacherMail;
-                    selectTeacher.appendChild(opt);
+                    if (selectTeacher != null) {
+                        selectTeacher.appendChild(opt);
+                    }
                 }
                 setFirstLoad(false);
             }
@@ -514,7 +518,7 @@ export default  function ExtendedTables() {
                             <Button onClick={() => subscriptionModalSetup()} color="info" style={{width:"100%"}}>Update Subscription</Button>
                             <Button onClick={() => categoryChangeSetup()} color="info" style={{width:"100%"}}>Update Category</Button>
                             <Button onClick={() => teacherChangeSetup()} color="info" style={{width:"100%"}}>Change Teacher</Button>
-                            <Button onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Student</Button>
+                            <Button disabled={!firebaseAccess} onClick={() => warningWithConfirmMessage()} color="danger" style={{width:"100%"}}>Delete Student</Button>
                             <Button onClick={() => setModal(false)} color="default" style={{width:"100%"}}>Never Mind..</Button>
                             </div>
                         </GridItem>

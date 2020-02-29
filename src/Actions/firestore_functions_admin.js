@@ -46,13 +46,13 @@ export async function getAllAdminMails() {
 export async function deleteTeacher(teacher_mail) {
     let teacherData = await getTeacherByMail(teacher_mail);
 
-    // delete from teachers collection
-    await db.collection('teachers').doc(teacher_mail).delete();
-
     // change students teacher
     let students = teacherData.students;
-    for (const student in students){
-        await changeTeacherForStudent(student.student_mail, null, true);
+    if (students.length > 0) {
+        for (const student of students) {
+            console.log(student);
+            await changeTeacherForStudent(student.student_mail, null, true);
+        }
     }
 
     let adminMails = await getAllAdminMails();
@@ -72,6 +72,9 @@ export async function deleteTeacher(teacher_mail) {
             all_teachers: teachers
         });
     }
+    await recursiveDeleteLessons(teacher_mail, "teachers", "teacher_lessons");
+    // delete from teachers collection
+    await db.collection('teachers').doc(teacher_mail).delete();
 
     await db.collection('users').doc(teacher_mail).delete();
 }
@@ -221,11 +224,8 @@ export async function deleteStudent(student_mail){
     let noSuccess = (snapshot === null || snapshot === undefined);
 
     // error handling
-    while (noSuccess){
-        snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
-            .where('date_utc.full_date', '>=', new Date()).get();
-        noSuccess = (snapshot === null || snapshot === undefined);
-    }
+    snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
+        .where('date_utc.full_date', '>=', new Date()).get();
 
     snapshot.forEach( doc => {
         lessons.push(doc.data())
@@ -234,6 +234,8 @@ export async function deleteStudent(student_mail){
     for (const lesson of lessons){
         db.collection('teachers').doc(lesson.teacher_mail).collection('teacher_lessons').doc(lesson.lesson_id).delete();
     }
+
+    await recursiveDeleteLessons(student_mail, "students", "student_lessons");
 
     db.collection('students').doc(student_mail).delete();
 
@@ -483,4 +485,42 @@ export async function editStudentCategory(stuent_mail, category) {
             all_students: students
         });
     }
+}
+
+async function recursiveDeleteLessons(mail, collection1, collection2) {
+    let full_lesson_list = await db.collection(collection1).doc(mail).collection(collection2).get();
+    full_lesson_list.forEach(lesson =>{
+        db.collection(collection1).doc(mail).collection(collection2).doc(lesson.data().lesson_id).delete();
+    });
+}
+
+export async function setNewAdmin(uid, email, first_name, last_name, firebase_access) {
+    let adminMails = await getAllAdminMails();
+    let adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+    let noSuccess = (adminInfo === null || adminInfo === undefined);
+
+    // error handling
+    while (noSuccess){
+        adminInfo = await db.collection('admins').doc(adminMails[0]).get();
+        noSuccess = (adminInfo === null || adminInfo === undefined);
+    }
+    let newAdminData = {
+        email: email,
+        first_name: first_name,
+        last_name: last_name,
+        uid: uid,
+        firebase_access: firebase_access,
+        all_students: adminInfo.data().all_students,
+        all_teachers: adminInfo.data().all_teachers
+    };
+    db.collection('admins').doc(email).set(newAdminData).then(function () {
+        console.log("new admin set");
+    });
+
+    let usersData = {
+        email: email,
+        uid: uid,
+        collection: "admins"
+    };
+    db.collection('users').doc(email).set(usersData);
 }
