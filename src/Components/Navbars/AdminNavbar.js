@@ -23,15 +23,9 @@ const useStyles = makeStyles(styles);
 export default function AdminNavbar(props) {
   const classes = useStyles();
   const { color, rtlActive, brandText } = props;
-  const appBarClasses = cx({
-    [" " + classes[color]]: color
-  });
-  const sidebarMinimize =
-    classes.sidebarMinimize +
-    " " +
-    cx({
-      [classes.sidebarMinimizeRTL]: rtlActive
-    });
+  const appBarClasses = cx({[" " + classes[color]]: color});
+  const sidebarMinimize = classes.sidebarMinimize + " " +  cx({[classes.sidebarMinimizeRTL]: rtlActive });
+
   return (
     <AppBar className={classes.appBar + appBarClasses}>
       <Toolbar className={classes.container}>

@@ -339,7 +339,7 @@ export default function Calendar({history}) {
                     </Card>
                 </GridItem>
                 {
-                    loading === false &&
+                    loading === false && events.length != 0 &&
                     <GridItem xs={12} sm={12} md={10}>
                         <Card>
                             <CardBody calendar>
@@ -416,7 +416,7 @@ export default function Calendar({history}) {
                                     onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
                         </GridItem>
                         <GridItem >
-                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
+                            <Button disabled={(!selectedEvent.no_show && !selectedEvent.started) || selectedEvent.feedback_given}
                                     onClick={() => unmarkLesson()} color="default">Reset Lesson Status</Button>
                         </GridItem>
                     </GridContainer>
