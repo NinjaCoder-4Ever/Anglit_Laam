@@ -163,7 +163,7 @@ export async function getTeacherByMail(email) {
         noSuccess = (doc === null || doc === undefined);
     }
 
-    return  doc.data()
+    return  await setLogOnTeacher(doc.data())
 }
 
 export async function getTeacherByUID(uid) {
@@ -653,8 +653,7 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
     searchedSunday.setHours(0,0);
     let searchedSaturday = new Date(searchedSunday.toISOString());
     searchedSaturday.setDate(searchedSaturday.getDate() + 6);
-    let unparsed_week_lessons = await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday);
-    let weeksLessons = parseWeeksLessons(unparsed_week_lessons);
+    let weeksLessons = parseWeeksLessons(await getWeekLessonByDateTeacher(teacher_mail, searchedSunday, searchedSaturday));
     let working = await getTeacherWorkingDaysAndHours(teacher_mail);
     let workingDays = working[0];
     let workingHours = working[1];
@@ -674,17 +673,14 @@ export async function getTeachersWeekFreeTime(year, month, day, teacher_mail) {
         let key = day.getFullYear() + "-" + month + "-" + dayDate;
         // if the day is today and the teacher is working on that day check only future hours.
         if (day.toDateString() === currentDate.toDateString() && workingDays.includes(WEEKDAYS[day.getDay()])){
-            console.log("this is not good");
             teacherFreeTime[key] = getFreeTimeToday(workingHours, weeksLessons, day);
         }
         // if the day is before today - dont display it.
         if (day < currentDate){
-            console.log("skipping day");
             continue
         }
         // if it is a future day and the teacher is working on that day - get all possible hours
         if (workingDays.includes(WEEKDAYS[day.getDay()])){
-            console.log("got here");
             teacherFreeTime[key] = getFreeTimeOnDay(workingHours, weeksLessons, day);
         }
     }
@@ -764,10 +760,7 @@ function getFreeTimeToday(working_hours, weeks_lessons, day) {
     let currentMin = currentDate.getUTCMinutes();
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
     // get the day's lessons - if no lessons exist this would be undefined.
-    let dayLessons = [];
-    if (weeks_lessons.length > 0) {
-        dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
-    }
+    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
         let i, j;
@@ -779,7 +772,7 @@ function getFreeTimeToday(working_hours, weeks_lessons, day) {
                 working_hours_subarray[i] = 'busy';
                 continue
             }
-            if (dayLessons.length > 0) {
+            if (dayLessons) {
                 for (j = 0; j < dayLessons.length; j++)
                     if (working_hours_subarray[i] === dayLessons[j].time) {
                         working_hours_subarray[i] = 'busy';
@@ -801,10 +794,7 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
      */
     let working_hours_array = getWorkingHoursForDay(working_hours, day);
     // get the day's lessons - if no lessons exist this would be undefined.
-    let dayLessons = [];
-    if (weeks_lessons.length > 0) {
-        dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
-    }
+    let dayLessons = weeks_lessons[WEEKDAYS[day.getDay()]];
     let freeTime = [];
     working_hours_array.forEach(working_hours_subarray => {
         let i, j;
@@ -812,7 +802,7 @@ function getFreeTimeOnDay(working_hours, weeks_lessons, day) {
             if (working_hours_subarray[i] === 'busy'){
                 continue
             }
-            if (dayLessons.length > 0) {
+            if (dayLessons) {
                 for (j = 0; j < dayLessons.length; j++)
                     if (working_hours_subarray[i] === dayLessons[j].time) {
                         working_hours_subarray[i] = 'busy';
@@ -893,7 +883,6 @@ function getWorkingHoursForDay(working_hours, day) {
                     }
                 }
             }
-            console.log(totalSchedule);
             working_hours_array.push(totalSchedule)
         }
     }
