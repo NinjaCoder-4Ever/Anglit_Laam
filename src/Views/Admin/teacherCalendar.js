@@ -292,7 +292,7 @@ export default function Calendar({history}) {
         );
     };
 
-    const substitueTeacherFunction = () => {
+    const substituteTeacherFunction = () => {
         setAvailableTeachersModal(false);
         setAlert(
             <SweetAlert
@@ -444,7 +444,7 @@ export default function Calendar({history}) {
                                     onClick={() => setLessonToNoShow()} color="danger">Student Absent</Button>
                         </GridItem>
                         <GridItem >
-                            <Button disabled={!selectedEvent.no_show && !selectedEvent.started || selectedEvent.feedback_given}
+                            <Button disabled={(!selectedEvent.no_show && !selectedEvent.started) || selectedEvent.feedback_given}
                                     onClick={() => unmarkLesson()} color="default">Reset Lesson Status</Button>
                         </GridItem>
                     </GridContainer>
@@ -495,7 +495,7 @@ export default function Calendar({history}) {
                     <GridContainer>
                         <GridItem>
                             <Button
-                                onClick={() => substitueTeacherFunction()} color="info">Substitute</Button>
+                                onClick={() => substituteTeacherFunction()} color="info">Substitute</Button>
                             <Button
                                     onClick={() => closeAvailableTeachersModal()} color="default">NeverMind</Button>
                         </GridItem>
