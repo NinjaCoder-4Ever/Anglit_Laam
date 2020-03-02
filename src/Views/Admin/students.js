@@ -347,6 +347,7 @@ export default  function ExtendedTables() {
         document.getElementById('adultsBox').checked = false;
         document.getElementById('businessBox').checked = false;
         document.getElementById('spokenBox').checked = false;
+        setCategoryModal(false);
         setModal(true);
     };
 
