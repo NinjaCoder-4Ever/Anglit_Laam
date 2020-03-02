@@ -89,7 +89,7 @@ const Home = ({ history }) => {
                                     {
                                         title: "How can I pay?",
                                         content: "You can pay via PayPal, credit card or a wire transfer.\n" +
-                                            "See My Subscription tab for more info."
+                                            "Contact us for more info or go to https://www.anglitlaam.com.."
                                     },
                                     {
                                         title: "Is my teacher permanent?",
