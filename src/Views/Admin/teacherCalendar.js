@@ -446,6 +446,8 @@ export default function Calendar({history}) {
                         <GridItem >
                             <Button disabled={(!selectedEvent.no_show && !selectedEvent.started) || selectedEvent.feedback_given}
                                     onClick={() => unmarkLesson()} color="default">Reset Lesson Status</Button>
+                            <Button disabled={selectedEvent.no_show || selectedEvent.started || selectedEvent.feedback_given}
+                                    onClick={() => setupAvailableTeachers()} color="primary">Substitute Teacher</Button>
                         </GridItem>
                     </GridContainer>
                 </DialogActions>
