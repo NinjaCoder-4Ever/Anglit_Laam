@@ -224,8 +224,11 @@ export async function deleteStudent(student_mail){
     let noSuccess = (snapshot === null || snapshot === undefined);
 
     // error handling
-    snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
-        .where('date_utc.full_date', '>=', new Date()).get();
+    while (noSuccess) {
+        snapshot = await db.collection('students').doc(student_mail).collection('student_lessons')
+            .where('date_utc.full_date', '>=', new Date()).get();
+        noSuccess = (snapshot === null || snapshot === undefined);
+    }
 
     snapshot.forEach( doc => {
         lessons.push(doc.data())
