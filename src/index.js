@@ -6,7 +6,6 @@ import * as serviceWorker from './Config/serviceWorker';
 import Cookies from 'js-cookie';
 
 window.$userType = Cookies.get('userType') !== undefined ? (Cookies.get('userType')) : ('/login');
-console.log('index ' + window.$userType);
 
 ReactDOM.render(<App />, document.getElementById('root'));
 
