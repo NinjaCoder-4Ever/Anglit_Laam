@@ -131,7 +131,7 @@ export default  function ExtendedTables({history}) {
                 cancelBtnText="Cancel"
                 showCancel
             >
-                <b>Canceling a lesson less than 24 hours ahead will not restore Credits for that lesson!</b>
+                <b>Canceling a lesson less than 24 hours ahead will not restore credits for that lesson!</b>
             </SweetAlert>
         );
     };
@@ -215,7 +215,7 @@ export default  function ExtendedTables({history}) {
         setButtonLesson(<Button round color="rose" onClick={() => {
             goToSetLesson();
         }}>
-            Lets Set a New Lesson!
+            Let's Set a New Lesson!
         </Button>)
     };
 

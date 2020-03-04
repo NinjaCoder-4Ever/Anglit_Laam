@@ -241,7 +241,7 @@ export default function Calendar({history}) {
                                 <InsertInvitation/>
                             </CardIcon>
                             <h3  className={classes.cardCategory}>
-                                Lets Set a New Lesson!
+                                Let's Set a New Lesson!
                             </h3>
                         </CardHeader>
                         <CardBody pricing>
@@ -251,7 +251,7 @@ export default function Calendar({history}) {
                                     studentData.credits > 0 ?
                                         <h3 className={`${classes.cardTitle}`}
                                             style={{fontSize: "16px",}}>
-                                            Here Is {studentData.teacher.first_name} {studentData.teacher.last_name}'s
+                                            Here is {studentData.teacher.first_name} {studentData.teacher.last_name}'s
                                             schedule, please choose a free time.
                                             <br/>
                                             <br/>

@@ -32,7 +32,7 @@ const Home = ({ history }) => {
                             </h4>
                         </CardHeader>
                         <CardBody>
-                            Contact us via mail: support@anglitlaam.com
+                            Contact us via email: support@anglitlaam.com
                             <br />
                             <br />
                             You can also find us on <a href='https://www.facebook.com/anglitlaam'>Facebook</a>
@@ -54,8 +54,8 @@ const Home = ({ history }) => {
                                     {
                                         title: "Who are you guys?",
                                         content: "We are Anglit Laam - the first low cost English school in Israel.\n" +
-                                            "We are here To find you the best teachers so you can learn English any time," +
-                                            "at any place and at the lowest cost possible"
+                                            "We are here to find you the best teachers so you can learn English at any time, " +
+                                            "at any place and at the lowest possible cost"
                                     },
                                     {
                                         title: "Who are the teachers?",
@@ -64,13 +64,13 @@ const Home = ({ history }) => {
                                     {
                                         title: "How do the lessons operate?",
                                         content: "Through Skype! You must install Skype on your computer, tablet or smartphone.\n" +
-                                            "At the lesson's scheduled time connect to Skype and await a call from your teacher\n" +
+                                            "At the lesson's scheduled time connect to Skype and await a call from your teacher.\n" +
                                             "Be sure to equip a functioning mic (note you do not have to use a camera).\n" +
-                                            "These are private one on one lessons"
+                                            "These are private one on one lessons."
                                     },
                                     {
                                         title: "When can I schedule a lesson?",
-                                        content: "At any time your teacher is available! You can see possible times at the Set A New Lessons tab."
+                                        content: "At any time your teacher is available! You can see possible times at the Set New Lessons tab."
                                     },
                                     {
                                         title: "Can I cancel a lesson?",
@@ -79,23 +79,23 @@ const Home = ({ history }) => {
                                     {
                                         title: "Are there any pre-commitments?",
                                         content: "No! You can cancel your subscription at any time and get a refund for the credits you currently have.\n" +
-                                            "Contact us via mail or Facebook to do so."
+                                            "Contact us via email or Facebook to do so."
                                     },
                                     {
                                         title: "Can I start a lesson from my smartphone?",
                                         content: "Sure! Just make sure to install Skype in advance.\n" +
-                                            "That being said we do recommend having the lesson on a big screen in a quite area."
+                                            "That being said, we do recommend having the lesson on a big screen in a quiet area."
                                     },
                                     {
                                         title: "How can I pay?",
                                         content: "You can pay via PayPal, credit card or a wire transfer.\n" +
-                                            "Contact us for more info or go to https://www.anglitlaam.com.."
+                                            "Contact us for more info or go to https://www.anglitlaam.com."
                                     },
                                     {
                                         title: "Is my teacher permanent?",
                                         content: "Yes, we recommend keeping the same teacher as long as you are subscribed to our service.\n" +
                                             "This is because we want to give you the most personal treatment possible.\n" +
-                                            "If you do want to change your teacher contact us via mail or Facebook.\n" +
+                                            "If you do want to change your teacher contact us via email or Facebook.\n" +
                                             "Changing a teacher requires no additional cost."
                                     },
                                     {

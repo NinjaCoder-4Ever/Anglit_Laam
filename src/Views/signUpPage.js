@@ -59,25 +59,25 @@ const SignUp = ({ history }) => {
         let error = '';
 
         if ((firstName.length < 2) || (!regName.test(firstName)))
-            error = error + 'First Name should be at least 2 english letters\n';
+            error = error + 'First Name should be at least 2 English letters.\n';
 
         if ((lastName.length < 2) || (!regName.test(lastName)))
-            error = error + 'Last Name should be at least 2 english letters\n';
+            error = error + 'Last Name should be at least 2 English letters.\n';
 
         if ((phone.length !== 10) ||  (!regPhone.test(phone)))
-            error = error + 'Phone number should contain 10 digits\n';
+            error = error + 'Phone number should contain 10 digits.\n';
 
         if (!regEmail.test(email))
-            error = error + 'Please provide a valid email';
+            error = error + 'Please provide a valid email.\n';
 
         if (email !== verifyEmail)
-            error = error + 'The email addresses you entered does not match\n';
+            error = error + 'The email addresses you entered does not match.\n';
 
         if (password.length < 6)
-            error = error + 'Password should contain at least 6 characters\n';
+            error = error + 'Password should contain at least 6 characters.\n';
 
         if (!regName.test(englishType))
-            error = error + 'Please select an English Type\n';
+            error = error + 'Please select an English Type.\n';
 
         if (error === '')
             return true;

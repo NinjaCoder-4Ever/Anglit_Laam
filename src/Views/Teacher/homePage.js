@@ -332,7 +332,7 @@ export default function Calendar({history}) {
                                     <Loader width={'20%'}/>:
                                     <h3 className={`${classes.cardTitle}`}
                                         style={{fontSize: "20px", fontWeight: "bold",}}>
-                                        A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                                        A look at {teacherData.first_name} {teacherData.last_name}'s week
                                     </h3>
                             }
                         </CardBody>
