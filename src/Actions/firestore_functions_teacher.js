@@ -163,7 +163,7 @@ export async function getTeacherByMail(email) {
         noSuccess = (doc === null || doc === undefined);
     }
 
-    return  await setLogOnTeacher(doc.data())
+    return  await setLogOnTeacher(doc.data());
 }
 
 export async function getTeacherByUID(uid) {

@@ -50,7 +50,6 @@ export async function deleteTeacher(teacher_mail) {
     let students = teacherData.students;
     if (students.length > 0) {
         for (const student of students) {
-            console.log(student);
             await changeTeacherForStudent(student.student_mail, null, true);
         }
     }

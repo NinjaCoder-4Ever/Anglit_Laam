@@ -332,7 +332,7 @@ export default function Calendar({history}) {
                                     <Loader width={'20%'}/>:
                                     <h3 className={`${classes.cardTitle}`}
                                         style={{fontSize: "20px", fontWeight: "bold",}}>
-                                        A Look at {teacherData.first_name} {teacherData.last_name}'s Week
+                                        A look at {teacherData.first_name} {teacherData.last_name}'s week
                                     </h3>
                             }
                         </CardBody>
@@ -397,7 +397,7 @@ export default function Calendar({history}) {
                     id="modal-slide-description"
                     className={classesPopup.modalBody}
                 >
-                    <h5>Student Mail: {selectedEvent.student_mail}</h5>
+                    <h5>Student Email: {selectedEvent.student_mail}</h5>
                     <h5>Student Name: {selectedEvent.student_name}</h5>
                     <h5>Date: {selectedEvent.start.toString().slice(0,15)}</h5>
                     <h5>Time: {selectedEvent.start.toString().slice(16,21)}</h5>

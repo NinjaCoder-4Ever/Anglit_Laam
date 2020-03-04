@@ -457,7 +457,7 @@ export default  function ExtendedTables() {
                                     <Table
                                         tableHead={[
                                             "Name",
-                                            "Mail",
+                                            "Email",
                                             "Phone",
                                             "Category",
                                             "Teacher",
